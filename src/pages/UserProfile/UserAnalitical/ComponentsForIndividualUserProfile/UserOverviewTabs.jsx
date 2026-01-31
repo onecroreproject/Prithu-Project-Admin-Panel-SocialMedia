@@ -1,10 +1,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Shield, 
-  CreditCard, 
-  Smartphone, 
+import {
+  Shield,
+  CreditCard,
+  Smartphone,
   Users,
   GraduationCap,
   Briefcase,
@@ -25,8 +25,6 @@ export default function UserOverviewTabs({ user, activeTab, setActiveTab }) {
     { id: "subscription", label: "Subscription", icon: CreditCard },
     { id: "device", label: "Device", icon: Smartphone },
     { id: "referrals", label: "Referrals", icon: Users },
-    { id: "education", label: "Education", icon: GraduationCap },
-    { id: "employment", label: "Employment", icon: Briefcase },
   ]);
 
   const renderTabContent = () => {
@@ -52,13 +50,12 @@ export default function UserOverviewTabs({ user, activeTab, setActiveTab }) {
             </div>
           </div>
         );
-      
+
       case "subscription":
         return (
           <div className="space-y-4">
-            <div className={`rounded-lg p-4 ${
-              user.subscriptionActive ? 'bg-green-50' : 'bg-gray-50'
-            }`}>
+            <div className={`rounded-lg p-4 ${user.subscriptionActive ? 'bg-green-50' : 'bg-gray-50'
+              }`}>
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium text-gray-900">Current Plan</h4>
@@ -66,18 +63,17 @@ export default function UserOverviewTabs({ user, activeTab, setActiveTab }) {
                     {user.subscriptionActive ? 'Active Premium Plan' : 'Free Plan'}
                   </p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  user.subscriptionActive 
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${user.subscriptionActive
                     ? 'bg-green-100 text-green-800'
                     : 'bg-gray-100 text-gray-800'
-                }`}>
+                  }`}>
                   {user.subscriptionActive ? 'Active' : 'Inactive'}
                 </span>
               </div>
             </div>
           </div>
         );
-      
+
       default:
         return (
           <div className="text-center py-8">
@@ -113,11 +109,10 @@ export default function UserOverviewTabs({ user, activeTab, setActiveTab }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.label)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}

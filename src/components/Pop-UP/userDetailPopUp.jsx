@@ -47,26 +47,25 @@ export default function UserDetailModal({ userId, onClose }) {
     { id: "Subscription", label: "Subscription" },
     { id: "Device", label: "Device" },
     { id: "Activity", label: "Activity" },
-    { id: "Education", label: "Education Detail" },
-    { id: "Employment", label: "Employment Detail" },
+    { id: "Activity", label: "Activity" },
   ];
 
   const renderTable = (rows) => (
-  <table className="min-w-full border-collapse border border-gray-200 dark:border-gray-700">
-    <tbody>
-      {rows.map(({ label, value }, idx) => (
-        <tr key={idx} className="border-b border-gray-200 dark:border-gray-700">
-          <td className="w-1/3 px-4 py-2 font-medium text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
-            {label}
-          </td>
-          <td className="w-2/3 px-4 py-2 text-gray-800 dark:text-gray-200">
-            {value || "-"}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
+    <table className="min-w-full border-collapse border border-gray-200 dark:border-gray-700">
+      <tbody>
+        {rows.map(({ label, value }, idx) => (
+          <tr key={idx} className="border-b border-gray-200 dark:border-gray-700">
+            <td className="w-1/3 px-4 py-2 font-medium text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+              {label}
+            </td>
+            <td className="w-2/3 px-4 py-2 text-gray-800 dark:text-gray-200">
+              {value || "-"}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 
 
   return (
@@ -109,11 +108,10 @@ export default function UserDetailModal({ userId, onClose }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
-                  activeTab === tab.id
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
                     ? "border-blue-600 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -122,93 +120,65 @@ export default function UserDetailModal({ userId, onClose }) {
 
           {/* Tab Content */}
           <AnimatePresence mode="wait">
-  {activeTab === "Profile" && (
-    <motion.div key="Profile" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
-      {renderTable([
-        { label: "Gender", value: user.profile?.gender },
-        { label: "DOB", value: user.profile?.dateOfBirth ? new Date(user.profile.dateOfBirth).toLocaleDateString() : null },
-        { label: "Marital Status", value: user.profile?.maritalStatus === "true" ? "Married" : "Single" },
-        { label: "Phone", value: user.profile?.phoneNumber },
-        { label: "Timezone", value: user.profile?.timezone },
-        { label: "Bio", value: user.profile?.bio },
-      ])}
-    </motion.div>
-  )}
+            {activeTab === "Profile" && (
+              <motion.div key="Profile" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+                {renderTable([
+                  { label: "Gender", value: user.profile?.gender },
+                  { label: "DOB", value: user.profile?.dateOfBirth ? new Date(user.profile.dateOfBirth).toLocaleDateString() : null },
+                  { label: "Marital Status", value: user.profile?.maritalStatus === "true" ? "Married" : "Single" },
+                  { label: "Phone", value: user.profile?.phoneNumber },
+                  { label: "Timezone", value: user.profile?.timezone },
+                  { label: "Bio", value: user.profile?.bio },
+                ])}
+              </motion.div>
+            )}
 
-  {activeTab === "Account" && (
-    <motion.div key="Account" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
-      {renderTable([
-        { label: "Referral Code", value: user.referralCode },
-        { label: "Referred By", value: user.referredByUserId },
-        { label: "Level", value: user.currentLevel },
-        { label: "Tier", value: user.currentTier },
-        { label: "Total Earnings", value: `$${user.totalEarnings || 0}` },
-        { label: "Withdrawable", value: `$${user.withdrawableEarnings || 0}` },
-      ])}
-    </motion.div>
-  )}
+            {activeTab === "Account" && (
+              <motion.div key="Account" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+                {renderTable([
+                  { label: "Referral Code", value: user.referralCode },
+                  { label: "Referred By", value: user.referredByUserId },
+                  { label: "Level", value: user.currentLevel },
+                  { label: "Tier", value: user.currentTier },
+                  { label: "Total Earnings", value: `$${user.totalEarnings || 0}` },
+                  { label: "Withdrawable", value: `$${user.withdrawableEarnings || 0}` },
+                ])}
+              </motion.div>
+            )}
 
-  {activeTab === "Subscription" && (
-    <motion.div key="Subscription" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
-      {renderTable([
-        { label: "Active", value: user.subscription?.subscriptionActive ? "✅ Yes" : "❌ No" },
-        { label: "Start Date", value: user.subscription?.startDate ? new Date(user.subscription.startDate).toLocaleDateString() : null },
-        { label: "End Date", value: user.subscription?.endDate ? new Date(user.subscription.endDate).toLocaleDateString() : null },
-        { label: "Activated At", value: user.subscription?.subscriptionActiveDate ? new Date(user.subscription.subscriptionActiveDate).toLocaleDateString() : null },
-      ])}
-    </motion.div>
-  )}
+            {activeTab === "Subscription" && (
+              <motion.div key="Subscription" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+                {renderTable([
+                  { label: "Active", value: user.subscription?.subscriptionActive ? "✅ Yes" : "❌ No" },
+                  { label: "Start Date", value: user.subscription?.startDate ? new Date(user.subscription.startDate).toLocaleDateString() : null },
+                  { label: "End Date", value: user.subscription?.endDate ? new Date(user.subscription.endDate).toLocaleDateString() : null },
+                  { label: "Activated At", value: user.subscription?.subscriptionActiveDate ? new Date(user.subscription.subscriptionActiveDate).toLocaleDateString() : null },
+                ])}
+              </motion.div>
+            )}
 
-  {activeTab === "Device" && (
-    <motion.div key="Device" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
-      {renderTable([
-        { label: "Type", value: user.device?.deviceType },
-        { label: "Name", value: user.device?.deviceName },
-        { label: "IP", value: user.device?.ipAddress },
-      ])}
-    </motion.div>
-  )}
+            {activeTab === "Device" && (
+              <motion.div key="Device" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+                {renderTable([
+                  { label: "Type", value: user.device?.deviceType },
+                  { label: "Name", value: user.device?.deviceName },
+                  { label: "IP", value: user.device?.ipAddress },
+                ])}
+              </motion.div>
+            )}
 
-  {activeTab === "Activity" && (
-    <motion.div key="Activity" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
-      {renderTable([
-        { label: "Active", value: user.isActive ? "✅ Yes" : "❌ No" },
-        { label: "Active At", value: user.isActiveAt ? new Date(user.isActiveAt).toLocaleString() : null },
-        { label: "Last Login", value: user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : null },
-        { label: "Languages", value: `App - ${user.language?.appLanguageCode || "en"}, Feed - ${user.language?.feedLanguageCode || "en"}` },
-      ])}
-    </motion.div>
-  )}
+            {activeTab === "Activity" && (
+              <motion.div key="Activity" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+                {renderTable([
+                  { label: "Active", value: user.isActive ? "✅ Yes" : "❌ No" },
+                  { label: "Active At", value: user.isActiveAt ? new Date(user.isActiveAt).toLocaleString() : null },
+                  { label: "Last Login", value: user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : null },
+                  { label: "Languages", value: `App - ${user.language?.appLanguageCode || "en"}, Feed - ${user.language?.feedLanguageCode || "en"}` },
+                ])}
+              </motion.div>
+            )}
 
-  {activeTab === "Education" && (
-    <motion.div key="Education" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
-      {user.education?.length > 0 ? user.education.map((edu, idx) => (
-        <div key={idx} className="mb-4">
-          {renderTable([
-            { label: "Degree", value: edu.degree },
-            { label: "Institution", value: edu.institution },
-            { label: "Year", value: edu.year },
-          ])}
-        </div>
-      )) : <p className="text-gray-500 dark:text-gray-400">No education details available.</p>}
-    </motion.div>
-  )}
-
-  {activeTab === "Employment" && (
-    <motion.div key="Employment" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
-      {user.employment?.length > 0 ? user.employment.map((job, idx) => (
-        <div key={idx} className="mb-4">
-          {renderTable([
-            { label: "Company", value: job.company },
-            { label: "Role", value: job.role },
-            { label: "Start Date", value: job.startDate ? new Date(job.startDate).toLocaleDateString() : null },
-            { label: "End Date", value: job.endDate ? new Date(job.endDate).toLocaleDateString() : "Present" },
-          ])}
-        </div>
-      )) : <p className="text-gray-500 dark:text-gray-400">No employment details available.</p>}
-    </motion.div>
-  )}
-</AnimatePresence>
+          </AnimatePresence>
 
         </div>
       </div>

@@ -4,23 +4,30 @@ import { motion, AnimatePresence } from "framer-motion";
 import PrithuLogo from "../Assets/Logo/PrithuLogo.png";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
-import { 
-  Grid, 
-  User, 
-  Users, 
-  Table, 
+import {
+  Grid,
+  User,
+  Users,
+  Table,
   FileText,
   ChevronDown,
   Shield,
-  LogOut
+  LogOut,
+  CreditCard,
+  DollarSign,
+  Cog,
+  Home,
+  BarChart3,
+  Database,
+  HardDrive
 } from "lucide-react";
 
 const mainNavItems = [
-  { 
-    icon: <Grid className="w-5 h-5" />, 
-    name: "Dashboard", 
-    path: "/social/dashboard", 
-    permission: null 
+  {
+    icon: <Grid className="w-5 h-5" />,
+    name: "Dashboard",
+    path: "/social/dashboard",
+    permission: null
   },
   {
     icon: <User className="w-5 h-5" />,
@@ -38,23 +45,24 @@ const mainNavItems = [
       { name: "Trending Creator", path: "/social/trending/creator", permission: "canTrendingCreators" }
     ]
   },
-  { 
-    icon: <Table className="w-5 h-5" />, 
-    name: "Feeds Info", 
-    permission: "canManageFeedInfo", 
+  {
+    icon: <Table className="w-5 h-5" />,
+    name: "Feeds Info",
+    permission: "canManageFeedInfo",
     subItems: [
       { name: "Treanding Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
       { name: "User Feed Request", path: "/social/post/request/approval", permission: "canManageUserFeedRequest" },
-   
-    ] 
+
+    ]
   },
-   {
+  {
     icon: <Users className="w-5 h-5" />,
     name: "Feed Management",
     permission: "canManageFeeds",
     subItems: [
-         { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
+      { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
       { name: "Frame Upload", path: "/social/frame/upload/page", permission: "canManageFrames" },
+      { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
     ],
   },
   {
@@ -65,18 +73,72 @@ const mainNavItems = [
       { name: "User Feed Reports", path: "/social/user-reportinfo", permission: "canManageUsersFeedReports" },
     ],
   },
+  {
+    icon: <Shield className="w-5 h-5" />,
+    name: "Admin Management",
+    permission: "canManageChildAdmins",
+    subItems: [
+      { name: "Dashboard", path: "/settings/dashboard", permission: "canViewSettingsDashboard" },
+      { name: "ChildAdmin Creation", path: "/settings/child/admin/page", permission: "canManageChildAdminsCreation" },
+      { name: "Admin Roles", path: "/settings/admin/roles", permission: "canManageAdminRoles" },
+      { name: "Permissions", path: "/settings/admin/permissions", permission: "canManagePermissions" },
+      { name: "Studio", path: "/settings/admin/studio", permission: "canManageStudio" },
+    ],
+  },
+  {
+    icon: <CreditCard className="w-5 h-5" />,
+    name: "Subscriptions",
+    permission: "canManageSettings",
+    subItems: [
+      { name: "Manage Subscriptions", path: "/settings/subscription/page", permission: "canManageSettingsSubscriptions" },
+      { name: "Billing", path: "/settings/billing", permission: "canViewBilling" },
+      { name: "Plans", path: "/settings/plans", permission: "canManagePlans" },
+    ],
+  },
+  {
+    icon: <DollarSign className="w-5 h-5" />,
+    name: "Sales",
+    permission: "canManageSalesSettings",
+    subItems: [
+      { name: "Sales Dashboard", path: "/settings/sales/dashboard", permission: "canManageSalesDashboard" },
+    ],
+  },
+  {
+    icon: <Users className="w-5 h-5" />,
+    name: "Settings Report",
+    permission: "canManageUsers",
+    subItems: [
+      { name: "Report Management", path: "/settings/report/management", permission: "canManageAddReport" },
+    ],
+  },
+  {
+    icon: <Cog className="w-5 h-5" />,
+    name: "Company Management",
+    permission: "canfaqmanagement",
+    subItems: [
+      { name: "FAQ Settings", path: "/settings/faq/management", permission: "canFaqManagement" },
+      { name: "User Feedbacks", path: "/settings/reportandfeedback/management", permission: "canManageUserFeedbacks" },
+      { name: "Company Info", path: "/settings/company/info", permission: "canViewSystemLogs" },
+    ],
+  },
+  {
+    icon: <HardDrive className="w-5 h-5" />,
+    name: "Manage Drive",
+    path: "/drive/dashboard",
+    permission: "canManageGoogleDrive",
+  },
 ];
 
 const SocialMediaSidebar = ({ user }) => {
-  const { 
-    isMobileOpen, 
-    setIsHovered, 
-    isHovered, 
-    isMobile, 
+  const {
+    isMobileOpen,
+    setIsHovered,
+    isHovered,
+    isMobile,
     setIsMobileOpen,
-    expandMain 
+    expandMain
   } = useSidebar();
-  
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -124,13 +186,13 @@ const SocialMediaSidebar = ({ user }) => {
     const findActiveItem = () => {
       for (let i = 0; i < filteredNavItems.length; i++) {
         const item = filteredNavItems[i];
-        
+
         // Check if current path matches main item
         if (item.path && location.pathname === item.path) {
           setActiveItem({ index: i, type: "main" });
           return;
         }
-        
+
         // Check subitems for matches
         if (item.subItems) {
           for (let j = 0; j < item.subItems.length; j++) {
@@ -142,31 +204,36 @@ const SocialMediaSidebar = ({ user }) => {
           }
         }
       }
-      
+
       // If no exact match found, try partial matching for social routes
-      if (location.pathname.startsWith('/social') || location.pathname.startsWith('/user') || 
-          location.pathname.startsWith('/creator') || location.pathname.startsWith('/admin') ||
-          location.pathname.startsWith('/frame') || location.pathname.startsWith('/report') ||
-          location.pathname.startsWith('/trending')) {
+      if (location.pathname.startsWith('/social') || location.pathname.startsWith('/user') ||
+        location.pathname.startsWith('/creator') || location.pathname.startsWith('/admin') ||
+        location.pathname.startsWith('/frame') || location.pathname.startsWith('/report') ||
+        location.pathname.startsWith('/trending') ||
+        location.pathname.startsWith('/settings') ||
+        location.pathname.startsWith('/child') ||
+        location.pathname.startsWith('/subscription') ||
+        location.pathname.startsWith('/sales') ||
+        location.pathname.startsWith('/social/category')) {
         const dashboardIndex = filteredNavItems.findIndex(item => item.path === "/social/dashboard");
         if (dashboardIndex !== -1) {
           setActiveItem({ index: dashboardIndex, type: "main" });
         }
       }
     };
-    
+
     findActiveItem();
   }, [location.pathname, filteredNavItems]);
 
   // Ensure sidebar is expanded on mount if we're on a social route
   useEffect(() => {
-    if (location.pathname.startsWith('/social') || 
-        location.pathname.startsWith('/user') ||
-        location.pathname.startsWith('/creator') ||
-        location.pathname.startsWith('/admin') ||
-        location.pathname.startsWith('/frame') ||
-        location.pathname.startsWith('/report') ||
-        location.pathname.startsWith('/trending')) {
+    if (location.pathname.startsWith('/social') ||
+      location.pathname.startsWith('/user') ||
+      location.pathname.startsWith('/creator') ||
+      location.pathname.startsWith('/admin') ||
+      location.pathname.startsWith('/frame') ||
+      location.pathname.startsWith('/report') ||
+      location.pathname.startsWith('/trending')) {
       expandMain();
     }
   }, [expandMain, location.pathname]);
@@ -187,67 +254,67 @@ const SocialMediaSidebar = ({ user }) => {
   const sidebarVariants = {
     collapsed: {
       width: "85px",
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 30, 
-        duration: 0.4 
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        duration: 0.4
       },
     },
     expanded: {
       width: "280px",
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 30, 
-        duration: 0.4 
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        duration: 0.4
       }
     },
   };
 
   const logoVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       x: -20,
-      transition: { duration: 0.2 } 
+      transition: { duration: 0.2 }
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: "easeOut"
-      } 
+      }
     },
   };
 
   const menuItemVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       x: -10,
-      transition: { duration: 0.15 } 
+      transition: { duration: 0.15 }
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
-      transition: { 
+      transition: {
         duration: 0.25,
         ease: "easeOut"
-      } 
+      }
     },
   };
 
   const subMenuVariants = {
-    hidden: { 
-      height: 0, 
+    hidden: {
+      height: 0,
       opacity: 0,
       transition: {
         height: { duration: 0.2, ease: "easeInOut" },
         opacity: { duration: 0.15 }
       }
     },
-    visible: { 
-      height: "auto", 
+    visible: {
+      height: "auto",
       opacity: 1,
       transition: {
         height: { duration: 0.3, ease: "easeInOut" },
@@ -271,10 +338,10 @@ const SocialMediaSidebar = ({ user }) => {
         const isItemActive = activeItem?.index === index && activeItem?.type === menuType;
         const hasActiveChild = nav.subItems?.some(sub => isActive(sub.path));
         const isDashboard = nav.path === "/social/dashboard";
-        
+
         // Special handling for dashboard - always show as active if no other active item
         const showAsActive = isItemActive || (isDashboard && location.pathname.startsWith('/social'));
-        
+
         return (
           <li key={nav.name} className="relative">
             {nav.subItems?.length ? (
@@ -301,7 +368,7 @@ const SocialMediaSidebar = ({ user }) => {
                 `}>
                   {nav.icon}
                 </span>
-                
+
                 <AnimatePresence mode="wait">
                   {(isHovered || isMobileOpen) && (
                     <motion.span
@@ -316,7 +383,7 @@ const SocialMediaSidebar = ({ user }) => {
                     </motion.span>
                   )}
                 </AnimatePresence>
-                
+
                 {(isHovered || isMobileOpen) && (
                   <motion.div
                     animate={{ rotate: isSubmenuOpen ? 180 : 0 }}
@@ -357,7 +424,7 @@ const SocialMediaSidebar = ({ user }) => {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
-                
+
                 <span className={`
                   flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0
                   transition-all duration-300 relative z-10
@@ -368,7 +435,7 @@ const SocialMediaSidebar = ({ user }) => {
                 `}>
                   {nav.icon}
                 </span>
-                
+
                 <AnimatePresence mode="wait">
                   {(isHovered || isMobileOpen) && (
                     <motion.span
@@ -384,7 +451,7 @@ const SocialMediaSidebar = ({ user }) => {
                 </AnimatePresence>
               </Link>
             )}
-            
+
             {/* Submenu Animation */}
             <AnimatePresence>
               {isSubmenuOpen && (
@@ -529,7 +596,7 @@ const SocialMediaSidebar = ({ user }) => {
               {renderMenuItems(filteredNavItems, "main")}
             </div>
           </nav>
-          
+
           {/* Social Media Info & Actions */}
           <AnimatePresence mode="wait">
             {(isHovered || isMobileOpen) && (
@@ -557,21 +624,17 @@ const SocialMediaSidebar = ({ user }) => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-1 px-3">
                   <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300 transition-colors">
                     <Users className="w-5 h-5" />
                     <span className="text-sm font-medium">Manage Users</span>
                   </button>
-                  <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-red-600 dark:text-red-400 transition-colors">
-                    <LogOut className="w-5 h-5" />
-                    <span className="text-sm font-medium">Switch Module</span>
-                  </button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {/* Sidebar Widget */}
           <AnimatePresence>
             {(isHovered || isMobileOpen) && (

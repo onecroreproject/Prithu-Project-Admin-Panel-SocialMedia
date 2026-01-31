@@ -49,8 +49,7 @@ const settingsNavItems = [
     permission: "canManageSalesSettings",
     subItems: [
       { name: "Sales Dashboard", path: "/settings/sales/dashboard", permission: "canManageSalesDashboard" },
-      { name: "Revenue Reports", path: "/settings/sales/reports", permission: "canViewSalesReports" },
-      { name: "Commission", path: "/settings/sales/commission", permission: "canManageCommission" },
+
     ],
   },
  
@@ -63,16 +62,7 @@ const settingsNavItems = [
     ],
   },
 
-  {
-    icon: <BarChart3Icon className="w-5 h-5" />,
-    name: "Analytics",
-    permission: "canViewAnalytics",
-    subItems: [
-      { name: "Platform Analytics", path: "/settings/analytics", permission: "canViewPlatformAnalytics" },
-      { name: "Revenue Analytics", path: "/settings/analytics/revenue", permission: "canViewRevenueAnalytics" },
-      { name: "User Growth", path: "/settings/analytics/growth", permission: "canViewGrowthAnalytics" },
-    ],
-  },
+
 
   // {
   //   icon: <BellIcon className="w-5 h-5" />,

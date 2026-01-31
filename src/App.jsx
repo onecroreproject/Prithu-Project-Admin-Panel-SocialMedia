@@ -20,18 +20,13 @@ import NotFound from "./pages/OtherPage/NotFound";
 // Social Media Module Pages
 import UploadPage from "./pages/uploadPage";
 import UserProfiles from "./pages/UserProfile/UserProfiles";
-import UserDashboard from "./pages/UserProfile/userProfilePage";
-import UserAnalytics from "./pages/UserProfile/UserAnalitical/userAnaliticalPage";
 import IndividualUserProfilePage from "./pages/UserProfile/UserAnalitical/individualUserProfilePage";
 import ReferralTreePage from "./pages/userTree";
 import CreatorTable from "./components/tables/UserTabel/creatorTable";
 import TrendingCreatorsPage from "./pages/trendingCreator";
 import FrameUploadPage from "./pages/FrameManagement/framePage";
 import UserFeedReportTable from "./components/tables/UserTabel/userReportTable";
-
-// Company Module Pages
-import CompanyDashboard from "./pages/Dashboard/companyDashbaord";
-import JobTable from "./pages/jobProfile";
+import CategoryManagementPage from "./pages/CategoryManagementPage";
 
 // Settings Module Pages
 import SettingsDashboard from "./pages/Dashboard/settingsDashboard";
@@ -66,21 +61,12 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 
 // Error Boundary
 import { ErrorBoundary } from "react-error-boundary";
-import AptitudeDashboard from "./pages/Dashboard/aptitudeDashboard";
 import TrendingFeedsTable from "./pages/treandingFeed";
-import TestManagement from "./pages/Aptitude/aptitudeManagement";
-import AnalyticsPage from "./pages/Aptitude/aptitudeAnalitical";
-import CompanyListPage from "./pages/company/companyList";
-import CompanyProfileView from "./pages/company/singlePageView";
-import JobListPage from "./pages/company/jobList";
-import JobPreviewModal from "./pages/company/singleJobView";
 import PostApprovalRequests from "./pages/socialMedia/Feed/userFeedRequestPage";
 import UsersWillingToPost from "./pages/socialMedia/Feed/userFeedRequestPage";
 import DriveDashboard from "./DriverDashboard/DriveDashboard";
 import GoogleDriveDashboard from "./DriverDashboard/googleDashboard"
-import AdminFaqPage from "./pages/faqPage";
 import AdminFeedbackPage from "./pages/feedbackandReportpage";
-import AdminCompanyPage from "./pages/companyInfoPage";
 import AdminStudioLayout from "./pages/AdminStudio/studioLayout";
 
 // Create separate dashboard components or use existing ones
@@ -116,45 +102,27 @@ function AnimatedRoutes() {
         <Route path="/" element={<AppLayout />}>
           {/* Dashboard Route - Shows dashboard cards */}
           <Route index element={<></>} />
-          
+
           {/* ====== SOCIAL MEDIA MODULE ROUTES ====== */}
           <Route path="/social/dashboard" element={<SocialMediaDashboard />} />
           <Route path="/social/creator/trending/table" element={<CreatorTable />} />
           <Route path="/social/trending/creator" element={<TrendingCreatorsPage />} />
           <Route path="/social/user-reportinfo" element={<UserFeedReportTable />} />
-      
-         
-          
-          
+
+
+
+
           {/* User Management */}
-          <Route path="/social/user/profile/dashboard" element={<UserDashboard />} />
           <Route path="/social/profile" element={<UserProfiles />} />
-          <Route path="/social/user/analitical/page/:userId" element={<UserAnalytics />} />
           <Route path="/social/individual/user/profile/:id" element={<IndividualUserProfilePage />} />
           <Route path="/social/referal/tree/page/:userId" element={<ReferralTreePage />} />
           <Route path="/social/tree" element={<ReferralTreePage />} />
-          <Route path="/social/trending/feed" element={<TrendingFeedsTable/>}/>
-          <Route path="/social/post/request/approval" element={<UsersWillingToPost/>}/>
-           <Route path="/social/frame/upload/page" element={<FrameUploadPage />} />
-            <Route path="/social/admin/upload/page" element={<UploadPage />} />
+          <Route path="/social/trending/feed" element={<TrendingFeedsTable />} />
+          <Route path="/social/post/request/approval" element={<UsersWillingToPost />} />
+          <Route path="/social/frame/upload/page" element={<FrameUploadPage />} />
+          <Route path="/social/admin/upload/page" element={<UploadPage />} />
+          <Route path="/social/category/management" element={<CategoryManagementPage />} />
 
-
-          {/*----------------Apptitude DashBoard-----------*/}
-         <Route path="/aptitude/dashboard" element={<AptitudeDashboard/>}/>
-         <Route path="/aptitude/test/management" element={<TestManagement/>}/>
-         <Route path="/aptitude/results/reports/:testId" element={<AnalyticsPage />}/>
-
-                 
-
-       
-
-          {/* ====== COMPANY MODULE ROUTES ====== */}
-          <Route path="/company/dashboard" element={<CompanyDashboard />} />
-          <Route path="/company/job/table/page" element={<JobTable />} />
-          <Route path="/company/company/list" element={<CompanyListPage/>}/>
-          <Route path="/company/profile/view/:companyId" element={<CompanyProfileView/>}/>
-          <Route path="/company/job/list" element={<JobListPage/>}/>
-          <Route path="/company/admin/job-preview/:id" element={<JobPreviewModal/>} />
 
           {/* ====== SETTINGS MODULE ROUTES ====== */}
           <Route path="/settings/dashboard" element={<SettingsDashboard />} />
@@ -165,15 +133,14 @@ function AnimatedRoutes() {
           <Route path="/settings/subscription/page" element={<SubscriptionPage />} />
           <Route path="/settings/sales/dashboard" element={<SalesDashboard />} />
           <Route path="/settings/report/management" element={<ReportManagementPage />} />
-          <Route path="/settings/faq/management" element={<AdminFaqPage/>} />
-          <Route path="/settings/reportandfeedback/management" element={<AdminFeedbackPage/>} />
-          <Route path="/settings/company/info" element={<AdminCompanyPage/>} />
-          <Route path="/settings/admin/studio" element={<AdminStudioLayout/>} />
-      
+          <Route path="/settings/faq/management" element={<AdminFaqPage />} />
+          <Route path="/settings/reportandfeedback/management" element={<AdminFeedbackPage />} />
+          <Route path="/settings/admin/studio" element={<AdminStudioLayout />} />
+
           {/* ====== DRIVE MODULE ROUTES ====== */}
-          <Route path="/drive/dashboard" element={<GoogleDriveDashboard/>} />
-          
-       
+          <Route path="/drive/dashboard" element={<GoogleDriveDashboard />} />
+
+
 
           {/* ====== ANALYTICS MODULE ROUTES ====== */}
           <Route path="/analytics/dashboard" element={<AnalyticsDashboard />} />
@@ -186,18 +153,18 @@ function AnimatedRoutes() {
           <Route path="/buttons" element={<Buttons />} />
           <Route path="/images" element={<Images />} />
           <Route path="/videos" element={<Videos />} />
-          
+
           {/* Charts */}
           <Route path="/line-chart" element={<LineChart />} />
           <Route path="/bar-chart" element={<BarChart />} />
-         
+
           {/* Other Pages */}
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/basic-tables" element={<BasicTables />} />
           <Route path="/form-elements" element={<FormElements />} />
           <Route path="/blank" element={<Blank />} />
         </Route>
-            
+
         {/* ====== FALLBACK ROUTE ====== */}
         <Route path="*" element={<NotFound />} />
       </Routes>
