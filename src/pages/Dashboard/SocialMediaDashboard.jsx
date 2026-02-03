@@ -15,6 +15,26 @@ export default function SocialMediaDashboard() {
   const { admin } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState("default");
+  const [childStats, setChildStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+
+  useEffect(() => {
+    if (admin?.role === "Admin") {
+      fetchChildAdminStats();
+    }
+  }, [admin]);
+
+  const fetchChildAdminStats = async () => {
+    setLoadingStats(true);
+    try {
+      const res = await api.get(API_ENDPOINTS.GET_CHILD_ADMIN_STATS);
+      setChildStats(res.data);
+    } catch (err) {
+      console.error("Failed to fetch child admin stats", err);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   // Responsive sidebar toggle
   const toggleSidebar = () => {
@@ -32,7 +52,7 @@ export default function SocialMediaDashboard() {
   return (
     <>
       <PageMeta title="Prithu Dashboard | Analytics" description="Admin dashboard with analytics, metrics, and user insights" />
-      
+
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3 shadow-sm">
         <div className="flex items-center justify-between">
@@ -48,7 +68,7 @@ export default function SocialMediaDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-full">
-              {admin?.name || "Admin"}
+              {admin?.userName || "Admin"}
             </span>
           </div>
         </div>
@@ -61,16 +81,16 @@ export default function SocialMediaDashboard() {
             { id: "metrics", label: "Metrics", icon: FiGrid },
             { id: "analytics", label: "Analytics", icon: FiTrendingUp },
             { id: "users", label: "Users", icon: FiUsers },
+            admin?.role === "Admin" && { id: "childAdmins", label: "Child Admins", icon: FiUsers },
             { id: "revenue", label: "Revenue", icon: FiDollarSign },
-          ].map((item) => (
+          ].filter(Boolean).map((item) => (
             <button
               key={item.id}
               onClick={() => handleViewChange(item.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-                activeView === item.id
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${activeView === item.id
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
             >
               <item.icon className="text-base" />
               <span className="hidden xs:inline">{item.label}</span>
@@ -81,9 +101,8 @@ export default function SocialMediaDashboard() {
 
       {/* Mobile Sidebar Drawer */}
       <div
-        className={`md:hidden fixed inset-0 z-50 transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`md:hidden fixed inset-0 z-50 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setSidebarOpen(false)}></div>
         <div className="relative w-64 h-full bg-white shadow-xl">
@@ -108,8 +127,11 @@ export default function SocialMediaDashboard() {
           <div className="hidden md:block px-6 pt-6 pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Welcome back, {admin?.name || "Admin"} 👋</h1>
-                <p className="text-gray-600 mt-1">Here's what's happening with your platform today.</p>
+                <h1 className="text-2xl font-bold text-gray-900">Welcome back, {admin?.userName || "Admin"} 👋</h1>
+                <p className="text-gray-600 mt-1">
+                  Here's what's happening with your platform today.
+                  {admin?.role === 'Admin' && ` Team Status: ${childStats?.totalChildAdmins || 0} child admins (${childStats?.onlineChildAdmins || 0} online).`}
+                </p>
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
@@ -190,15 +212,54 @@ export default function SocialMediaDashboard() {
                   </div>
                 </div>
               </div>
-            ) : activeView === "revenue" && window.innerWidth < 768 ? (
-              <div className="md:hidden space-y-4">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="px-4 py-4 border-b border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-800">Subscription Revenue</h2>
-                    <p className="text-sm text-gray-500 mt-1">Revenue breakdown</p>
+            ) : activeView === "childAdmins" && admin?.role === "Admin" ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-center">
+                    <p className="text-sm text-gray-500 uppercase font-bold">Total Child Admins</p>
+                    <p className="text-4xl font-black text-blue-600 mt-2">{childStats?.totalChildAdmins || 0}</p>
                   </div>
-                  <div className="p-4">
-                    <SubscriptionRevenue />
+                  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-center">
+                    <p className="text-sm text-gray-500 uppercase font-bold">Active Now</p>
+                    <p className="text-4xl font-black text-emerald-600 mt-2">{childStats?.onlineChildAdmins || 0}</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-800">Child Admin Offline History</h2>
+                    <p className="text-sm text-gray-500 mt-1">Detailed session and inactivity logs</p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                          <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Child Admin</th>
+                          <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Date</th>
+                          <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Offline From</th>
+                          <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Offline To</th>
+                          <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Duration</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {childStats?.offlineHistory?.map((log, i) => (
+                          <tr key={i} className="border-b border-gray-50 hover:bg-gray-50/50">
+                            <td className="px-6 py-4">
+                              <p className="font-medium text-gray-800">{log.childAdminId?.userName}</p>
+                              <p className="text-xs text-gray-500">{log.childAdminId?.email}</p>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">{log.date}</td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {log.offlineFrom ? new Date(log.offlineFrom).toLocaleTimeString() : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {log.offlineTo ? new Date(log.offlineTo).toLocaleTimeString() : 'Active'}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-medium text-blue-600">{log.duration || 'Running'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -206,7 +267,7 @@ export default function SocialMediaDashboard() {
               <>
                 {/* Desktop & Tablet Layout (Default) */}
                 <div className="grid grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-7">
-                  
+
                   {/* User Registration Ratio - After Dashboard Metrics */}
                   <div className="col-span-12 xl:col-span-8">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

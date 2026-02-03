@@ -34,7 +34,7 @@ const mainNavItems = [
     name: "User Profile",
     permission: "canManageUsers",
     subItems: [
-      { name: "User Detail", path: "/social/user/profile/dashboard", permission: "canManageUsersDetail" },
+      { name: "User Detail", path: "/social/profile", permission: "canManageUsersDetail" },
     ],
   },
   {
@@ -581,18 +581,6 @@ const SocialMediaSidebar = ({ user }) => {
         <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar px-3 py-6">
           <nav className="mb-8">
             <div className="mb-6">
-              <h2 className="text-xs font-semibold uppercase text-gray-400 dark:text-gray-500 tracking-wider mb-4 px-3">
-                {isHovered || isMobileOpen ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-1 h-4 bg-blue-500 rounded-full" />
-                    SOCIAL PORTAL
-                  </span>
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto">
-                    <Users className="w-3 h-3 text-blue-600 dark:text-blue-400" />
-                  </div>
-                )}
-              </h2>
               {renderMenuItems(filteredNavItems, "main")}
             </div>
           </nav>
@@ -607,23 +595,7 @@ const SocialMediaSidebar = ({ user }) => {
                 exit="hidden"
                 className="mt-auto border-t border-gray-100 dark:border-gray-800 pt-6"
               >
-                <div className="px-3 mb-4">
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-800 flex items-center justify-center flex-shrink-0">
-                        <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          Social Media Status
-                        </p>
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                          Active • {user?.role === "Admin" ? "Full Access" : "Limited Access"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+               
 
                 <div className="space-y-1 px-3">
                   <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300 transition-colors">

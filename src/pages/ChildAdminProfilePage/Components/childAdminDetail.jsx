@@ -21,7 +21,7 @@ export default function ChildAdminDetails({ profile }) {
   };
 
   const handleEdit = () => {
-    navigate(`/social/childadmin/permission/${profile._id}`);
+    navigate(`/settings/childadmin/permission/${profile._id}`);
   };
 
   return (

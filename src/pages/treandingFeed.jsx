@@ -38,7 +38,7 @@ const fetchTrendingFeeds = async (filters) => {
       ...(filters.search && { search: filters.search }),
     };
 
-    const response = await axios.get("/api/admin/get/trending/feed", { params });
+    const response = await axios.get("/api/get/trending/feed", { params });
     return response.data;
   } catch (error) {
     console.error("Error fetching trending feeds:", error);

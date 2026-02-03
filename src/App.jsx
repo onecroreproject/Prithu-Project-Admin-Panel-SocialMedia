@@ -9,6 +9,8 @@ import { AdminProfileProvider } from "./context/adminProfileContext";
 // Auth Pages
 import SignIn from "./pages/AuthPages/SignIn";
 import ForgotPassword from "./components/auth/forgotPasswordForm";
+import AdminProtectedRoute from "./components/auth/AdminProtectedRoute";
+import PublicRoute from "./components/auth/PublicRoute";
 
 // Layout
 import AppLayout from "./layout/AppLayout";
@@ -68,6 +70,7 @@ import DriveDashboard from "./DriverDashboard/DriveDashboard";
 import GoogleDriveDashboard from "./DriverDashboard/googleDashboard"
 import AdminFeedbackPage from "./pages/feedbackandReportpage";
 import AdminStudioLayout from "./pages/AdminStudio/studioLayout";
+import AdminFaqPage from "./pages/faqPage";
 
 // Create separate dashboard components or use existing ones
 // For now, we'll use SocialMediaDashboard as a placeholder for analytics
@@ -95,11 +98,11 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* ====== AUTH ROUTES ====== */}
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/reset-password" element={<ForgotPassword />} />
+        <Route path="/signin" element={<PublicRoute><SignIn /></PublicRoute>} />
+        <Route path="/reset-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
 
         {/* ====== MAIN LAYOUT WITH DASHBOARD CARDS ====== */}
-        <Route path="/" element={<AppLayout />}>
+        <Route path="/" element={<AdminProtectedRoute><AppLayout /></AdminProtectedRoute>}>
           {/* Dashboard Route - Shows dashboard cards */}
           <Route index element={<></>} />
 

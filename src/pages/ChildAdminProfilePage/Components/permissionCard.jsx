@@ -14,7 +14,7 @@ export default function PermissionsCard({ profile,role }) {
 
 
   const handleEdit = () => {
-    navigate(`/social/childadmin/permission/s${profile._id}`);
+    navigate(`/settings/childadmin/permission/s${profile._id}`);
   };
 
   return (

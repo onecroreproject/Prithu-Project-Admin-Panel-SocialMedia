@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { FaUsers, FaUserCheck, FaUserPlus, FaUserSlash, FaFlag } from "react-icons/fa";
+import { FaUsers, FaUserCheck, FaUserPlus, FaUserSlash, FaFlag, FaUserShield } from "react-icons/fa";
 import { fetchMetrics } from "../../../Services/DashboardServices/metricksServices";
 
 // Responsive Skeleton Loader
@@ -24,8 +24,8 @@ export default function TodayMetrics() {
   // Responsive Loading State
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 px-2 sm:px-4">
-        {[...Array(5)].map((_, i) => (
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3 sm:gap-4 px-2 sm:px-4">
+        {[...Array(7)].map((_, i) => (
           <div
             key={i}
             className="rounded-xl border border-gray-100 bg-white shadow-sm p-3 sm:p-4 md:p-5 min-h-[110px] xs:min-h-[120px] sm:min-h-[130px] md:min-h-[140px] flex flex-col justify-between"
@@ -111,6 +111,26 @@ export default function TodayMetrics() {
       trend: "-3%",
       description: "All reports",
     },
+    {
+      key: "totalChildAdmins",
+      title: "Total Child Admins",
+      value: data.totalChildAdmins,
+      icon: FaUserShield,
+      color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
+      border: "border-indigo-100",
+      trend: null,
+      description: "Total team members",
+    },
+    {
+      key: "onlineChildAdmins",
+      title: "Online Admins",
+      value: data.onlineChildAdmins,
+      icon: FaUserCheck,
+      color: "bg-gradient-to-br from-cyan-500 to-cyan-600",
+      border: "border-cyan-100",
+      trend: "Live",
+      description: "Admins currently active",
+    },
   ];
 
   // Responsive number formatting
@@ -124,7 +144,7 @@ export default function TodayMetrics() {
   return (
     <div className="w-full">
       {/* Container with responsive padding */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 px-2 sm:px-3 md:px-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3 sm:gap-4 px-2 sm:px-3 md:px-4">
         {metrics.map((metric) => (
           <div
             key={metric.key}
@@ -137,7 +157,7 @@ export default function TodayMetrics() {
           >
             {/* Glow effect - hidden on mobile for performance */}
             <div className="hidden sm:block absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"></div>
-            
+
             <div className="relative z-10 w-full">
               {/* Header Section */}
               <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -158,21 +178,20 @@ export default function TodayMetrics() {
                     </p>
                   </div>
                 </div>
-                
+
                 {/* Trend Badge - hidden on extra small screens */}
                 {metric.trend && (
                   <span
-                    className={`hidden xs:inline-flex text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ml-1 flex-shrink-0 ${
-                      metric.trend.startsWith("+")
+                    className={`hidden xs:inline-flex text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ml-1 flex-shrink-0 ${metric.trend.startsWith("+")
                         ? "bg-emerald-50 text-emerald-700"
                         : "bg-rose-50 text-rose-700"
-                    }`}
+                      }`}
                   >
                     {metric.trend}
                   </span>
                 )}
               </div>
-              
+
               {/* Value and Progress Bar Section */}
               <div className="mt-2 sm:mt-3">
                 <div className="flex items-baseline gap-1 sm:gap-2">
@@ -181,22 +200,21 @@ export default function TodayMetrics() {
                   </span>
                   <div className="hidden sm:block h-1.5 w-1.5 rounded-full bg-gray-300 flex-shrink-0"></div>
                 </div>
-                
+
                 {/* Progress Bar - hidden on mobile to save space */}
                 <div className="hidden sm:block mt-2">
                   <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${
-                        metric.key === "totalUsers"
+                      className={`h-full rounded-full ${metric.key === "totalUsers"
                           ? "bg-blue-500"
                           : metric.key === "activeUsersToday"
-                          ? "bg-emerald-500"
-                          : metric.key === "newRegistrationsToday"
-                          ? "bg-violet-500"
-                          : metric.key === "suspendedUsers"
-                          ? "bg-rose-500"
-                          : "bg-amber-500"
-                      }`}
+                            ? "bg-emerald-500"
+                            : metric.key === "newRegistrationsToday"
+                              ? "bg-violet-500"
+                              : metric.key === "suspendedUsers"
+                                ? "bg-rose-500"
+                                : "bg-amber-500"
+                        }`}
                       style={{
                         width: `${Math.min((metric.value / (data.totalUsers || 1)) * 100, 100)}%`,
                       }}
@@ -205,10 +223,10 @@ export default function TodayMetrics() {
                 </div>
               </div>
             </div>
-            
+
             {/* Bottom border on hover - hidden on mobile */}
             <div className="hidden sm:block absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
+
             {/* Mobile indicator - visible only on mobile */}
             <div className="sm:hidden absolute bottom-2 right-2">
               <div className="w-1.5 h-1.5 rounded-full bg-gray-200"></div>
@@ -216,7 +234,7 @@ export default function TodayMetrics() {
           </div>
         ))}
       </div>
-      
+
       {/* Legend/Help Text - hidden on mobile, shown on tablet+ */}
       <div className="hidden md:flex items-center justify-center mt-4 px-4">
         <p className="text-xs text-gray-500 text-center">

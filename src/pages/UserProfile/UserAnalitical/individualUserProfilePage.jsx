@@ -54,7 +54,7 @@ export default function IndividualUserProfilePage() {
           <h3 className="text-xl font-bold text-gray-900 mb-2">Failed to load user</h3>
           <p className="text-gray-600 mb-6">The user profile could not be loaded. Please try again.</p>
           <button
-            onClick={() => navigate("/social/user/profile/dashboard")}
+            onClick={() => navigate("/social/profile")}
             className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Back to Users Dashboard
@@ -76,7 +76,7 @@ export default function IndividualUserProfilePage() {
         {/* Navigation Header */}
         <div className="mb-8">
           <button
-            onClick={() => navigate("/social/user/profile/dashboard")}
+            onClick={() => navigate("/social/profile")}
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm font-medium mb-6 px-3 py-2 rounded-lg hover:bg-white transition-all duration-200"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

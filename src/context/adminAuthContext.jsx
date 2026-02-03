@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import api from "../Utils/axiosApi";
 import { API_ENDPOINTS } from "../API-Constanse/apiConstance";
 
@@ -20,6 +20,11 @@ export const AdminAuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
 
+  const [lastActive, setLastActive] = useState(() => {
+    const stored = localStorage.getItem("lastActive");
+    return stored ? parseInt(stored, 10) : Date.now();
+  });
+
   // ✅ Load from localStorage when app starts
   useEffect(() => {
     const storedAdmin = localStorage.getItem("admin");
@@ -28,6 +33,55 @@ export const AdminAuthProvider = ({ children }) => {
     if (storedAdmin) setAdmin(JSON.parse(storedAdmin));
     if (storedRole) setRole(storedRole);
   }, []);
+
+  // ✅ Update Activity Function
+  const updateActivity = useCallback(() => {
+    const now = Date.now();
+    setLastActive(now);
+    localStorage.setItem("lastActive", now.toString());
+  }, []);
+
+  // ✅ Activity Listeners
+  useEffect(() => {
+    if (!admin) return;
+
+    const events = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
+    const handleActivity = () => updateActivity();
+
+    events.forEach((event) => window.addEventListener(event, handleActivity));
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, handleActivity));
+    };
+  }, [admin, updateActivity]);
+
+  // ✅ Inactivity Check Timer
+  useEffect(() => {
+    if (!admin) return;
+
+    const checkInactivity = () => {
+      const now = Date.now();
+      const twoHours = 2 * 60 * 60 * 1000;
+      const storedLastActive = localStorage.getItem("lastActive");
+      const activeTime = storedLastActive ? parseInt(storedLastActive, 10) : lastActive;
+
+      if (now - activeTime > twoHours) {
+        console.log("Inactivity timeout reached. Logging out...");
+        logout();
+      } else if (role === 'Child_Admin') {
+        // Send heartbeat to backend
+        api.post(API_ENDPOINTS.CHILD_ADMIN_HEARTBEAT).catch(err => console.error("Heartbeat failed", err));
+      }
+    };
+
+    // Check every minute
+    const interval = setInterval(checkInactivity, 60000);
+
+    // Also check on mount
+    checkInactivity();
+
+    return () => clearInterval(interval);
+  }, [admin, lastActive]);
 
   // ✅ Admin / Child_Admin Login
   const login = async (identifier, password) => {
@@ -52,6 +106,7 @@ export const AdminAuthProvider = ({ children }) => {
       // ✅ Update state
       setAdmin({ ...adminData, token, grantedPermissions, role: userRole });
       setRole(userRole);
+      updateActivity(); // Mark active on login
     } catch (err) {
       console.error("Login error:", err.response?.data || err);
       setError(err.response?.data?.error || "Login failed");
@@ -62,17 +117,18 @@ export const AdminAuthProvider = ({ children }) => {
 
   // ✅ Logout
   const logout = () => {
-  // Clear state
-  setAdmin(null);
-  setRole(null);
+    // Clear state
+    setAdmin(null);
+    setRole(null);
 
-  // Clear localStorage
-  localStorage.removeItem("admin");
-  localStorage.removeItem("role");
-  localStorage.removeItem("token");
+    // Clear localStorage
+    localStorage.removeItem("admin");
+    localStorage.removeItem("role");
+    localStorage.removeItem("token");
+    localStorage.removeItem("lastActive");
 
-  console.log("Logged out successfully");
-};
+    console.log("Logged out successfully");
+  };
 
 
   // ✅ Send OTP
@@ -170,6 +226,8 @@ export const AdminAuthProvider = ({ children }) => {
         verifyOtp,
         resetPassword,
         createChildAdmin,
+        lastActive,
+        updateActivity,
       }}
     >
       {children}
