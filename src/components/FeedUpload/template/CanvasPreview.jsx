@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
 import { Play, Pause, RotateCcw, X } from 'lucide-react';
-import sampleAvatar from '../../../assets/sampleimage.png';
+import sampleAvatar from '../../../Assets/sampleimage.png';
 
 const FILTER_STYLES = {
     original: '',
