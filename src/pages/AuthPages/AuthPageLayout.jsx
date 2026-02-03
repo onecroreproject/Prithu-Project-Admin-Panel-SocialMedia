@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import GridShape from "../../components/common/GridShape";
-import PrithuLogo from "../../Assets/Logo/PrithuLogo.png";
+import PrithuLogo from "../../Assets/Logo/prithuLogo.png";
 import ThemeTogglerTwo from "../../components/common/ThemeTogglerTwo";
 
 export default function AuthLayout({ children }) {
