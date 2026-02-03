@@ -7,12 +7,9 @@ import ProfileHeader from "./ComponentsForIndividualUserProfile/ProfileHeader";
 import PersonalInfoCard from "./ComponentsForIndividualUserProfile/PersonalInfoCard";
 import UserStats from "./ComponentsForIndividualUserProfile/userStatus";
 import SocialLinksCard from "./ComponentsForIndividualUserProfile/socialLinkCard";
-import TopPostsSection from "./ComponentsForIndividualUserProfile/topPostSection";
 import PerformanceMetrics from "./ComponentsForIndividualUserProfile/performaceMetricks";
-import UserEngagement from "./ComponentsForIndividualUserProfile/userEngagement";
 import ReportsCard from "./ComponentsForIndividualUserProfile/reportCard";
 import DeviceInfoCard from "./ComponentsForIndividualUserProfile/deviceInfocard";
-import QuickActionsCard from "./ComponentsForIndividualUserProfile/quickActionCard";
 
 const pageMotion = {
   initial: { opacity: 0, y: 10 },
@@ -84,13 +81,13 @@ export default function IndividualUserProfilePage() {
             </svg>
             Back to Users Dashboard
           </button>
-          
+
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
                 {user.profile?.profileAvatar && (
-                  <img 
-                    src={user.profile.profileAvatar} 
+                  <img
+                    src={user.profile.profileAvatar}
                     alt={user.userName}
                     className="w-14 h-14 rounded-2xl border-2 border-white shadow-lg"
                   />
@@ -107,7 +104,7 @@ export default function IndividualUserProfilePage() {
               </div>
               <p className="text-gray-500 mt-2 max-w-2xl">{user.profile?.bio || 'User profile and comprehensive analytics'}</p>
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <button className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl">
                 Send Message
@@ -124,32 +121,22 @@ export default function IndividualUserProfilePage() {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <PersonalInfoCard user={user} />
             </div>
-            
+
             {/* User Stats */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <UserStats user={user} />
             </div>
           </div>
 
-          {/* Second Row: Performance Metrics and User Engagement */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Second Row: Performance Metrics */}
+          <div className="grid grid-cols-1 gap-8">
             {/* Performance Metrics */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <PerformanceMetrics user={user} />
             </div>
-            
-            {/* User Engagement */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <UserEngagement user={user} />
-            </div>
           </div>
 
-          {/* Third Row: Top Posts (Full width) */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <TopPostsSection posts={user.posts} />
-          </div>
-
-          {/* Fourth Row: Social Links, Device Info, Reports */}
+          {/* Third Row: Social Links, Device Info, Reports */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Social Links */}
             {user.profile?.socialLinks && (
@@ -171,78 +158,75 @@ export default function IndividualUserProfilePage() {
             </div>
           </div>
 
-          {/* Fifth Row: Quick Actions and Account Timeline */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-  {/* Quick Actions */}
-  <QuickActionsCard user={user} />
-
-  {/* Account Timeline */}
-  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-    <h3 className="font-semibold text-gray-900 mb-4 text-lg flex items-center gap-2">
-      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      Account Timeline
-    </h3>
-    <div className="space-y-4">
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <div>
-          <div className="text-xs text-gray-500 font-medium">Registered</div>
-          <div className="text-sm text-gray-900 font-semibold">
-            {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric' 
-            }) : 'N/A'}
+          {/* Fourth Row: Account Timeline */}
+          <div className="grid grid-cols-1 gap-8">
+            {/* Account Timeline */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+              <h3 className="font-semibold text-gray-900 mb-4 text-lg flex items-center gap-2">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Account Timeline
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="text-xs text-gray-500 font-medium">Registered</div>
+                    <div className="text-sm text-gray-900 font-semibold">
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      }) : 'N/A'}
+                    </div>
+                  </div>
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="text-xs text-gray-500 font-medium">Last Login</div>
+                    <div className="text-sm text-gray-900 font-semibold">
+                      {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : 'Never'}
+                    </div>
+                  </div>
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="text-xs text-gray-500 font-medium">Last Active</div>
+                    <div className="text-sm text-gray-900 font-semibold">
+                      {user.lastActiveAt ? new Date(user.lastActiveAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : 'N/A'}
+                    </div>
+                  </div>
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 01118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="p-2 bg-blue-100 rounded-lg">
-          <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      </div>
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <div>
-          <div className="text-xs text-gray-500 font-medium">Last Login</div>
-          <div className="text-sm text-gray-900 font-semibold">
-            {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }) : 'Never'}
-          </div>
-        </div>
-        <div className="p-2 bg-green-100 rounded-lg">
-          <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-        </div>
-      </div>
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <div>
-          <div className="text-xs text-gray-500 font-medium">Last Active</div>
-          <div className="text-sm text-gray-900 font-semibold">
-            {user.lastActiveAt ? new Date(user.lastActiveAt).toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }) : 'N/A'}
-          </div>
-        </div>
-        <div className="p-2 bg-purple-100 rounded-lg">
-          <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 01118 0z" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
         </div>
       </div>
     </motion.div>

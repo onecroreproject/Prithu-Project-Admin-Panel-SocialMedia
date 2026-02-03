@@ -22,6 +22,7 @@ import NotFound from "./pages/OtherPage/NotFound";
 // Social Media Module Pages
 import UploadPage from "./pages/uploadPage";
 import UserProfiles from "./pages/UserProfile/UserProfiles";
+import UserProfilePage from "./pages/UserProfile/userProfilePage";
 import IndividualUserProfilePage from "./pages/UserProfile/UserAnalitical/individualUserProfilePage";
 import ReferralTreePage from "./pages/userTree";
 import CreatorTable from "./components/tables/UserTabel/creatorTable";
@@ -116,7 +117,7 @@ function AnimatedRoutes() {
 
 
           {/* User Management */}
-          <Route path="/social/profile" element={<UserProfiles />} />
+          <Route path="/social/profile" element={<UserProfilePage />} />
           <Route path="/social/individual/user/profile/:id" element={<IndividualUserProfilePage />} />
           <Route path="/social/referal/tree/page/:userId" element={<ReferralTreePage />} />
           <Route path="/social/tree" element={<ReferralTreePage />} />
