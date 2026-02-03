@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { feedPortalService } from '../services/feedPortalService';
+import { feedPortalService } from '../Services/feedPortalService';
 import { io } from 'socket.io-client';
 
-import { getMediaUrl } from '../utils/urlHelper';
+import { getMediaUrl } from '../Utils/urlHelper';
 
 const STORAGE_KEY = "feed_upload_state";
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
