@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { clsx } from 'clsx';
 import { Play, Pause, RotateCcw, X } from 'lucide-react';
 import sampleAvatar from '../../../Assets/sampleimage.png';
@@ -18,6 +18,186 @@ const FILTER_STYLES = {
     slumber: 'saturate(0.6) brightness(1.05)'
 };
 
+const OverlayItem = React.memo(({
+    overlay,
+    activeOverlayId,
+    isPlaying,
+    animationState,
+    mediaAreaRef,
+    containerRef,
+    brushPos,
+    onMouseDown,
+    onUpdateOverlay,
+    isPainting
+}) => {
+    const isActive = activeOverlayId === overlay.id;
+
+    const getInitialOffset = (overlay, containerW, containerH) => {
+        if (!overlay.animation?.enabled) return { x: 0, y: 0 };
+        const { direction } = overlay.animation;
+        const x = (overlay.xPercent / 100) * containerW;
+        const y = (overlay.yPercent / 100) * containerH;
+        const w = (overlay.wPercent / 100) * containerW;
+        const h = (overlay.hPercent / 100) * containerH;
+
+        switch (direction) {
+            case 'top': return { x: 0, y: -(y + h) };
+            case 'bottom': return { x: 0, y: (containerH - y) };
+            case 'left': return { x: -(x + w), y: 0 };
+            case 'right': return { x: (containerW - x), y: 0 };
+            default: return { x: 0, y: 0 };
+        }
+    };
+
+    // Calculate Transform & Transition using useMemo to avoid re-calc on every render
+    const { transformStyle, transitionStyle } = useMemo(() => {
+        let tStyle = {};
+        let trStyle = {};
+
+        if (isPlaying && mediaAreaRef.current) {
+            const { width, height } = mediaAreaRef.current.getBoundingClientRect();
+            const offset = getInitialOffset(overlay, width, height);
+
+            if (animationState === 'reset') {
+                tStyle = { transform: `translate(${offset.x}px, ${offset.y}px)` };
+                trStyle = { transition: 'none' };
+            } else if (animationState === 'animating') {
+                tStyle = { transform: 'translate(0, 0)' };
+                trStyle = { transition: `transform ${overlay.animation?.speed || 1}s cubic-bezier(0.2, 1, 0.3, 1)` };
+            }
+        }
+        return { transformStyle: tStyle, transitionStyle: trStyle };
+    }, [isPlaying, animationState, overlay, mediaAreaRef]);
+
+    // Mask Generation (Memoized) - This handles the heavy lifting
+    const maskStyle = useMemo(() => {
+        if (overlay.type !== 'avatar' || !overlay.avatarConfig?.softEdgeConfig?.enabled || !containerRef.current) {
+            return {};
+        }
+
+        const strokes = overlay.avatarConfig.softEdgeConfig.strokes;
+        if (!strokes || strokes.length === 0) return {};
+
+        const rect = containerRef.current.getBoundingClientRect();
+        // Use rect size to determine relative sizing for mask canvas
+        const containerW = (overlay.wPercent / 100) * rect.width;
+        const containerH = (overlay.hPercent / 100) * rect.height;
+
+        // If dimensions are invalid, return empty
+        if (containerW <= 0 || containerH <= 0) return {};
+
+        const canvas = document.createElement('canvas');
+        canvas.width = containerW;
+        canvas.height = containerH;
+        const ctx = canvas.getContext('2d');
+
+        // Initial fill opaque white
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, containerW, containerH);
+
+        // Draw "erased" areas (black with blur)
+        strokes.forEach(s => {
+            const x = (s.x / 100) * containerW;
+            const y = (s.y / 100) * containerH;
+            const r = (s.r / 100) * containerW;
+
+            const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+            grad.addColorStop(0, `rgba(0,0,0,${s.opacity})`);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        const url = canvas.toDataURL();
+        return {
+            maskImage: `url(${url})`,
+            WebkitMaskImage: `url(${url})`,
+            maskSize: '100% 100%',
+            WebkitMaskSize: '100% 100%'
+        };
+    }, [
+        overlay.type,
+        overlay.avatarConfig?.softEdgeConfig,
+        overlay.wPercent,
+        overlay.hPercent,
+        // We do NOT depend on containerRef itself (which is stable) but strictly speaking we need its dimensions.
+        // However, dimensions change on resize. If resizing happens, the parent re-renders and we get new wPercent/hPercent?
+        // No, wPercent/hPercent are strictly controlled by state. But pixel size changes on window resize.
+        // This might need a window resize listener or reliance on parent re-renders. 
+        // For now, let's assume parent re-renders on significant layout changes or we accept mask might be slightly off during resize until interaction.
+    ]);
+
+
+    if (!overlay.visible) return null;
+
+    return (
+        <div
+            id={`overlay-${overlay.id}`}
+            className={clsx(
+                "absolute pointer-events-auto transition-all",
+                !isPlaying && "cursor-move",
+                !isPlaying && isActive ? "z-50 ring-4 ring-blue-500/50 outline outline-2 outline-blue-500 rounded-sm" : "z-10",
+                overlay.type === 'avatar' && overlay.avatarConfig?.softEdgeConfig?.enabled && isActive && "!cursor-none"
+            )}
+            style={{
+                left: `${overlay.xPercent}%`, top: `${overlay.yPercent}%`,
+                width: `${overlay.wPercent}%`, height: `${overlay.hPercent}%`,
+                ...transformStyle, ...transitionStyle
+            }}
+            onMouseDown={(e) => onMouseDown(e, overlay, 'move')}
+        >
+            {isActive && !isPlaying && (
+                <>
+                    {/* Brush Preview Cursor */}
+                    {overlay.type === 'avatar' && overlay.avatarConfig?.softEdgeConfig?.enabled && (
+                        <div
+                            className="absolute pointer-events-none z-[100] border-2 border-white rounded-full bg-blue-500/10 shadow-[0_0_0_1px_rgba(0,0,0,0.5),0_0_20px_rgba(59,130,246,0.5)] transition-all duration-75"
+                            style={{
+                                width: `${overlay.avatarConfig.softEdgeConfig.brushSize}%`,
+                                height: `${overlay.avatarConfig.softEdgeConfig.brushSize}%`,
+                                left: `${brushPos.x}%`,
+                                top: `${brushPos.y}%`,
+                                transform: 'translate(-50%, -50%)',
+                                filter: `blur(${overlay.avatarConfig.softEdgeConfig.brushSize / 4}px)`
+                            }}
+                        />
+                    )}
+
+                    {!overlay.avatarConfig?.softEdgeConfig?.enabled && (
+                        <>
+                            <div className="absolute -bottom-2 -right-2 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize border-2 border-white z-50 shadow-2xl transform hover:scale-125 transition-transform" onMouseDown={(e) => onMouseDown(e, overlay, 'resize')} />
+                            <button className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white border-2 border-white z-50 hover:bg-red-600 shadow-2xl transform hover:scale-125 transition-transform" onClick={(e) => { e.stopPropagation(); onUpdateOverlay(overlay.id, { visible: false }); }}>
+                                <X size={12} strokeWidth={4} />
+                            </button>
+                        </>
+                    )}
+                </>
+            )}
+            <div className="w-full h-full relative" style={maskStyle}>
+                {overlay.type === 'avatar' && (
+                    <div className={clsx("w-full h-full overflow-hidden shadow-2xl", (overlay.avatarConfig?.shape === 'square' || overlay.shape === 'square') ? 'rounded-2xl' : 'rounded-full')} style={{ border: overlay.avatarConfig?.softEdgeConfig?.enabled ? 'none' : '2.5px solid white' }}>
+                        <img src={sampleAvatar} alt="Avatar" className="w-full h-full object-cover" draggable={false} />
+                    </div>
+                )}
+                {overlay.type === 'logo' && (
+                    <div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
+                        <span className="text-[10px] text-white font-black uppercase tracking-tighter">LOGO</span>
+                    </div>
+                )}
+                {overlay.type === 'username' && (
+                    <div className="w-full h-full flex items-center justify-center bg-black/20 backdrop-blur-sm rounded-lg px-2">
+                        <span className="text-white font-black drop-shadow-2xl truncate text-center uppercase tracking-wider" style={{ fontSize: '12px' }}>{overlay.text || 'User Name'}</span>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+});
+
 const CanvasPreview = ({
     previewUrl,
     fileType,
@@ -33,6 +213,7 @@ const CanvasPreview = ({
     const mediaAreaRef = useRef(null);
     const videoRef = useRef(null);
     const audioRef = useRef(null);
+    const colorCanvasRef = useRef(null);
 
     // State
     const [dragging, setDragging] = useState(null);
@@ -43,7 +224,6 @@ const CanvasPreview = ({
     const [duration, setDuration] = useState(0);
     const [dominantColor, setDominantColor] = useState('#1a1a1a');
     const [brushPos, setBrushPos] = useState({ x: 50, y: 50 }); // Local % for cursor tracking
-    const colorCanvasRef = useRef(null);
 
     const isVideo = fileType?.startsWith('video');
 
@@ -52,39 +232,6 @@ const CanvasPreview = ({
     }, [audioConfig?.file]);
 
     const activeOverlay = metadata.overlayElements.find(el => el.id === activeOverlayId);
-
-    // --- MASK RENDERING HELPER ---
-    const generateMaskUrl = useCallback((strokes, containerW, containerH) => {
-        if (!strokes || strokes.length === 0) return null;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = containerW;
-        canvas.height = containerH;
-        const ctx = canvas.getContext('2d');
-
-        // Initial fill opaque white
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, containerW, containerH);
-
-        // Draw "erased" areas (black with blur)
-        strokes.forEach(s => {
-            const x = (s.x / 100) * containerW;
-            const y = (s.y / 100) * containerH;
-            const r = (s.r / 100) * containerW; // Scaling r same as W for simplicity
-
-            const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-            grad.addColorStop(0, `rgba(0,0,0,${s.opacity})`);
-            grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        return canvas.toDataURL();
-    }, []);
 
     const extractDominantColor = React.useCallback(() => {
         const media = isVideo ? videoRef.current : mediaAreaRef.current?.querySelector('img');
@@ -145,12 +292,12 @@ const CanvasPreview = ({
         });
     };
 
-    const handleMouseDown = (e, overlay, mode = 'move') => {
+    const handleMouseDown = useCallback((e, overlay, mode = 'move') => {
         if (isPlaying) return;
         e.preventDefault(); e.stopPropagation();
         onSelectOverlay(overlay.id);
 
-        if (overlay.type === 'avatar' && overlay.avatarConfig?.softEdgeConfig?.enabled) {
+        if (overlay.type === 'avatar' && overlay.avatarConfig?.softEdgeConfig?.enabled && mode === 'move') {
             setIsPainting(true);
             const rect = e.currentTarget.getBoundingClientRect();
             const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
@@ -168,23 +315,20 @@ const CanvasPreview = ({
             initialWPercent: overlay.wPercent, initialHPercent: overlay.hPercent,
             containerWidth: rect.width, containerHeight: rect.height,
         });
-    };
+    }, [isPlaying, onSelectOverlay]);
 
     useEffect(() => {
         const handleMouseMove = (e) => {
-            if (activeOverlay?.type === 'avatar' && activeOverlay?.avatarConfig?.softEdgeConfig?.enabled) {
+            if (isPainting && activeOverlay?.type === 'avatar' && activeOverlay?.avatarConfig?.softEdgeConfig?.enabled) {
                 const el = document.getElementById(`overlay-${activeOverlay.id}`);
                 if (el) {
                     const rect = el.getBoundingClientRect();
                     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
                     const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
                     setBrushPos({ x: xPercent, y: yPercent });
-
-                    if (isPainting) {
-                        handlePaint(e, activeOverlay, xPercent, yPercent);
-                    }
+                    handlePaint(e, activeOverlay, xPercent, yPercent);
+                    return;
                 }
-                if (isPainting) return;
             }
 
             if (!dragging) return;
@@ -230,7 +374,7 @@ const CanvasPreview = ({
                 audioRef.current.currentTime = audioConfig?.crop?.start || 0;
                 audioRef.current.play();
             }
-        }, 300); // Give a bit more time for reset to take effect
+        }, 300);
     };
 
     const handlePause = () => {
@@ -266,23 +410,6 @@ const CanvasPreview = ({
             const offset = audioConfig?.crop?.start || 0;
             setCurrentTime(Math.max(0, audioRef.current.currentTime - offset));
             setDuration(audioRef.current.duration - offset);
-        }
-    };
-
-    const getInitialOffset = (overlay, containerW, containerH) => {
-        if (!overlay.animation?.enabled) return { x: 0, y: 0 };
-        const { direction } = overlay.animation;
-        const x = (overlay.xPercent / 100) * containerW;
-        const y = (overlay.yPercent / 100) * containerH;
-        const w = (overlay.wPercent / 100) * containerW;
-        const h = (overlay.hPercent / 100) * containerH;
-
-        switch (direction) {
-            case 'top': return { x: 0, y: -(y + h) };
-            case 'bottom': return { x: 0, y: (containerH - y) };
-            case 'left': return { x: -(x + w), y: 0 };
-            case 'right': return { x: (containerW - x), y: 0 };
-            default: return { x: 0, y: 0 };
         }
     };
 
@@ -356,107 +483,23 @@ const CanvasPreview = ({
 
                             <canvas ref={colorCanvasRef} style={{ display: 'none' }} />
 
-                            {/* Overlays Layer */}
+                            {/* Overlays Layer - Uses Rendered Overlay Items */}
                             <div className="absolute inset-0 z-20 pointer-events-none">
-                                {metadata.overlayElements.map((overlay) => {
-                                    if (!overlay.visible) return null;
-                                    const isActive = activeOverlayId === overlay.id;
-
-                                    let transformStyle = {};
-                                    let transitionStyle = {};
-                                    if (isPlaying && mediaAreaRef.current) {
-                                        const { width, height } = mediaAreaRef.current.getBoundingClientRect();
-                                        const offset = getInitialOffset(overlay, width, height);
-                                        if (animationState === 'reset') {
-                                            transformStyle = { transform: `translate(${offset.x}px, ${offset.y}px)` };
-                                            transitionStyle = { transition: 'none' };
-                                        } else if (animationState === 'animating') {
-                                            transformStyle = { transform: 'translate(0, 0)' };
-                                            transitionStyle = { transition: `transform ${overlay.animation?.speed || 1}s cubic-bezier(0.2, 1, 0.3, 1)` };
-                                        }
-                                    }
-
-                                    // Special handle for avatar mask
-                                    let maskStyle = {};
-                                    if (overlay.type === 'avatar' && overlay.avatarConfig?.softEdgeConfig?.enabled && containerRef.current) {
-                                        const rect = containerRef.current.getBoundingClientRect();
-                                        const avatarW = (overlay.wPercent / 100) * rect.width;
-                                        const avatarH = (overlay.hPercent / 100) * rect.height;
-                                        const maskUrl = generateMaskUrl(overlay.avatarConfig.softEdgeConfig.strokes, avatarW, avatarH);
-                                        if (maskUrl) {
-                                            maskStyle = {
-                                                maskImage: `url(${maskUrl})`,
-                                                WebkitMaskImage: `url(${maskUrl})`,
-                                                maskSize: '100% 100%',
-                                                WebkitMaskSize: '100% 100%'
-                                            };
-                                        }
-                                    }
-
-                                    return (
-                                        <div
-                                            key={overlay.id}
-                                            id={`overlay-${overlay.id}`}
-                                            className={clsx(
-                                                "absolute pointer-events-auto transition-all",
-                                                !isPlaying && "cursor-move",
-                                                !isPlaying && isActive ? "z-50 ring-4 ring-blue-500/50 outline outline-2 outline-blue-500 rounded-sm" : "z-10",
-                                                overlay.type === 'avatar' && overlay.avatarConfig?.softEdgeConfig?.enabled && isActive && "!cursor-none"
-                                            )}
-                                            style={{
-                                                left: `${overlay.xPercent}%`, top: `${overlay.yPercent}%`,
-                                                width: `${overlay.wPercent}%`, height: `${overlay.hPercent}%`,
-                                                ...transformStyle, ...transitionStyle
-                                            }}
-                                            onMouseDown={(e) => handleMouseDown(e, overlay, 'move')}
-                                        >
-                                            {isActive && !isPlaying && (
-                                                <>
-                                                    {/* Brush Preview Cursor */}
-                                                    {overlay.type === 'avatar' && overlay.avatarConfig?.softEdgeConfig?.enabled && (
-                                                        <div
-                                                            className="absolute pointer-events-none z-[100] border-2 border-white rounded-full bg-blue-500/10 shadow-[0_0_0_1px_rgba(0,0,0,0.5),0_0_20px_rgba(59,130,246,0.5)] transition-all duration-75"
-                                                            style={{
-                                                                width: `${overlay.avatarConfig.softEdgeConfig.brushSize}%`,
-                                                                height: `${overlay.avatarConfig.softEdgeConfig.brushSize}%`,
-                                                                left: `${brushPos.x}%`,
-                                                                top: `${brushPos.y}%`,
-                                                                transform: 'translate(-50%, -50%)',
-                                                                filter: `blur(${overlay.avatarConfig.softEdgeConfig.brushSize / 4}px)`
-                                                            }}
-                                                        />
-                                                    )}
-
-                                                    {!overlay.avatarConfig?.softEdgeConfig?.enabled && (
-                                                        <>
-                                                            <div className="absolute -bottom-2 -right-2 w-5 h-5 bg-blue-500 rounded-full cursor-nwse-resize border-2 border-white z-50 shadow-2xl transform hover:scale-125 transition-transform" onMouseDown={(e) => handleMouseDown(e, overlay, 'resize')} />
-                                                            <button className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white border-2 border-white z-50 hover:bg-red-600 shadow-2xl transform hover:scale-125 transition-transform" onClick={(e) => { e.stopPropagation(); onUpdateOverlay(overlay.id, { visible: false }); }}>
-                                                                <X size={12} strokeWidth={4} />
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                </>
-                                            )}
-                                            <div className="w-full h-full relative" style={maskStyle}>
-                                                {overlay.type === 'avatar' && (
-                                                    <div className={clsx("w-full h-full overflow-hidden shadow-2xl", (overlay.avatarConfig?.shape === 'square' || overlay.shape === 'square') ? 'rounded-2xl' : 'rounded-full')} style={{ border: overlay.avatarConfig?.softEdgeConfig?.enabled ? 'none' : '2.5px solid white' }}>
-                                                        <img src={sampleAvatar} alt="Avatar" className="w-full h-full object-cover" draggable={false} />
-                                                    </div>
-                                                )}
-                                                {overlay.type === 'logo' && (
-                                                    <div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
-                                                        <span className="text-[10px] text-white font-black uppercase tracking-tighter">LOGO</span>
-                                                    </div>
-                                                )}
-                                                {overlay.type === 'username' && (
-                                                    <div className="w-full h-full flex items-center justify-center bg-black/20 backdrop-blur-sm rounded-lg px-2">
-                                                        <span className="text-white font-black drop-shadow-2xl truncate text-center uppercase tracking-wider" style={{ fontSize: '12px' }}>{overlay.text || 'User Name'}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                {metadata.overlayElements.map((overlay) => (
+                                    <OverlayItem
+                                        key={overlay.id}
+                                        overlay={overlay}
+                                        activeOverlayId={activeOverlayId}
+                                        isPlaying={isPlaying}
+                                        animationState={animationState}
+                                        mediaAreaRef={mediaAreaRef}
+                                        containerRef={containerRef}
+                                        brushPos={brushPos}
+                                        onMouseDown={handleMouseDown}
+                                        onUpdateOverlay={onUpdateOverlay}
+                                        isPainting={isPainting}
+                                    />
+                                ))}
                             </div>
                         </div>
 
