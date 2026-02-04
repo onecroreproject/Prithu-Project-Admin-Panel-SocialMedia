@@ -154,12 +154,17 @@ export default function ChildAdminForm({ onSuccess }) {
                 required
                 className="transition-shadow duration-300 focus:shadow-brand-200 pr-10"
               />
-              <span
+              <button
+                type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2 transition-colors duration-200"
+                className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors z-30 focus:outline-none"
               >
-                {showPassword ? <EyeIcon className="fill-gray-500 size-5" /> : <EyeCloseIcon className="fill-gray-500 size-5" />}
-              </span>
+                {showPassword ? (
+                  <EyeIcon className="w-5 h-5" />
+                ) : (
+                  <EyeCloseIcon className="w-5 h-5" />
+                )}
+              </button>
             </div>
           </div>
 

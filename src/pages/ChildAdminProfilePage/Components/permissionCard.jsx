@@ -9,12 +9,12 @@ const fadeLeft = {
   visible: { opacity: 1, x: 0, transition: { type: "spring", duration: 0.55, bounce: 0.17 } },
 };
 
-export default function PermissionsCard({ profile,role }) {
+export default function PermissionsCard({ profile, role }) {
   const navigate = useNavigate();
 
 
   const handleEdit = () => {
-    navigate(`/settings/childadmin/permission/s${profile._id}`);
+    navigate(`/settings/childadmin/permission/${profile._id}`);
   };
 
   return (
