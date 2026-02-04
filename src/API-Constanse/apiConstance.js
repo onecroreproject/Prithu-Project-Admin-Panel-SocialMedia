@@ -57,7 +57,7 @@ export const API_ENDPOINTS = {
   ADMIN_UPLOAD_CATEGORY: "/api/admin/add/feed/category",
   ADMIN_GET_ALL_FEED: "/api/admin/get/all/feed",
   ADMIN_DELETE_FEED: "/api/delete/feed",
-  ADMIN_DELETE_CATEGORY: "/api/admin/feed/category",
+  ADMIN_DELETE_CATEGORY: "/api/delete/category",
   ADMIN_UPDATE_CATEGORY: "/api/admin/update/category",
 
 

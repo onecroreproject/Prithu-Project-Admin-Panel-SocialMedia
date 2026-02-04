@@ -48,6 +48,7 @@ export const useAdminUpload = () => {
     const [overallProgress, setOverallProgress] = useState(0);
     const [globalSettings, setGlobalSettings] = useState({
         categoryId: '',
+        categoryIds: [],
         isScheduled: false,
         scheduleDate: '',
         applyCategoryToAll: false,
@@ -104,6 +105,7 @@ export const useAdminUpload = () => {
                 id: f.id,
                 uploadMode: f.uploadMode,
                 categoryId: f.categoryId,
+                categoryIds: f.categoryIds || [],
                 caption: f.caption,
                 scheduleDate: f.scheduleDate,
                 isScheduled: f.isScheduled,
@@ -183,6 +185,7 @@ export const useAdminUpload = () => {
                 dimensions,
                 dominantColor,
                 categoryId: globalSettings.applyCategoryToAll ? globalSettings.categoryId : '',
+                categoryIds: globalSettings.applyCategoryToAll ? globalSettings.categoryIds : [],
                 caption: '',
                 scheduleDate: globalSettings.applyScheduleToAll ? globalSettings.scheduleDate : '',
                 isScheduled: globalSettings.applyScheduleToAll ? globalSettings.isScheduled : false,
@@ -261,8 +264,11 @@ export const useAdminUpload = () => {
             if (field === 'categoryId' && next.applyCategoryToAll) {
                 setFiles(f => f.map(file => ({ ...file, categoryId: value, isEdited: true })));
             }
+            if (field === 'categoryIds' && next.applyCategoryToAll) {
+                setFiles(f => f.map(file => ({ ...file, categoryIds: value, isEdited: true })));
+            }
             if (field === 'applyCategoryToAll' && value) {
-                setFiles(f => f.map(file => ({ ...file, categoryId: next.categoryId, isEdited: true })));
+                setFiles(f => f.map(file => ({ ...file, categoryId: next.categoryId, categoryIds: next.categoryIds, isEdited: true })));
             }
             if ((field === 'scheduleDate' || field === 'isScheduled') && next.applyScheduleToAll) {
                 setFiles(f => f.map(file => ({ ...file, [field]: value, isEdited: true })));
@@ -323,8 +329,8 @@ export const useAdminUpload = () => {
     const upload = async () => {
         if (files.length === 0) return alert("Select files first");
 
-        const missingCategory = files.find(f => !f.categoryId);
-        if (missingCategory) return alert(`Please select a category for ${missingCategory.file.name}`);
+        const missingCategory = files.find(f => !f.categoryId && (!f.categoryIds || !f.categoryIds.length));
+        if (missingCategory) return alert(`Please select at least one category for ${missingCategory.file.name}`);
 
         setIsUploading(true);
         setUploadError(null);
@@ -342,7 +348,7 @@ export const useAdminUpload = () => {
                 }
 
                 perFileMetadata[f.file.name] = {
-                    categoryId: f.categoryId,
+                    categoryIds: f.categoryIds && f.categoryIds.length > 0 ? f.categoryIds : [f.categoryId],
                     caption: f.caption,
                     scheduleTime: f.isScheduled ? f.scheduleDate : null,
                     designData: {

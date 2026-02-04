@@ -6,8 +6,8 @@ import { fetchCategories, uploadFeed } from "../../Services/FeedServices/feedSer
 export default function FeedUploadForm() {
   const [files, setFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [categoryId, setCategoryId] = useState("");
-  const [selectedCategoryName, setSelectedCategoryName] = useState("");
+  const [categoryIds, setCategoryIds] = useState([]);
+  const [selectedCategoryNames, setSelectedCategoryNames] = useState([]);
   const [language, setLanguage] = useState("en");
   const [fileType, setFileType] = useState("");
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -19,10 +19,10 @@ export default function FeedUploadForm() {
     queryKey: ["categories"],
     queryFn: fetchCategories,
   });
-  
-  const categories = categoriesData|| [];
 
-  
+  const categories = categoriesData || [];
+
+
 
   // Upload mutation
   const { mutate, isLoading: uploading } = useMutation({
@@ -31,8 +31,8 @@ export default function FeedUploadForm() {
       toast.success("Feed uploaded successfully!");
       setFiles([]);
       setSelectedFiles([]);
-      setCategoryId("");
-      setSelectedCategoryName("");
+      setCategoryIds([]);
+      setSelectedCategoryNames([]);
       setLanguage("en");
       setFileType("");
     },
@@ -79,12 +79,16 @@ export default function FeedUploadForm() {
 
   // Handle upload
   const handleUpload = () => {
-    if (!categoryId) return toast.error("Please select a category");
+    if (categoryIds.length === 0) return toast.error("Please select at least one category");
     if (!fileType) return toast.error("Please select a file type (image or video)");
 
     const formData = new FormData();
     formData.append("language", language);
-    formData.append("categoryId", categoryId);
+    // Send as array
+    categoryIds.forEach(id => formData.append("categoryIds[]", id));
+    // also send as single for compatibility if needed by some older logic, 
+    // but the backend we just changed expects categoryIds or categoryId
+    formData.append("categoryId", categoryIds[0]);
     formData.append("type", fileType);
 
     const uniqueFiles = files.filter(
@@ -98,6 +102,17 @@ export default function FeedUploadForm() {
     console.log("Uploading files:", uniqueFiles.map(f => f.name));
 
     mutate(formData);
+  };
+
+  const toggleCategory = (cat) => {
+    const isSelected = categoryIds.includes(cat.categoryId);
+    if (isSelected) {
+      setCategoryIds(categoryIds.filter(id => id !== cat.categoryId));
+      setSelectedCategoryNames(selectedCategoryNames.filter(name => name !== cat.categoriesName));
+    } else {
+      setCategoryIds([...categoryIds, cat.categoryId]);
+      setSelectedCategoryNames([...selectedCategoryNames, cat.categoriesName]);
+    }
   };
 
   const filteredCategories = categories.filter((cat) =>
@@ -151,7 +166,11 @@ export default function FeedUploadForm() {
           onClick={() => setIsCategoryOpen(!isCategoryOpen)}
           className="w-full cursor-pointer rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900 dark:text-white flex justify-between items-center"
         >
-          <span>{selectedCategoryName || "Select a category"}</span>
+          <span className="truncate">
+            {selectedCategoryNames.length > 0
+              ? selectedCategoryNames.join(", ")
+              : "Select categories"}
+          </span>
           <span className={`transition-transform ${isCategoryOpen ? "rotate-180" : ""}`}>
             &#9662;
           </span>
@@ -175,17 +194,17 @@ export default function FeedUploadForm() {
               filteredCategories.map((cat, idx) => (
                 <div
                   key={idx}
-                  onClick={() => {
-                    setCategoryId(cat.categoryId);
-                    setSelectedCategoryName(cat.categoriesName);
-                    setIsCategoryOpen(false);
-                    setCategorySearch("");
-                  }}
-                  className={`px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 ${
-                    categoryId === cat._id ? "bg-blue-100 dark:bg-blue-700" : ""
-                  }`}
+                  onClick={() => toggleCategory(cat)}
+                  className={`px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 flex items-center gap-2 ${categoryIds.includes(cat.categoryId) ? "bg-blue-50 dark:bg-blue-900/40" : ""
+                    }`}
                 >
-                  {cat.categoriesName}
+                  <input
+                    type="checkbox"
+                    checked={categoryIds.includes(cat.categoryId)}
+                    readOnly
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="dark:text-white">{cat.categoriesName}</span>
                 </div>
               ))
             )}
@@ -202,8 +221,8 @@ export default function FeedUploadForm() {
             fileType === "image"
               ? "image/*"
               : fileType === "video"
-              ? "video/*"
-              : ""
+                ? "video/*"
+                : ""
           }
           onChange={handleFileChange}
           className="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border file:border-gray-200 file:bg-gray-50 file:px-4 file:py-2 file:text-sm file:font-semibold hover:file:bg-gray-100 dark:file:border-gray-700 dark:file:bg-gray-800 dark:file:text-gray-300"
@@ -219,9 +238,8 @@ export default function FeedUploadForm() {
             return (
               <div
                 key={`${file.name}-${index}`}
-                className={`relative border rounded-md p-2 ${
-                  isSelected ? "border-blue-500" : "border-gray-200"
-                }`}
+                className={`relative border rounded-md p-2 ${isSelected ? "border-blue-500" : "border-gray-200"
+                  }`}
               >
                 <input
                   type="checkbox"

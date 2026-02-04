@@ -9,7 +9,7 @@ export async function fetchCategories() {
   try {
     const res = await Api.get(API_ENDPOINTS.ADMIN_GET_CATEGORY);
 
-    return res.data.categories; 
+    return res.data.categories;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to fetch categories");
   }
@@ -21,7 +21,7 @@ export async function uploadFeed(formData) {
     const tokenData = localStorage.getItem("admin");
     if (!tokenData) throw new Error("Admin token not found");
 
-    const  {token}  = JSON.parse(tokenData);
+    const { token } = JSON.parse(tokenData);
 
 
     const res = await Api.post(API_ENDPOINTS.ADMIN_UPLOAD_FEED, formData, {
@@ -78,7 +78,7 @@ export async function fetchFeeds() {
   try {
     const res = await Api.get(API_ENDPOINTS.ADMIN_GET_ALL_FEED);
 
-    return res.data.feeds; 
+    return res.data.feeds;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to fetch feeds");
   }
@@ -88,7 +88,9 @@ export async function fetchFeeds() {
 // ✅ Delete Category
 export async function deleteCategory(categoryId) {
   try {
-    const res = await Api.delete(`${API_ENDPOINTS.ADMIN_DELETE_CATEGORY}/${categoryId}`);
+    const res = await Api.delete(API_ENDPOINTS.ADMIN_DELETE_CATEGORY, {
+      data: { categoryId }
+    });
     return res.data; // 👈 return success info
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to delete category");

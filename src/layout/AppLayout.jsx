@@ -42,10 +42,14 @@ const LayoutContent = () => {
 
   // Always use social module logic for sidebars
   useEffect(() => {
-    if (location.pathname === "/") {
-      navigate("/social/dashboard", { replace: true });
+    if (location.pathname === "/" || location.pathname === "/social/dashboard") {
+      if (admin?.role === "Child_Admin" && admin?.userId) {
+        navigate(`/settings/child/admin/profile/${admin.userId}`, { replace: true });
+      } else if (location.pathname === "/") {
+        navigate("/social/dashboard", { replace: true });
+      }
     }
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, admin]);
 
   // Update sidebar width - ALWAYS COLLAPSED (85px) on desktop
   useEffect(() => {

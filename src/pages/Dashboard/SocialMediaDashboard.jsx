@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 import { useAdminAuth } from "../../context/adminAuthContext";
 import { useNavigate } from "react-router";
 import { FiMenu, FiX, FiGrid, FiTrendingUp, FiUsers, FiDollarSign } from "react-icons/fi";
+import api from "../../Utils/axiosApi";
+import { API_ENDPOINTS } from "../../API-Constanse/apiConstance";
 
 export default function SocialMediaDashboard() {
   const navigate = useNavigate();

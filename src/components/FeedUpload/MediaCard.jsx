@@ -1,6 +1,5 @@
+import { Trash2, Edit2, Play, Layout, CheckCircle2, ChevronDown, Check } from 'lucide-react';
 import React from 'react';
-import { Trash2, Edit2, Play, Layout, CheckCircle2 } from 'lucide-react';
-
 const MediaCard = ({
     fileData,
     categories,
@@ -12,7 +11,30 @@ const MediaCard = ({
     onLivePreview,
     onUpdateField
 }) => {
+    const [isCatOpen, setIsCatOpen] = React.useState(false);
     const isVideo = fileData.file.type.startsWith('video');
+
+    const toggleCategory = (catId) => {
+        const current = fileData.categoryIds || (fileData.categoryId ? [fileData.categoryId] : []);
+        const exists = current.includes(catId);
+        let next;
+        if (exists) {
+            next = current.filter(id => id !== catId);
+        } else {
+            next = [...current, catId];
+        }
+        onUpdateField('categoryIds', next);
+        if (next.length > 0) {
+            onUpdateField('categoryId', next[0]); // for backward compat/primary
+        } else {
+            onUpdateField('categoryId', '');
+        }
+    };
+
+    const selectedIds = fileData.categoryIds || (fileData.categoryId ? [fileData.categoryId] : []);
+    const selectedNames = categories
+        .filter(c => selectedIds.includes(c.categoryId))
+        .map(c => c.categoriesName);
 
     return (
         <div className="bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden group shadow-xl hover:border-blue-500/30 transition-all flex flex-col h-full">
@@ -104,16 +126,32 @@ const MediaCard = ({
                 </div>
 
                 <div className="space-y-3 flex-1">
-                    <select
-                        value={fileData.categoryId}
-                        onChange={(e) => onUpdateField('categoryId', e.target.value)}
-                        className="w-full bg-gray-900 text-white border border-gray-800 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:border-gray-700"
-                    >
-                        <option value="">Select Category</option>
-                        {categories.map(c => (
-                            <option key={c.categoryId} value={c.categoryId}>{c.categoriesName}</option>
-                        ))}
-                    </select>
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsCatOpen(!isCatOpen)}
+                            className="w-full bg-gray-900 text-white border border-gray-800 rounded-xl px-3 py-2 text-xs flex justify-between items-center hover:border-gray-700 transition-all"
+                        >
+                            <span className="truncate">
+                                {selectedNames.length > 0 ? selectedNames.join(", ") : "Select Categories"}
+                            </span>
+                            <ChevronDown size={14} className={`transition-transform ${isCatOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {isCatOpen && (
+                            <div className="absolute z-30 bottom-full mb-1 w-full bg-gray-950 border border-gray-800 rounded-xl shadow-2xl max-h-48 overflow-y-auto p-1 scrollbar-hide">
+                                {categories.map(c => (
+                                    <div
+                                        key={c.categoryId}
+                                        onClick={() => toggleCategory(c.categoryId)}
+                                        className="flex items-center justify-between px-3 py-2 hover:bg-white/5 rounded-lg cursor-pointer transition-colors"
+                                    >
+                                        <span className="text-[10px] text-gray-300">{c.categoriesName}</span>
+                                        {selectedIds.includes(c.categoryId) && <Check size={12} className="text-blue-500" />}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     <textarea
                         value={fileData.caption}

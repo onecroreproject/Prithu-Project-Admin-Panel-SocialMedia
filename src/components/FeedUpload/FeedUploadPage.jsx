@@ -5,7 +5,7 @@ import MediaCard from './MediaCard';
 import TemplateEditor from './template/TemplateEditor';
 import PostEditor from './PostEditor';
 import LivePreview from './LivePreview';
-import { Settings, Send, Calendar, Tag, ChevronDown, LayoutGrid } from 'lucide-react';
+import { Settings, Send, Calendar, Tag, ChevronDown, LayoutGrid, Check } from 'lucide-react';
 import { clsx } from 'clsx';
 
 const FeedUploadPage = () => {
@@ -24,6 +24,7 @@ const FeedUploadPage = () => {
         handleUpdateEditMetadata,
         upload
     } = useAdminUpload();
+    const [globalCatOpen, setGlobalCatOpen] = useState(false);
 
     const [activeEditorId, setActiveEditorId] = useState(null);
     const [activePostEditorId, setActivePostEditorId] = useState(null);
@@ -112,16 +113,41 @@ const FeedUploadPage = () => {
                             <Tag className="text-blue-500" size={16} />
                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Auto-Categorize</h4>
                         </div>
-                        <select
-                            value={globalSettings.categoryId}
-                            onChange={(e) => updateGlobalSettings('categoryId', e.target.value)}
-                            className="w-full bg-gray-900 text-white border border-gray-800 rounded-2xl px-5 py-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        >
-                            <option value="">Select Category</option>
-                            {categories.map(c => (
-                                <option key={c.categoryId} value={c.categoryId}>{c.categoriesName}</option>
-                            ))}
-                        </select>
+                        <div className="relative">
+                            <button
+                                onClick={() => setGlobalCatOpen(!globalCatOpen)}
+                                className="w-full bg-gray-900 text-white border border-gray-800 rounded-2xl px-5 py-3 text-xs flex justify-between items-center focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            >
+                                <span className="truncate">
+                                    {(globalSettings.categoryIds && globalSettings.categoryIds.length > 0)
+                                        ? categories.filter(c => globalSettings.categoryIds.includes(c.categoryId)).map(c => c.categoriesName).join(", ")
+                                        : "Select Categories"}
+                                </span>
+                                <ChevronDown size={14} className={`transition-transform ${globalCatOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {globalCatOpen && (
+                                <div className="absolute z-50 mt-2 w-full bg-gray-950 border border-gray-800 rounded-2xl shadow-2xl max-h-60 overflow-y-auto p-2 scrollbar-hide">
+                                    {categories.map(c => (
+                                        <div
+                                            key={c.categoryId}
+                                            onClick={() => {
+                                                const current = globalSettings.categoryIds || [];
+                                                const next = current.includes(c.categoryId)
+                                                    ? current.filter(id => id !== c.categoryId)
+                                                    : [...current, c.categoryId];
+                                                updateGlobalSettings('categoryIds', next);
+                                                updateGlobalSettings('categoryId', next[0] || '');
+                                            }}
+                                            className="flex items-center justify-between px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors"
+                                        >
+                                            <span className="text-xs text-gray-300">{c.categoriesName}</span>
+                                            {(globalSettings.categoryIds || []).includes(c.categoryId) && <Check size={14} className="text-blue-500" />}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         <label className="flex items-center gap-3 cursor-pointer group">
                             <input
                                 type="checkbox"

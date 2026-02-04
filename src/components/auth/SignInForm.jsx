@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion"; 
+import { motion } from "framer-motion";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -15,15 +15,15 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  
-  const { login, error, loading, role } = useAdminAuth();
+
+  const { login, error, loading, role, admin } = useAdminAuth();
   const navigate = useNavigate();
 
   // Check for reduced motion preference
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setReducedMotion(mediaQuery.matches);
-    
+
     const handleChange = () => setReducedMotion(mediaQuery.matches);
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
@@ -32,13 +32,21 @@ export default function SignInForm() {
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await login(email, password);
+    const result = await login(email, password);
 
-    if (role === "Admin" || role === "Child_Admin") {
+    // After login, use the role from context or the result
+    if (role === "Child_Admin" || admin?.role === "Child_Admin") {
+      const adminId = admin?.userId || admin?._id || admin?.id;
+      if (adminId) {
+        navigate(`/settings/child/admin/profile/${adminId}`);
+      } else {
+        navigate("/");
+      }
+    } else if (role === "Admin" || admin?.role === "Admin") {
       navigate("/");
     }
     setIsSubmitting(false);
-  }, [email, password, login, role, navigate]);
+  }, [email, password, login, role, admin, navigate]);
 
   // Simplified animations with reduced motion support
   const containerVariants = reducedMotion ? {
@@ -102,7 +110,7 @@ export default function SignInForm() {
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Enter your credentials to access your account
             </p>
-            
+
             {/* Error message - simplified animation */}
             {error && (
               <motion.div
@@ -124,7 +132,7 @@ export default function SignInForm() {
                 <Label className="mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Email Address
                 </Label>
-                <Input 
+                <Input
                   type="email"
                   placeholder="you@example.com"
                   value={email}
@@ -142,7 +150,7 @@ export default function SignInForm() {
                   Password
                 </Label>
                 <div className="relative">
-                  <Input 
+                  <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
@@ -169,7 +177,7 @@ export default function SignInForm() {
               {/* Remember me & Forgot password */}
               <motion.div variants={itemVariants} className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2">
-                  <Checkbox 
+                  <Checkbox
                     checked={isChecked}
                     onChange={setIsChecked}
                     className="w-4 h-4"
@@ -178,8 +186,8 @@ export default function SignInForm() {
                     Keep me logged in
                   </span>
                 </div>
-                <Link 
-                  to="/reset-password" 
+                <Link
+                  to="/reset-password"
                   className="text-sm font-medium text-brand-500 hover:text-brand-600 transition-colors"
                 >
                   Forgot password?
@@ -187,7 +195,7 @@ export default function SignInForm() {
               </motion.div>
 
               {/* Submit Button */}
-              <motion.div 
+              <motion.div
                 variants={itemVariants}
                 initial={reducedMotion ? false : { scale: 0.95 }}
                 animate={reducedMotion ? false : { scale: 1 }}
@@ -218,8 +226,8 @@ export default function SignInForm() {
           >
             <p className="text-center text-sm text-gray-500 dark:text-gray-400">
               Don't have an account?{" "}
-              <Link 
-                to="/signup" 
+              <Link
+                to="/signup"
                 className="font-medium text-brand-500 hover:text-brand-600 transition-colors"
               >
                 Contact administrator
