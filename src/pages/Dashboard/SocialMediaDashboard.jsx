@@ -140,12 +140,7 @@ export default function SocialMediaDashboard() {
                   <p className="text-sm text-gray-500">Last updated</p>
                   <p className="text-sm font-medium text-gray-700">Just now</p>
                 </div>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 flex items-center gap-2"
-                >
-                  <span>Refresh Data</span>
-                </button>
+
               </div>
             </div>
           </div>

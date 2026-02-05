@@ -186,18 +186,16 @@ const LayoutContent = () => {
                     </div>
                     <div>
                       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-                        {location.pathname.includes('social') ? 'Social Media' :
-                          location.pathname.includes('settings') ? 'Settings' :
-                            location.pathname.includes('drive') ? 'Google Drive' :
-                              'Dashboard'}
+                        {location.pathname.includes('settings') ? 'Settings' :
+                          location.pathname.includes('drive') ? 'Google Drive' :
+                            'Dashboard'}
                       </h1>
                     </div>
                   </div>
                   <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-2 sm:mt-3 max-w-3xl">
-                    {location.pathname.includes('social') ? 'Manage users, creators, feeds, and reports' :
-                      location.pathname.includes('settings') ? 'System configuration and administration' :
-                        location.pathname.includes('drive') ? 'Manage files and storage in Google Drive' :
-                          "Manage your data and monitor performance in real-time."}
+                    {location.pathname.includes('settings') ? 'System configuration and administration' :
+                      location.pathname.includes('drive') ? 'Manage files and storage in Google Drive' :
+                        "Manage your data and monitor performance in real-time."}
                   </p>
                 </div>
               </div>

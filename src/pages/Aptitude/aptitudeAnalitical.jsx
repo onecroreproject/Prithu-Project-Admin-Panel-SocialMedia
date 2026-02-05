@@ -46,7 +46,7 @@ import api from '../../Utils/axiosApi';
 const AnalyticsPage = () => {
   const { testId } = useParams();
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState(true);
   const [testDetails, setTestDetails] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
@@ -56,22 +56,22 @@ const AnalyticsPage = () => {
     minScore: 0,
     maxScore: 100
   });
-  
+
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'pending', 'completed'
   const [viewMode, setViewMode] = useState('candidates');
-  
+
   // Fetch analytics data
   const fetchAnalyticsData = async () => {
     if (!testId) return;
-    
+
     try {
       setLoading(true);
       const response = await api.get(`/api/analitycal/detail/for/test/${testId}`);
-console.log(response.data)
+      console.log(response.data)
       if (response.data.success) {
         setTestDetails(response.data.testDetails);
         setAnalyticsData(response.data);
-        
+
         // Set view mode based on test status
         if (response.data.status === 'completed') {
           setViewMode('ranking');
@@ -92,16 +92,16 @@ console.log(response.data)
       setLoading(false);
     }
   };
-  
+
   // Export to CSV
   const exportToCSV = () => {
     if (!analyticsData) return;
-    
+
     let headers, csvData;
-    
+
     if (analyticsData.status === 'completed' && analyticsData.rankedCandidates) {
       headers = ['Rank', 'Name', 'Email', 'Score', 'Result', 'Certificate ID', 'Time Taken', 'Completed At'];
-      
+
       csvData = analyticsData.rankedCandidates.map((candidate, index) => [
         index + 1,
         candidate.name || 'N/A',
@@ -138,7 +138,7 @@ console.log(response.data)
       }
     } else if (analyticsData.interestedUsers) {
       headers = ['Name', 'Email', 'First Name', 'Last Name', 'Interested At'];
-      
+
       csvData = analyticsData.interestedUsers.map(user => [
         user.name || 'N/A',
         user.email || 'N/A',
@@ -150,12 +150,12 @@ console.log(response.data)
       alert('No data to export');
       return;
     }
-    
+
     const csvContent = [
       headers.join(','),
       ...csvData.map(row => row.join(','))
     ].join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -163,19 +163,19 @@ console.log(response.data)
     a.download = `test-analytics-${testId}-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
   };
-  
+
   // Handle filter changes
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({ ...prev, [filterType]: value }));
   };
-  
+
   // Get filtered candidates based on status and active tab
   const getFilteredCandidates = () => {
     if (!analyticsData) return [];
-    
+
     if (analyticsData.status === 'completed' && analyticsData.rankedCandidates) {
       let filtered = [...analyticsData.rankedCandidates];
-      
+
       // Filter by search query
       if (filters.searchQuery) {
         const query = filters.searchQuery.toLowerCase();
@@ -185,13 +185,13 @@ console.log(response.data)
           candidate.certificateId?.toLowerCase().includes(query)
         );
       }
-      
+
       // Filter by score range
       filtered = filtered.filter(candidate =>
         candidate.score >= filters.minScore &&
         candidate.score <= filters.maxScore
       );
-      
+
       // Sort by selected criteria
       switch (filters.sortBy) {
         case 'score_desc':
@@ -207,11 +207,11 @@ console.log(response.data)
           filtered.sort((a, b) => new Date(b.receivedAt) - new Date(a.receivedAt));
           break;
       }
-      
+
       return filtered;
     } else if (analyticsData.status === 'running') {
       let filtered = [];
-      
+
       // Get data based on active tab
       if (activeTab === 'pending') {
         filtered = [...(analyticsData.pendingUsers || [])];
@@ -223,7 +223,7 @@ console.log(response.data)
         const completed = analyticsData.completedUsers || [];
         filtered = [...pending, ...completed];
       }
-      
+
       // Filter by search query
       if (filters.searchQuery) {
         const query = filters.searchQuery.toLowerCase();
@@ -233,18 +233,18 @@ console.log(response.data)
           (user.sessionToken && user.sessionToken.toLowerCase().includes(query))
         );
       }
-      
+
       // Sort by startedAt (for pending) or receivedAt (for completed)
       filtered.sort((a, b) => {
         const dateA = a.startedAt || a.receivedAt;
         const dateB = b.startedAt || b.receivedAt;
         return new Date(dateB) - new Date(dateA);
       });
-      
+
       return filtered;
     } else if (analyticsData.interestedUsers) {
       let filtered = [...analyticsData.interestedUsers];
-      
+
       // Filter by search query
       if (filters.searchQuery) {
         const query = filters.searchQuery.toLowerCase();
@@ -255,24 +255,24 @@ console.log(response.data)
           user.lastName?.toLowerCase().includes(query)
         );
       }
-      
+
       // Sort by interested date
       filtered.sort((a, b) => new Date(b.interestedAt) - new Date(a.interestedAt));
-      
+
       return filtered;
     }
-    
+
     return [];
   };
-  
+
   // Calculate statistics
   const calculateStats = () => {
     if (!analyticsData) return null;
-    
+
     if (analyticsData.status === 'completed' && analyticsData.rankedCandidates) {
       const candidates = analyticsData.rankedCandidates;
       const total = candidates.length;
-      
+
       if (total === 0) {
         return {
           totalCandidates: 0,
@@ -284,7 +284,7 @@ console.log(response.data)
           passRate: 0
         };
       }
-      
+
       const passed = candidates.filter(c => c.result === 'pass').length;
       const failed = candidates.filter(c => c.result === 'fail').length;
       const scores = candidates.map(c => c.score);
@@ -292,7 +292,7 @@ console.log(response.data)
       const topScore = Math.max(...scores);
       const lowestScore = Math.min(...scores);
       const passRate = ((passed / total) * 100).toFixed(1);
-      
+
       return {
         totalCandidates: total,
         averageScore,
@@ -306,15 +306,15 @@ console.log(response.data)
       const pending = analyticsData.pendingUsers || [];
       const completed = analyticsData.completedUsers || [];
       const totalSessions = analyticsData.totalSessions || 0;
-      
+
       // Calculate average score for completed users
       const completedScores = completed.filter(c => c.score).map(c => c.score);
-      const averageScore = completedScores.length > 0 
+      const averageScore = completedScores.length > 0
         ? (completedScores.reduce((a, b) => a + b, 0) / completedScores.length).toFixed(1)
         : 0;
-      
+
       const passed = completed.filter(c => c.result === 'pass').length;
-      
+
       return {
         pendingCount: pending.length,
         completedCount: completed.length,
@@ -329,10 +329,10 @@ console.log(response.data)
         interestedCount: analyticsData.interestedCount
       };
     }
-    
+
     return null;
   };
-  
+
   // Get status badge
   const getStatusBadge = (status) => {
     const styles = {
@@ -341,14 +341,14 @@ console.log(response.data)
       completed: 'bg-purple-100 text-purple-800',
       cancelled: 'bg-red-100 text-red-800'
     };
-    
+
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
   };
-  
+
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -361,7 +361,7 @@ console.log(response.data)
       minute: '2-digit'
     });
   };
-  
+
   // Format time duration
   const formatDuration = (seconds) => {
     if (!seconds) return 'N/A';
@@ -369,7 +369,7 @@ console.log(response.data)
     const remainingSeconds = seconds % 60;
     return `${minutes}m ${remainingSeconds}s`;
   };
-  
+
   // Get score color
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-emerald-600';
@@ -377,7 +377,7 @@ console.log(response.data)
     if (score >= 40) return 'text-amber-600';
     return 'text-red-600';
   };
-  
+
   // Get score background color
   const getScoreBgColor = (score) => {
     if (score >= 80) return 'bg-emerald-50 border-emerald-100';
@@ -385,7 +385,7 @@ console.log(response.data)
     if (score >= 40) return 'bg-amber-50 border-amber-100';
     return 'bg-red-50 border-red-100';
   };
-  
+
   // Get rank medal
   const getRankMedal = (rank) => {
     if (rank === 1) return { icon: <Crown className="w-5 h-5 text-yellow-500" />, color: 'bg-yellow-100' };
@@ -393,22 +393,22 @@ console.log(response.data)
     if (rank === 3) return { icon: <Medal className="w-5 h-5 text-amber-600" />, color: 'bg-amber-100' };
     return { icon: <Hash className="w-5 h-5 text-gray-500" />, color: 'bg-gray-50' };
   };
-  
+
   // Get session status badge
   const getSessionStatusBadge = (user) => {
     if (user.score !== undefined) {
-      return user.result === 'pass' 
+      return user.result === 'pass'
         ? <span className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs">Completed ✓</span>
         : <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Completed ✗</span>;
     }
     return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">In Progress</span>;
   };
-  
+
   // Fetch data on mount and when testId changes
   useEffect(() => {
     fetchAnalyticsData();
   }, [testId]);
-  
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -419,7 +419,7 @@ console.log(response.data)
       </div>
     );
   }
-  
+
   if (!analyticsData || !testDetails) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -439,13 +439,13 @@ console.log(response.data)
       </div>
     );
   }
-  
+
   const stats = calculateStats();
   const filteredCandidates = getFilteredCandidates();
   const isCompleted = analyticsData.status === 'completed';
   const isRunning = analyticsData.status === 'running';
   const isUpcoming = analyticsData.status === 'upcoming';
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -470,15 +470,9 @@ console.log(response.data)
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
-              <button
-                onClick={fetchAnalyticsData}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </button>
+
               <button
                 onClick={exportToCSV}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -490,14 +484,14 @@ console.log(response.data)
           </div>
         </div>
       </div>
-      
+
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         {/* Test Details Card */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Test Information</h2>
           </div>
-          
+
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-4">
@@ -515,7 +509,7 @@ console.log(response.data)
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <h3 className="font-medium text-gray-700 mb-2">Timing & Duration</h3>
                 <div className="space-y-3">
@@ -535,7 +529,7 @@ console.log(response.data)
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <h3 className="font-medium text-gray-700 mb-2">Test Configuration</h3>
                 <div className="space-y-3">
@@ -565,7 +559,7 @@ console.log(response.data)
             </div>
           </div>
         </div>
-        
+
         {/* Statistics Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -588,7 +582,7 @@ console.log(response.data)
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -606,7 +600,7 @@ console.log(response.data)
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -624,7 +618,7 @@ console.log(response.data)
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -662,7 +656,7 @@ console.log(response.data)
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -680,7 +674,7 @@ console.log(response.data)
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -698,7 +692,7 @@ console.log(response.data)
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -736,7 +730,7 @@ console.log(response.data)
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -760,7 +754,7 @@ console.log(response.data)
             )}
           </div>
         )}
-        
+
         {/* Main Analytics Content */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           {/* Header with Filters */}
@@ -768,20 +762,20 @@ console.log(response.data)
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
-                  {isCompleted ? 'Ranked Results' : 
-                   isRunning ? 'Test Sessions' : 
-                   'Interested Candidates'}
+                  {isCompleted ? 'Ranked Results' :
+                    isRunning ? 'Test Sessions' :
+                      'Interested Candidates'}
                 </h2>
                 <p className="text-gray-600">
-                  {isCompleted 
+                  {isCompleted
                     ? `Showing ${filteredCandidates.length} of ${analyticsData.totalCandidates || analyticsData.rankedCandidates?.length || 0} candidates`
                     : isRunning
-                    ? `Showing ${filteredCandidates.length} of ${analyticsData.totalSessions || 0} sessions`
-                    : `Showing ${filteredCandidates.length} of ${analyticsData.interestedCount || analyticsData.interestedUsers?.length || 0} interested users`
+                      ? `Showing ${filteredCandidates.length} of ${analyticsData.totalSessions || 0} sessions`
+                      : `Showing ${filteredCandidates.length} of ${analyticsData.interestedCount || analyticsData.interestedUsers?.length || 0} interested users`
                   }
                 </p>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -793,7 +787,7 @@ console.log(response.data)
                     onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
                   />
                 </div>
-                
+
                 {isCompleted && (
                   <select
                     className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -808,44 +802,41 @@ console.log(response.data)
                 )}
               </div>
             </div>
-            
+
             {/* Tabs for Running Tests */}
             {isRunning && (
               <div className="flex space-x-4 mt-4">
                 <button
                   onClick={() => setActiveTab('all')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    activeTab === 'all' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === 'all'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   All Sessions ({analyticsData.totalSessions || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('pending')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    activeTab === 'pending' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === 'pending'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   In Progress ({analyticsData.pendingCount || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('completed')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    activeTab === 'completed' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${activeTab === 'completed'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   Completed ({analyticsData.completedCount || 0})
                 </button>
               </div>
             )}
           </div>
-          
+
           {/* Table */}
           <div className="overflow-x-auto">
             {filteredCandidates.length > 0 ? (
@@ -856,9 +847,9 @@ console.log(response.data)
                     {isRunning && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {isCompleted ? 'Performance' : 
-                       isRunning ? 'Session Info' : 
-                       'Interest Info'}
+                      {isCompleted ? 'Performance' :
+                        isRunning ? 'Session Info' :
+                          'Interest Info'}
                     </th>
                     {isCompleted && (
                       <>
@@ -892,14 +883,14 @@ console.log(response.data)
                           </div>
                         </td>
                       )}
-                      
+
                       {/* Status Column (Running tests only) */}
                       {isRunning && (
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getSessionStatusBadge(item)}
                         </td>
                       )}
-                      
+
                       {/* User Column */}
                       <td className="px-6 py-4">
                         <div className="flex items-center">
@@ -920,8 +911,8 @@ console.log(response.data)
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {item.name || item.firstName 
-                                ? `${item.firstName || ''} ${item.lastName || ''}`.trim() 
+                              {item.name || item.firstName
+                                ? `${item.firstName || ''} ${item.lastName || ''}`.trim()
                                 : item.email?.split('@')[0] || 'Unknown User'
                               }
                             </div>
@@ -932,7 +923,7 @@ console.log(response.data)
                           </div>
                         </div>
                       </td>
-                      
+
                       {/* Performance/Interest Column */}
                       <td className="px-6 py-4">
                         {isCompleted ? (
@@ -990,16 +981,15 @@ console.log(response.data)
                           </div>
                         )}
                       </td>
-                      
+
                       {/* Result Column (Completed tests only) */}
                       {isCompleted && (
                         <>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              item.result === 'pass' 
-                                ? 'bg-emerald-100 text-emerald-800' 
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${item.result === 'pass'
+                                ? 'bg-emerald-100 text-emerald-800'
                                 : 'bg-red-100 text-red-800'
-                            }`}>
+                              }`}>
                               {item.result === 'pass' ? (
                                 <span className="flex items-center gap-1">
                                   <CheckCircle className="w-3 h-3" />
@@ -1013,7 +1003,7 @@ console.log(response.data)
                               )}
                             </span>
                           </td>
-                          
+
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
                               {item.certificateId ? (
@@ -1025,7 +1015,7 @@ console.log(response.data)
                               )}
                             </div>
                           </td>
-                          
+
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4 text-gray-400" />
@@ -1036,7 +1026,7 @@ console.log(response.data)
                           </td>
                         </>
                       )}
-                      
+
                       {/* Score Column (Running tests - completed users only) */}
                       {isRunning && item.score !== undefined && (
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1047,13 +1037,13 @@ console.log(response.data)
                           </div>
                         </td>
                       )}
-                      
+
                       {isRunning && item.score === undefined && (
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-sm text-gray-500">In progress</span>
                         </td>
                       )}
-                      
+
                       {/* Started At Column (Running tests) */}
                       {isRunning && (
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1065,7 +1055,7 @@ console.log(response.data)
                           </div>
                         </td>
                       )}
-                      
+
                       {/* Date Column */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
@@ -1091,18 +1081,18 @@ console.log(response.data)
                   )}
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {isCompleted ? 'No results found' : 
-                   isRunning ? 'No sessions found' : 
-                   'No interested users found'}
+                  {isCompleted ? 'No results found' :
+                    isRunning ? 'No sessions found' :
+                      'No interested users found'}
                 </h3>
                 <p className="text-gray-500">
-                  {filters.searchQuery 
+                  {filters.searchQuery
                     ? `No ${isCompleted ? 'candidates' : isRunning ? 'sessions' : 'users'} match "${filters.searchQuery}"`
                     : isCompleted
                       ? 'No candidates have taken this test yet'
                       : isRunning
-                      ? 'No sessions found for this test'
-                      : 'No users have shown interest in this test yet'
+                        ? 'No sessions found for this test'
+                        : 'No users have shown interest in this test yet'
                   }
                 </p>
                 {filters.searchQuery && (
@@ -1116,7 +1106,7 @@ console.log(response.data)
               </div>
             )}
           </div>
-          
+
           {/* Pagination (Optional - add if needed) */}
           {filteredCandidates.length > 0 && filteredCandidates.length > 10 && (
             <div className="px-6 py-4 border-t border-gray-200">
@@ -1133,7 +1123,7 @@ console.log(response.data)
             </div>
           )}
         </div>
-        
+
         {/* Additional Information */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Test Instructions */}
@@ -1147,7 +1137,7 @@ console.log(response.data)
               </div>
             </div>
           )}
-          
+
           {/* Quick Actions */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
@@ -1162,7 +1152,7 @@ console.log(response.data)
                 </div>
                 <ChevronUp className="w-5 h-5 text-gray-400" />
               </button>
-              
+
               <button
                 onClick={() => window.open(`/aptitude/test/management`, '_blank')}
                 className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1173,7 +1163,7 @@ console.log(response.data)
                 </div>
                 <ChevronUp className="w-5 h-5 text-gray-400" />
               </button>
-              
+
               <button
                 onClick={() => navigate('/aptitude/dashboard')}
                 className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"

@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { 
-  Brain, 
-  Users, 
-  FileText, 
-  Clock, 
-  CheckCircle, 
-  TrendingUp, 
-  BarChart, 
-  PlusCircle, 
+import {
+  Brain,
+  Users,
+  FileText,
+  Clock,
+  CheckCircle,
+  TrendingUp,
+  BarChart,
+  PlusCircle,
   Download,
   Eye,
   Filter,
@@ -54,35 +54,35 @@ const AptitudeDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch stats
       const statsResponse = await axios.get(`/api/aptitude/dashboard/stats`);
       console.log("Dashboard Stats:", statsResponse.data);
       setStats(statsResponse.data);
-      
+
       // Fetch recent tests
       const testsResponse = await axios.get(`/api/aptitude/tests/recent`);
       console.log("Recent Tests:", testsResponse.data);
       setRecentTests(testsResponse.data || []);
-      
+
       // Fetch top performers
       const performersResponse = await axios.get(`/api/aptitude/results/top-performers`);
       console.log("Top Performers:", performersResponse.data);
       setTopPerformers(performersResponse.data || []);
-      
+
       // Fetch upcoming tests
       const upcomingResponse = await axios.get(`/api/aptitude/tests/upcoming`);
       console.log("Upcoming Tests:", upcomingResponse.data);
       setUpcomingTests(upcomingResponse.data || []);
-      
+
       // Fetch system status
       const statusResponse = await axios.get(`/api/aptitude/system/status`);
       console.log("System Status:", statusResponse.data);
       setSystemStatus(statusResponse.data);
-      
+
       // Update last updated time
       setLastUpdated(new Date().toLocaleTimeString());
-      
+
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       // Clear data and show not available
@@ -114,10 +114,10 @@ const AptitudeDashboard = () => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return "Invalid date";
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
       });
     } catch (error) {
       return "Invalid date";
@@ -127,11 +127,11 @@ const AptitudeDashboard = () => {
   // Format system uptime
   const formatUptime = (seconds) => {
     if (!seconds) return "N/A";
-    
+
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (days > 0) return `${days}d ${hours}h`;
     if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
@@ -139,7 +139,7 @@ const AptitudeDashboard = () => {
 
   // Get status color
   const getStatusColor = (status) => {
-    switch(status?.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'healthy':
       case 'connected':
       case 'online':
@@ -161,7 +161,7 @@ const AptitudeDashboard = () => {
 
   // Get status dot color
   const getStatusDotColor = (status) => {
-    switch(status?.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'healthy':
       case 'connected':
       case 'online':
@@ -184,7 +184,7 @@ const AptitudeDashboard = () => {
   // Handle test action
   const handleTestAction = async (testId, action) => {
     try {
-      switch(action) {
+      switch (action) {
         case 'view':
           window.location.href = `/aptitude/tests/${testId}`;
           break;
@@ -217,10 +217,10 @@ const AptitudeDashboard = () => {
   // Initial data fetch
   useEffect(() => {
     fetchDashboardData();
-    
+
     // Poll for updates every 30 seconds
     const interval = setInterval(fetchDashboardData, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -245,13 +245,7 @@ const AptitudeDashboard = () => {
             <p className="text-indigo-100 mt-2">Manage tests, monitor candidates, and analyze performance</p>
           </div>
           <div className="flex items-center gap-3">
-            <button 
-              onClick={handleRefresh}
-              className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh Data
-            </button>
+
             <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
               <p className="text-sm">Last Updated: {lastUpdated || "Not available"}</p>
             </div>
@@ -295,8 +289,8 @@ const AptitudeDashboard = () => {
           </div>
           <div className="mt-4 flex items-center text-sm">
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
-                className="bg-blue-500 h-2 rounded-full" 
+              <div
+                className="bg-blue-500 h-2 rounded-full"
                 style={{ width: `${stats.totalTests > 0 ? (stats.activeTests / stats.totalTests) * 100 : 0}%` }}
               ></div>
             </div>
@@ -380,8 +374,8 @@ const AptitudeDashboard = () => {
           </div>
           <div className="mt-4">
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
-                className="bg-purple-500 h-2 rounded-full" 
+              <div
+                className="bg-purple-500 h-2 rounded-full"
                 style={{ width: `${stats.completionRate}%` }}
               ></div>
             </div>
@@ -403,8 +397,8 @@ const AptitudeDashboard = () => {
                 <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                   <Filter className="w-4 h-4 text-gray-500" />
                 </button>
-                <Link 
-                  to="/aptitude/tests" 
+                <Link
+                  to="/aptitude/tests"
                   className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1"
                 >
                   View All <ChevronRight className="w-4 h-4" />
@@ -457,11 +451,10 @@ const AptitudeDashboard = () => {
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-2">
-                            <span className={`text-sm font-medium ${
-                              test.avgScore >= 80 ? 'text-green-600 dark:text-green-400' :
-                              test.avgScore >= 70 ? 'text-amber-600 dark:text-amber-400' :
-                              'text-red-600 dark:text-red-400'
-                            }`}>
+                            <span className={`text-sm font-medium ${test.avgScore >= 80 ? 'text-green-600 dark:text-green-400' :
+                                test.avgScore >= 70 ? 'text-amber-600 dark:text-amber-400' :
+                                  'text-red-600 dark:text-red-400'
+                              }`}>
                               {test.avgScore > 0 ? `${test.avgScore}%` : "N/A"}
                             </span>
                             {test.avgScore >= 80 ? (
@@ -474,20 +467,19 @@ const AptitudeDashboard = () => {
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            test.status === 'pending' 
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${test.status === 'pending'
                               ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                            test.status === 'completed'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
-                          }`}>
-                            {test.status === 'pending' ? 'Pending' : 
-                             test.status === 'completed' ? 'Completed' : 'Unknown'}
+                              test.status === 'completed'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                            }`}>
+                            {test.status === 'pending' ? 'Pending' :
+                              test.status === 'completed' ? 'Completed' : 'Unknown'}
                           </span>
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-2">
-                            <button 
+                            <button
                               onClick={() => test._id && handleTestAction(test._id, 'view')}
                               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                               title="View Details"
@@ -495,7 +487,7 @@ const AptitudeDashboard = () => {
                             >
                               <Eye className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button 
+                            <button
                               onClick={() => test._id && handleTestAction(test._id, 'download')}
                               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                               title="Download Results"
@@ -503,7 +495,7 @@ const AptitudeDashboard = () => {
                             >
                               <Download className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button 
+                            <button
                               onClick={() => test._id && handleTestAction(test._id, 'analytics')}
                               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                               title="View Analytics"
@@ -578,8 +570,8 @@ const AptitudeDashboard = () => {
                       </div>
                     </div>
                   ))}
-                  <Link 
-                    to="/aptitude/results" 
+                  <Link
+                    to="/aptitude/results"
                     className="block mt-4 text-center text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                   >
                     View All Results →
@@ -606,7 +598,7 @@ const AptitudeDashboard = () => {
                 <p className="text-sm text-gray-600 dark:text-gray-400">Assessment platform health</p>
               </div>
             </div>
-            
+
             {systemStatus ? (
               <>
                 <div className="space-y-4">
@@ -620,7 +612,7 @@ const AptitudeDashboard = () => {
                       {systemStatus.database?.status || 'Unknown'}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
                       <Brain className="w-4 h-4" />
@@ -631,7 +623,7 @@ const AptitudeDashboard = () => {
                       {systemStatus.testEngine?.status || 'Unknown'}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
                       <Activity className="w-4 h-4" />
@@ -642,7 +634,7 @@ const AptitudeDashboard = () => {
                       {systemStatus.externalExamServer?.status || 'Unknown'}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-700 dark:text-gray-300">Server Uptime</span>
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -650,7 +642,7 @@ const AptitudeDashboard = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 pt-4 border-t border-indigo-200 dark:border-indigo-800">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Overall Status</span>
@@ -669,7 +661,7 @@ const AptitudeDashboard = () => {
             )}
           </div>
 
-        
+
         </div>
       </div>
     </div>

@@ -95,17 +95,13 @@ const DriveDashboard = () => {
             </Box>
           </Box>
           <Box display="flex" gap={2} alignItems="center">
-            <Chip 
+            <Chip
               icon={<Cloud />}
               label={dashboardData.oauth.mode === 'testing' ? 'Test Mode' : 'Production'}
               color={dashboardData.oauth.mode === 'testing' ? 'warning' : 'success'}
               variant="outlined"
             />
-            <Tooltip title="Refresh Data">
-              <IconButton onClick={handleRefresh} color="primary">
-                <Refresh />
-              </IconButton>
-            </Tooltip>
+
           </Box>
         </Box>
       </Box>

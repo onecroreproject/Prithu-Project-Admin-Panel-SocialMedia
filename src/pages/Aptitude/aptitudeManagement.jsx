@@ -33,15 +33,15 @@ const TestManagement = () => {
   const [tests, setTests] = useState([]);
   const [filteredTests, setFilteredTests] = useState([]);
   const [selectedTest, setSelectedTest] = useState(null);
-  
+
   // State for candidates (for future implementation)
   const [candidates, setCandidates] = useState([]);
-   const navigate=useNavigate()
+  const navigate = useNavigate()
   // State for forms
   const [showCreateTest, setShowCreateTest] = useState(false);
   const [showEditTest, setShowEditTest] = useState(false);
   const [showTestDetails, setShowTestDetails] = useState(false);
-  
+
   // Form data
   const [testForm, setTestForm] = useState({
     scheduleId: "",
@@ -56,43 +56,43 @@ const TestManagement = () => {
     isProctored: false,
     instructions: ""
   });
-  
+
   // Filter and search
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
-  
+
   // Loading states
   const [loading, setLoading] = useState(true);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  
+
   // Calculate test status based on current time
   const calculateTestStatus = (test) => {
     if (test.status === "cancelled") return "cancelled";
-    
+
     const now = new Date();
     const startTime = new Date(test.startTime);
     const endTime = new Date(test.endTime);
-    
+
     if (now < startTime) return "upcoming";
     if (now >= startTime && now <= endTime) return "running";
     if (now > endTime) return "completed";
     return "unknown";
   };
-  
+
   // Fetch all tests
   const fetchAllTests = async () => {
     try {
       setLoading(true);
       const response = await axios.get("/api/get/all/aptitude/test");
       console.log("Fetched tests:", response.data);
-      
+
       if (response.data.success) {
         const testsWithStatus = response.data.schedules.map(test => ({
           ...test,
@@ -108,10 +108,10 @@ const TestManagement = () => {
           totalCandidates: test.totalCandidates || 0,
           avgScore: test.avgScore || 0
         }));
-        
+
         setTests(testsWithStatus);
         setFilteredTests(testsWithStatus);
-        
+
         // If a test is selected, refresh its data
         if (selectedTest) {
           fetchTestDetails(selectedTest._id);
@@ -124,12 +124,12 @@ const TestManagement = () => {
       setLoading(false);
     }
   };
-  
+
   // Fetch test details
   const fetchTestDetails = async (testId) => {
     try {
       const response = await axios.get(`/api/aptitude/get/single/schedule/${testId}`);
-      
+
       if (response.data.success) {
         const test = response.data.schedule;
         const testWithStatus = {
@@ -144,7 +144,7 @@ const TestManagement = () => {
           totalCandidates: test.totalCandidates || 0,
           avgScore: test.avgScore || 0
         };
-        
+
         setSelectedTest(testWithStatus);
       }
     } catch (error) {
@@ -154,11 +154,10 @@ const TestManagement = () => {
   };
 
 
-  const handleAnalitical=async(testId)=>
-  {
- navigate(`/aptitude/results/reports/${testId}`)
+  const handleAnalitical = async (testId) => {
+    navigate(`/aptitude/results/reports/${testId}`)
   }
-  
+
   // Create new test
   const handleCreateTest = async (e) => {
     e.preventDefault();
@@ -200,22 +199,22 @@ const TestManagement = () => {
       alert(error.response?.data?.message || "Failed to create test. Please try again.");
     }
   };
-  
+
   // Update test
   const handleUpdateTest = async (e) => {
     e.preventDefault();
-    
+
     if (!testForm.scheduleId) {
       alert("Test ID is required for updating.");
       return;
     }
-    
+
     // Validate testId if provided
     if (testForm.testId && isNaN(testForm.testId)) {
       alert("Please enter a valid Test ID (numeric value).");
       return;
     }
-    
+
     try {
       setUpdating(true);
       // Prepare update data
@@ -231,19 +230,19 @@ const TestManagement = () => {
         isProctored: testForm.isProctored,
         instructions: testForm.instructions
       };
-      
+
       // Remove null, undefined, or empty string values
       Object.keys(updateData).forEach(key => {
         if (updateData[key] === null || updateData[key] === undefined || updateData[key] === "") {
           delete updateData[key];
         }
       });
-      
+
       const response = await axios.put(
-        `/api/aptitude/test/update/${testForm.scheduleId}`, 
+        `/api/aptitude/test/update/${testForm.scheduleId}`,
         updateData
       );
-      
+
       if (response.data.success) {
         alert("Test updated successfully!");
         setShowEditTest(false);
@@ -259,19 +258,19 @@ const TestManagement = () => {
       setUpdating(false);
     }
   };
-  
+
   // Delete test
   const handleDeleteTest = async (testId) => {
     if (!testId) {
       alert("Test ID is required for deletion.");
       return;
     }
-    
+
     if (window.confirm("Are you sure you want to delete this test? This action cannot be undone.")) {
       try {
         setDeleting(true);
         const response = await axios.delete(`/api/delete/aptitude/test/${testId}`);
-        
+
         if (response.data.success) {
           alert("Test deleted successfully!");
           setSelectedTest(null);
@@ -287,13 +286,13 @@ const TestManagement = () => {
       }
     }
   };
-  
+
   // View test details in modal
   const handleViewTest = (test) => {
     setSelectedTest(test);
     setShowTestDetails(true);
   };
-  
+
   // Export test results
   const handleExportResults = async (testId) => {
     try {
@@ -303,11 +302,11 @@ const TestManagement = () => {
       alert("Failed to export results.");
     }
   };
-  
+
   // Filter tests
   useEffect(() => {
     let filtered = [...tests];
-    
+
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(test =>
@@ -316,12 +315,12 @@ const TestManagement = () => {
         test.testId?.toString().includes(searchTerm)
       );
     }
-    
+
     // Status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter(test => calculateTestStatus(test) === statusFilter);
     }
-    
+
     // Date filter
     if (dateFilter !== "all") {
       const now = new Date();
@@ -351,17 +350,17 @@ const TestManagement = () => {
         }
       });
     }
-    
+
     setFilteredTests(filtered);
     setCurrentPage(1);
   }, [searchTerm, statusFilter, dateFilter, tests]);
-  
+
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentTests = filteredTests.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredTests.length / itemsPerPage);
-  
+
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "Not scheduled";
@@ -372,7 +371,7 @@ const TestManagement = () => {
       day: 'numeric'
     });
   };
-  
+
   // Format time
   const formatTime = (dateString) => {
     if (!dateString) return "";
@@ -382,7 +381,7 @@ const TestManagement = () => {
       minute: '2-digit'
     });
   };
-  
+
   // Format date and time together
   const formatDateTime = (dateString) => {
     if (!dateString) return "Not scheduled";
@@ -395,10 +394,10 @@ const TestManagement = () => {
       minute: '2-digit'
     });
   };
-  
+
   // Get status badge color
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'upcoming': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
       case 'running': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
       case 'completed': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
@@ -406,7 +405,7 @@ const TestManagement = () => {
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
-  
+
   // Reset form
   const resetTestForm = () => {
     setTestForm({
@@ -423,7 +422,7 @@ const TestManagement = () => {
       instructions: ""
     });
   };
-  
+
   // Initialize form with selected test for editing
   const initEditForm = (test) => {
     // Format dates for datetime-local input (convert UTC to local time)
@@ -453,12 +452,12 @@ const TestManagement = () => {
     });
     setShowEditTest(true);
   };
-  
+
   // Initial data fetch
   useEffect(() => {
     fetchAllTests();
   }, []);
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -469,7 +468,7 @@ const TestManagement = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -480,13 +479,7 @@ const TestManagement = () => {
             <p className="text-indigo-100 mt-2">Create, view, edit, and delete aptitude tests</p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={fetchAllTests}
-              className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
+
             <button
               onClick={() => setShowCreateTest(true)}
               className="bg-white text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 font-medium"
@@ -497,7 +490,7 @@ const TestManagement = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Tests List */}
         <div className="lg:col-span-2 space-y-6">
@@ -517,7 +510,7 @@ const TestManagement = () => {
                   />
                 </div>
               </div>
-              
+
               {/* Filters */}
               <div className="flex flex-wrap gap-2">
                 <select
@@ -531,7 +524,7 @@ const TestManagement = () => {
                   <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-                
+
                 <select
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
@@ -543,7 +536,7 @@ const TestManagement = () => {
                   <option value="thisWeek">This Week</option>
                   <option value="nextWeek">Next Week</option>
                 </select>
-                
+
                 <select
                   value={itemsPerPage}
                   onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -557,7 +550,7 @@ const TestManagement = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Tests List */}
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
@@ -572,15 +565,14 @@ const TestManagement = () => {
                 </div>
               </div>
             </div>
-            
+
             {currentTests.length > 0 ? (
               <div className="divide-y divide-gray-100 dark:divide-gray-700">
                 {currentTests.map((test) => (
                   <div
                     key={test._id}
-                    className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer ${
-                      selectedTest?._id === test._id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
-                    }`}
+                    className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer ${selectedTest?._id === test._id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                      }`}
                     onClick={() => setSelectedTest(test)}
                   >
                     <div className="flex items-start justify-between">
@@ -599,7 +591,7 @@ const TestManagement = () => {
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{test.description}</p>
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-4 mt-3">
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-gray-400" />
@@ -607,21 +599,21 @@ const TestManagement = () => {
                               {formatDateTime(test.startTime)}
                             </span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4 text-gray-400" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">
                               {test.testDuration || test.duration} minutes
                             </span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
                             <ListChecks className="w-4 h-4 text-gray-400" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">
                               {test.totalQuestions} questions
                             </span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
                             <Target className="w-4 h-4 text-gray-400" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">
@@ -630,12 +622,12 @@ const TestManagement = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col items-end gap-2">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(calculateTestStatus(test))}`}>
                           {calculateTestStatus(test).charAt(0).toUpperCase() + calculateTestStatus(test).slice(1)}
                         </span>
-                        
+
                         <div className="flex items-center gap-1">
                           <button
                             onClick={(e) => {
@@ -647,7 +639,7 @@ const TestManagement = () => {
                           >
                             <Eye className="w-4 h-4 text-green-500" />
                           </button>
-                          
+
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -659,7 +651,7 @@ const TestManagement = () => {
                           >
                             <Edit className="w-4 h-4 text-blue-500" />
                           </button>
-                          
+
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -689,7 +681,7 @@ const TestManagement = () => {
                 </p>
               </div>
             )}
-            
+
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
@@ -701,7 +693,7 @@ const TestManagement = () => {
                   >
                     Previous
                   </button>
-                  
+
                   <div className="flex items-center gap-2">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum;
@@ -714,23 +706,22 @@ const TestManagement = () => {
                       } else {
                         pageNum = currentPage - 2 + i;
                       }
-                      
+
                       return (
                         <button
                           key={pageNum}
                           onClick={() => setCurrentPage(pageNum)}
-                          className={`w-8 h-8 rounded-lg ${
-                            currentPage === pageNum
+                          className={`w-8 h-8 rounded-lg ${currentPage === pageNum
                               ? 'bg-indigo-600 text-white'
                               : 'border border-gray-300 dark:border-gray-600'
-                          }`}
+                            }`}
                         >
                           {pageNum}
                         </button>
                       );
                     })}
                   </div>
-                  
+
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
@@ -743,7 +734,7 @@ const TestManagement = () => {
             )}
           </div>
         </div>
-        
+
         {/* Right Column - Test Details */}
         <div className="space-y-6">
           {/* Selected Test Details */}
@@ -777,7 +768,7 @@ const TestManagement = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4 mb-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -789,7 +780,7 @@ const TestManagement = () => {
                         {formatDateTime(selectedTest.startTime)}
                       </p>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-gray-400" />
@@ -800,7 +791,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -811,7 +802,7 @@ const TestManagement = () => {
                         {selectedTest.testDuration || selectedTest.duration} minutes
                       </p>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <ListChecks className="w-4 h-4 text-gray-400" />
@@ -822,7 +813,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -833,7 +824,7 @@ const TestManagement = () => {
                         {selectedTest.passScore || selectedTest.passingScore}%
                       </p>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Zap className="w-4 h-4 text-gray-400" />
@@ -844,7 +835,7 @@ const TestManagement = () => {
                       </span>
                     </div>
                   </div>
-                  
+
                   {selectedTest.totalCandidates > 0 && (
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                       <div className="space-y-2">
@@ -856,7 +847,7 @@ const TestManagement = () => {
                           {selectedTest.totalCandidates}
                         </p>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <BarChart className="w-4 h-4 text-gray-400" />
@@ -869,7 +860,7 @@ const TestManagement = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleExportResults(selectedTest._id)}
@@ -878,15 +869,15 @@ const TestManagement = () => {
                     <Download className="w-4 h-4" />
                     Export Results
                   </button>
-                  
+
                   <button
-                    onClick={()=>handleAnalitical(selectedTest._id)}
+                    onClick={() => handleAnalitical(selectedTest._id)}
                     className="px-4 py-2 border border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-2"
                   >
                     <BarChart className="w-4 h-4" />
                     View Analytics
                   </button>
-                  
+
                   <button
                     onClick={() => handleDeleteTest(selectedTest._id)}
                     disabled={deleting}
@@ -897,11 +888,11 @@ const TestManagement = () => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Test Status Information */}
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Test Information</h3>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600 dark:text-gray-300">Current Status</span>
@@ -909,7 +900,7 @@ const TestManagement = () => {
                       {calculateTestStatus(selectedTest).toUpperCase()}
                     </span>
                   </div>
-                  
+
                   {selectedTest.status === 'cancelled' && (
                     <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <p className="text-sm text-red-700 dark:text-red-400">
@@ -917,7 +908,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   )}
-                  
+
                   {calculateTestStatus(selectedTest) === 'upcoming' && (
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                       <p className="text-sm text-blue-700 dark:text-blue-400">
@@ -925,7 +916,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   )}
-                  
+
                   {calculateTestStatus(selectedTest) === 'running' && (
                     <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <p className="text-sm text-green-700 dark:text-green-400">
@@ -933,7 +924,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   )}
-                  
+
                   {calculateTestStatus(selectedTest) === 'completed' && (
                     <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                       <p className="text-sm text-purple-700 dark:text-purple-400">
@@ -941,7 +932,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   )}
-                  
+
                   <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600 dark:text-gray-400">Time Status</span>
@@ -976,9 +967,9 @@ const TestManagement = () => {
           )}
         </div>
       </div>
-      
+
       {/* Modals */}
-      
+
       {/* Create/Edit Test Modal */}
       {(showCreateTest || showEditTest) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -999,7 +990,7 @@ const TestManagement = () => {
                   <XCircle className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
-              
+
               <form onSubmit={showEditTest ? handleUpdateTest : handleCreateTest}>
                 <div className="space-y-4">
                   <div>
@@ -1010,12 +1001,12 @@ const TestManagement = () => {
                       type="text"
                       required
                       value={testForm.testName}
-                      onChange={(e) => setTestForm({...testForm, testName: e.target.value})}
+                      onChange={(e) => setTestForm({ ...testForm, testName: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="e.g., Frontend Developer Aptitude Test"
                     />
                   </div>
-                  
+
                   {/* Test ID Field - Only show for create, hide for edit (if you want testId to be immutable) */}
                   {showCreateTest && (
                     <div>
@@ -1027,7 +1018,7 @@ const TestManagement = () => {
                         required
                         min="1"
                         value={testForm.testId}
-                        onChange={(e) => setTestForm({...testForm, testId: parseInt(e.target.value)})}
+                        onChange={(e) => setTestForm({ ...testForm, testId: parseInt(e.target.value) })}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         placeholder="Enter unique test ID number"
                       />
@@ -1036,7 +1027,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   )}
-                  
+
                   {/* For edit mode, show testId as read-only */}
                   {showEditTest && (
                     <div>
@@ -1054,20 +1045,20 @@ const TestManagement = () => {
                       </p>
                     </div>
                   )}
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Description
                     </label>
                     <textarea
                       value={testForm.description}
-                      onChange={(e) => setTestForm({...testForm, description: e.target.value})}
+                      onChange={(e) => setTestForm({ ...testForm, description: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Describe the test purpose and what it measures"
                       rows={3}
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1077,11 +1068,11 @@ const TestManagement = () => {
                         type="datetime-local"
                         required
                         value={testForm.startTime}
-                        onChange={(e) => setTestForm({...testForm, startTime: e.target.value})}
+                        onChange={(e) => setTestForm({ ...testForm, startTime: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         End Date & Time
@@ -1089,7 +1080,7 @@ const TestManagement = () => {
                       <input
                         type="datetime-local"
                         value={testForm.endTime}
-                        onChange={(e) => setTestForm({...testForm, endTime: e.target.value})}
+                        onChange={(e) => setTestForm({ ...testForm, endTime: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                       <p className="text-xs text-gray-500 mt-1">
@@ -1097,7 +1088,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1108,11 +1099,11 @@ const TestManagement = () => {
                         required
                         min="1"
                         value={testForm.testDuration}
-                        onChange={(e) => setTestForm({...testForm, testDuration: parseInt(e.target.value)})}
+                        onChange={(e) => setTestForm({ ...testForm, testDuration: parseInt(e.target.value) })}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Total Questions *
@@ -1122,12 +1113,12 @@ const TestManagement = () => {
                         required
                         min="1"
                         value={testForm.totalQuestions}
-                        onChange={(e) => setTestForm({...testForm, totalQuestions: parseInt(e.target.value)})}
+                        onChange={(e) => setTestForm({ ...testForm, totalQuestions: parseInt(e.target.value) })}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1139,18 +1130,18 @@ const TestManagement = () => {
                         min="0"
                         max="100"
                         value={testForm.passScore}
-                        onChange={(e) => setTestForm({...testForm, passScore: parseInt(e.target.value)})}
+                        onChange={(e) => setTestForm({ ...testForm, passScore: parseInt(e.target.value) })}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-center">
                       <div className="flex items-center gap-3 mt-6">
                         <input
                           type="checkbox"
                           id="proctored"
                           checked={testForm.isProctored}
-                          onChange={(e) => setTestForm({...testForm, isProctored: e.target.checked})}
+                          onChange={(e) => setTestForm({ ...testForm, isProctored: e.target.checked })}
                           className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
                         />
                         <label htmlFor="proctored" className="text-sm text-gray-700 dark:text-gray-300">
@@ -1159,21 +1150,21 @@ const TestManagement = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Instructions (Optional)
                     </label>
                     <textarea
                       value={testForm.instructions}
-                      onChange={(e) => setTestForm({...testForm, instructions: e.target.value})}
+                      onChange={(e) => setTestForm({ ...testForm, instructions: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Provide test instructions for candidates"
                       rows={4}
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex gap-3 mt-8">
                   <button
                     type="submit"
@@ -1199,7 +1190,7 @@ const TestManagement = () => {
           </div>
         </div>
       )}
-      
+
       {/* View Test Details Modal */}
       {showTestDetails && selectedTest && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -1216,7 +1207,7 @@ const TestManagement = () => {
                   <XCircle className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
@@ -1234,14 +1225,14 @@ const TestManagement = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h5 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Description</h5>
                   <p className="text-gray-900 dark:text-white">
                     {selectedTest.description || "No description provided"}
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -1254,7 +1245,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       Status
@@ -1264,7 +1255,7 @@ const TestManagement = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -1277,7 +1268,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       End Time
@@ -1290,7 +1281,7 @@ const TestManagement = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -1303,7 +1294,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       Total Questions
@@ -1316,7 +1307,7 @@ const TestManagement = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -1329,7 +1320,7 @@ const TestManagement = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       Proctoring
@@ -1339,7 +1330,7 @@ const TestManagement = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 {selectedTest.instructions && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -1352,7 +1343,7 @@ const TestManagement = () => {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex gap-3">
                     <button

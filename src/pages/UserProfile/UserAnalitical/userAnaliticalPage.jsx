@@ -7,14 +7,14 @@ import UserAnalyticsFilter from "./userAnalyticsFilter";
 import UserAnalyticsTabs from "./UserAnalyticsTabs";
 import UserAnalyticsTable from "./userAnaliticalRenderTabel";
 import AnalyticsStats from "./analiticalStatus";
-import { 
-  Users, 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  Download, 
-  Eye, 
-  BarChart3, 
+import {
+  Users,
+  Heart,
+  MessageCircle,
+  Share2,
+  Download,
+  Eye,
+  BarChart3,
   Calendar,
   TrendingUp,
   Video,
@@ -30,13 +30,13 @@ import {
 // Fetch user analytics data with filters
 const fetchUserAnalyticsData = async (userId, filters) => {
   if (!userId) throw new Error("User ID is required");
-  
+
   const params = new URLSearchParams();
   if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
   if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
   if (filters.type && filters.type !== 'all') params.append('type', filters.type);
   if (filters.tab) params.append('tab', filters.tab);
-  
+
   const response = await axios.get(`/api/admin/get/user/analytical/data/${userId}?${params.toString()}`);
   return response.data;
 };
@@ -55,13 +55,13 @@ export default function UserAnalytics() {
   const itemsPerPage = 10;
 
   // Fetch analytics data with filters
-  const { 
-    data: analyticsData, 
-    isLoading, 
+  const {
+    data: analyticsData,
+    isLoading,
     isError,
     error,
     refetch,
-    isRefetching 
+    isRefetching
   } = useQuery({
     queryKey: ['userAnalytics', userId, filters],
     queryFn: () => fetchUserAnalyticsData(userId, { ...filters, tab: activeTab }),
@@ -69,7 +69,7 @@ export default function UserAnalytics() {
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,
   });
-console.log(analyticsData)
+  console.log(analyticsData)
   // Transform API data to match expected format - Updated for all tabs
   const transformTabData = () => {
     if (!analyticsData) return [];
@@ -260,43 +260,43 @@ console.log(analyticsData)
   const totalPages = Math.ceil(tabData.length / itemsPerPage);
   const paginatedData = tabData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-const handleFilterChange = (newFilters) => {
-  // Merge new filters with existing ones
-  const updatedFilters = { 
-    ...filters, 
-    ...newFilters,
-    tab: activeTab // Always include current tab
-  };
-  
-  // Validate date range (end date should be after start date)
-  if (updatedFilters.startDate && updatedFilters.endDate) {
-    const start = new Date(updatedFilters.startDate);
-    const end = new Date(updatedFilters.endDate);
-    if (end < start) {
-      // Swap dates if end date is before start date
-      const temp = updatedFilters.startDate;
-      updatedFilters.startDate = updatedFilters.endDate;
-      updatedFilters.endDate = temp;
+  const handleFilterChange = (newFilters) => {
+    // Merge new filters with existing ones
+    const updatedFilters = {
+      ...filters,
+      ...newFilters,
+      tab: activeTab // Always include current tab
+    };
+
+    // Validate date range (end date should be after start date)
+    if (updatedFilters.startDate && updatedFilters.endDate) {
+      const start = new Date(updatedFilters.startDate);
+      const end = new Date(updatedFilters.endDate);
+      if (end < start) {
+        // Swap dates if end date is before start date
+        const temp = updatedFilters.startDate;
+        updatedFilters.startDate = updatedFilters.endDate;
+        updatedFilters.endDate = temp;
+      }
     }
-  }
-  
-  setFilters(updatedFilters);
-  setCurrentPage(1); // Reset to first page when filters change
-};
+
+    setFilters(updatedFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
 
   const clearFilters = () => {
-  setFilters({
-    startDate: null,
-    endDate: null,
-    type: "all",
-    tab: activeTab
-  });
-};
+    setFilters({
+      startDate: null,
+      endDate: null,
+      type: "all",
+      tab: activeTab
+    });
+  };
 
-// Update hasActiveFilters:
-const hasActiveFilters = () => {
-  return filters.startDate || filters.endDate || filters.type !== 'all';
-};
+  // Update hasActiveFilters:
+  const hasActiveFilters = () => {
+    return filters.startDate || filters.endDate || filters.type !== 'all';
+  };
 
   // Loading state
   if (isLoading && !isRefetching) {
@@ -308,7 +308,7 @@ const hasActiveFilters = () => {
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2"></div>
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
           </div>
-          
+
           {/* Stats Skeleton */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
             {[...Array(6)].map((_, i) => (
@@ -318,7 +318,7 @@ const hasActiveFilters = () => {
               </div>
             ))}
           </div>
-          
+
           {/* Table Skeleton */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
             <div className="h-16 bg-gray-100 dark:bg-gray-700"></div>
@@ -373,8 +373,8 @@ const hasActiveFilters = () => {
               </h1>
               <div className="flex items-center gap-3 mt-3">
                 {analyticsData?.selectedUser?.userAvatar && (
-                  <img 
-                    src={analyticsData.selectedUser.userAvatar} 
+                  <img
+                    src={analyticsData.selectedUser.userAvatar}
                     alt={analyticsData.selectedUser.userName}
                     className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-700 shadow-lg"
                   />
@@ -398,18 +398,11 @@ const hasActiveFilters = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Action buttons */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => refetch()}
-                disabled={isRefetching}
-                className="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-                {isRefetching ? 'Refreshing...' : 'Refresh'}
-              </button>
-              
+
+
               <button
                 onClick={() => {
                   // Export functionality
@@ -490,7 +483,7 @@ const hasActiveFilters = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 {(filters.startDate || filters.endDate) && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -541,7 +534,7 @@ const hasActiveFilters = () => {
                       {tabData.length}
                     </span> entries
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -553,7 +546,7 @@ const hasActiveFilters = () => {
                       </svg>
                       Previous
                     </button>
-                    
+
                     <div className="flex items-center gap-1">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         let pageNum;
@@ -566,23 +559,22 @@ const hasActiveFilters = () => {
                         } else {
                           pageNum = currentPage - 2 + i;
                         }
-                        
+
                         return (
                           <button
                             key={pageNum}
                             onClick={() => setCurrentPage(pageNum)}
-                            className={`w-10 h-10 flex items-center justify-center text-sm rounded-lg transition-all ${
-                              currentPage === pageNum
+                            className={`w-10 h-10 flex items-center justify-center text-sm rounded-lg transition-all ${currentPage === pageNum
                                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
+                              }`}
                           >
                             {pageNum}
                           </button>
                         );
                       })}
                     </div>
-                    
+
                     <button
                       onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
@@ -594,7 +586,7 @@ const hasActiveFilters = () => {
                       </svg>
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Rows per page:</span>
                     <select

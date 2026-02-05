@@ -18,7 +18,7 @@ const AppHeader = () => {
   }, []);
 
   return (
-    <header 
+    <header
       className={`
         sticky top-0 z-40 
         bg-white/80 dark:bg-gray-900/80 
@@ -45,31 +45,31 @@ const AppHeader = () => {
               aria-label="Toggle menu"
             >
               {isMobileOpen ? (
-                <svg 
-                  className="w-5 h-5" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M6 18L18 6M6 6l12 12" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
               ) : (
-                <svg 
-                  className="w-5 h-5" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M4 6h16M4 12h16M4 18h16" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
                   />
                 </svg>
               )}
@@ -88,17 +88,17 @@ const AppHeader = () => {
               `}
               aria-label="Toggle sidebar"
             >
-              <svg 
-                className="w-5 h-5" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M4 6h16M4 12h16M4 18h16" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
             </button>
@@ -115,65 +115,7 @@ const AppHeader = () => {
           <div className="flex items-center gap-1 sm:gap-2">
             {/* Quick Action Buttons */}
             <div className="hidden sm:flex items-center gap-1">
-              {/* Quick Add Button */}
-              <button
-                className={`
-                  px-3 py-1.5 rounded-lg text-sm font-medium
-                  transition-all duration-300
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-100 dark:hover:bg-gray-800
-                  border border-gray-300 dark:border-gray-700
-                  hover:border-gray-400 dark:hover:border-gray-600
-                  active:scale-95
-                  flex items-center gap-1.5
-                `}
-                aria-label="Quick add"
-              >
-                <svg 
-                  className="w-4 h-4" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M12 4v16m8-8H4" 
-                  />
-                </svg>
-                <span className="hidden lg:inline">New</span>
-              </button>
-
-              {/* Export Button */}
-              <button
-                className={`
-                  px-3 py-1.5 rounded-lg text-sm font-medium
-                  transition-all duration-300
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-100 dark:hover:bg-gray-800
-                  border border-gray-300 dark:border-gray-700
-                  hover:border-gray-400 dark:hover:border-gray-600
-                  active:scale-95
-                  flex items-center gap-1.5
-                `}
-                aria-label="Export"
-              >
-                <svg 
-                  className="w-4 h-4" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
-                  />
-                </svg>
-                <span className="hidden lg:inline">Export</span>
-              </button>
+              {/* Removed New and Export buttons */}
             </div>
 
             {/* Divider */}
@@ -196,65 +138,9 @@ const AppHeader = () => {
           </div>
         </div>
 
-        {/* Mobile Quick Actions */}
+        {/* Mobile Quick Actions - Cleanup */}
         <div className="lg:hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                className={`
-                  px-4 py-2 rounded-lg text-sm font-medium
-                  transition-all duration-300
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-100 dark:hover:bg-gray-800
-                  border border-gray-300 dark:border-gray-700
-                  hover:border-gray-400 dark:hover:border-gray-600
-                  active:scale-95
-                  flex items-center gap-2
-                `}
-              >
-                <svg 
-                  className="w-4 h-4" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M12 4v16m8-8H4" 
-                  />
-                </svg>
-                New
-              </button>
-              <button
-                className={`
-                  px-4 py-2 rounded-lg text-sm font-medium
-                  transition-all duration-300
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-100 dark:hover:bg-gray-800
-                  border border-gray-300 dark:border-gray-700
-                  hover:border-gray-400 dark:hover:border-gray-600
-                  active:scale-95
-                  flex items-center gap-2
-                `}
-              >
-                <svg 
-                  className="w-4 h-4" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
-                  />
-                </svg>
-                Export
-              </button>
-            </div>
+          <div className="flex items-center justify-end">
             <div className="text-xs text-gray-500 dark:text-gray-400">
               <span className="hidden sm:inline">Last updated:</span> Just now
             </div>

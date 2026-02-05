@@ -126,7 +126,7 @@ const GoogleDriveDashboard = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (response.data.success) {
         setCommandSuccess(response.data.message);
         setFormData({ action: '', fileId: '', feedId: '', targetFolderId: '' });
@@ -224,7 +224,7 @@ const GoogleDriveDashboard = () => {
 
   const storage = dashboardData.storage;
   const usagePercent = parseFloat(storage.usagePercent) || 0;
-  
+
   const getProgressColor = (percent) => {
     if (percent < 70) return 'success';
     if (percent < 90) return 'warning';
@@ -278,17 +278,13 @@ const GoogleDriveDashboard = () => {
             </Box>
           </Box>
           <Box display="flex" gap={2} alignItems="center">
-            <Chip 
+            <Chip
               icon={<Cloud />}
               label={dashboardData.oauth.mode === 'testing' ? 'Test Mode' : 'Production'}
               color={dashboardData.oauth.mode === 'testing' ? 'warning' : 'success'}
               variant="outlined"
             />
-            <Tooltip title="Refresh Data">
-              <IconButton onClick={handleRefresh} color="primary">
-                <Refresh />
-              </IconButton>
-            </Tooltip>
+
           </Box>
         </Box>
       </Box>

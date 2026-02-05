@@ -77,13 +77,13 @@ export default function TrendingCreatorsPage() {
   }, [searchTerm]);
 
   // Fetch data with query using Axios
-  const { 
-    data, 
-    isLoading, 
-    isError, 
+  const {
+    data,
+    isLoading,
+    isError,
     refetch,
     isRefetching,
-    error 
+    error
   } = useQuery({
     queryKey: [
       "trendingCreators",
@@ -137,7 +137,7 @@ export default function TrendingCreatorsPage() {
   const handleExport = async () => {
     try {
       toast.loading("Preparing export...");
-      
+
       const params = {
         page: 1,
         limit: 1000, // Export more records
@@ -146,13 +146,13 @@ export default function TrendingCreatorsPage() {
       };
 
       const response = await axios.get('/api/trending-creators', { params });
-      
+
       // Convert to CSV or Excel (you can implement this based on your needs)
       const csvContent = convertToCSV(response.data.creators);
-      
+
       // Download the file
       downloadCSV(csvContent, 'trending-creators.csv');
-      
+
       toast.dismiss();
       toast.success("Export completed successfully!");
     } catch (error) {
@@ -164,9 +164,9 @@ export default function TrendingCreatorsPage() {
   // Helper function to convert data to CSV
   const convertToCSV = (data) => {
     if (!data.length) return '';
-    
+
     const headers = ['User ID', 'Username', 'Trending Score', 'Followers', 'Total Views', 'Likes', 'Shares', 'Image Posts', 'Video Posts', 'Last Updated'];
-    
+
     const rows = data.map(creator => [
       creator.userId,
       creator.userName,
@@ -179,7 +179,7 @@ export default function TrendingCreatorsPage() {
       creator.videoPosts,
       new Date(creator.lastUpdated).toLocaleDateString()
     ]);
-    
+
     return [headers, ...rows].map(row => row.join(',')).join('\n');
   };
 
@@ -222,14 +222,14 @@ export default function TrendingCreatorsPage() {
               </div>
               <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
             </div>
-            
+
             {/* Filters skeleton */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
               ))}
             </div>
-            
+
             {/* Table skeleton */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden">
               <div className="h-16 bg-gray-100 dark:bg-gray-700"></div>
@@ -275,8 +275,8 @@ export default function TrendingCreatorsPage() {
   return (
     <div className="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <Toaster 
-          position="top-right" 
+        <Toaster
+          position="top-right"
           reverseOrder={false}
           toastOptions={{
             className: 'dark:bg-gray-800 dark:text-gray-200',
@@ -295,18 +295,11 @@ export default function TrendingCreatorsPage() {
                 Discover top-performing creators based on engagement metrics
               </p>
             </div>
-            
+
             {/* Header actions */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => refetch()}
-                disabled={isRefetching}
-                className="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-              
+
+
               <button
                 onClick={handleExport}
                 className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
@@ -330,13 +323,13 @@ export default function TrendingCreatorsPage() {
                 <Users className="w-10 h-10 opacity-80" />
               </div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90">Avg. Score</p>
                   <p className="text-2xl font-bold mt-1">
-                    {creators.length > 0 
+                    {creators.length > 0
                       ? (creators.reduce((acc, c) => acc + (c.trendingScore || 0), 0) / creators.length).toFixed(1)
                       : "0.0"
                     }
@@ -345,7 +338,7 @@ export default function TrendingCreatorsPage() {
                 <BarChart3 className="w-10 h-10 opacity-80" />
               </div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
@@ -357,13 +350,13 @@ export default function TrendingCreatorsPage() {
                 <Users className="w-10 h-10 opacity-80" />
               </div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90">Avg. Posts</p>
                   <p className="text-2xl font-bold mt-1">
-                    {creators.length > 0 
+                    {creators.length > 0
                       ? Math.round(creators.reduce((acc, c) => acc + (c.imagePosts + c.videoPosts || 0), 0) / creators.length)
                       : "0"
                     }
@@ -388,7 +381,7 @@ export default function TrendingCreatorsPage() {
                 {showAdvancedFilters ? 'Hide Advanced' : 'Show Advanced'}
               </button>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               {/* Search Input */}
               <div className="relative">
@@ -514,7 +507,7 @@ export default function TrendingCreatorsPage() {
 
         {/* Main Table Content */}
         <div className="mb-8">
-          <TrendingCreatorsTable 
+          <TrendingCreatorsTable
             creators={creators}
             isLoading={isLoading || isRefetching}
             sortBy={filters.sortBy}
@@ -538,7 +531,7 @@ export default function TrendingCreatorsPage() {
                   {pagination.totalCount?.toLocaleString()}
                 </span> creators
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -547,7 +540,7 @@ export default function TrendingCreatorsPage() {
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
-                
+
                 {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
                   let pageNum;
                   if (pagination.totalPages <= 5) {
@@ -559,22 +552,21 @@ export default function TrendingCreatorsPage() {
                   } else {
                     pageNum = page - 2 + i;
                   }
-                  
+
                   return (
                     <button
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
-                      className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                        page === pageNum
+                      className={`w-10 h-10 rounded-lg font-medium transition-colors ${page === pageNum
                           ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                           : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>
                   );
                 })}
-                
+
                 <button
                   onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
                   disabled={page === pagination.totalPages}
@@ -583,7 +575,7 @@ export default function TrendingCreatorsPage() {
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Rows per page:</span>
                 <select

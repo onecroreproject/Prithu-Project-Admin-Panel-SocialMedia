@@ -113,7 +113,7 @@ const AdminFeedbackPage = () => {
       const response = await axios.get('/api/admin/feedback', { params });
       setFeedbacks(response.data.data);
       setTotalPages(Math.ceil(response.data.total / 20));
-      
+
       // Calculate stats from current data
       calculateStats(response.data.data);
     } catch (error) {
@@ -151,15 +151,15 @@ const AdminFeedbackPage = () => {
       }
 
       await axios.put(`/api/admin/feedback/${id}`, payload);
-      
+
       // Update local state
-      setFeedbacks(prev => prev.map(item => 
+      setFeedbacks(prev => prev.map(item =>
         item._id === id ? { ...item, status, adminNote: editingNote || item.adminNote } : item
       ));
-      
+
       setEditingNote('');
       setSelectedFeedback(null);
-      
+
       // Refresh stats
       fetchFeedbacks();
     } catch (error) {
@@ -267,13 +267,7 @@ const AdminFeedbackPage = () => {
                 <Download className="w-4 h-4" />
                 Export CSV
               </button>
-              <button
-                onClick={fetchFeedbacks}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </button>
+
             </div>
           </div>
         </div>
@@ -530,9 +524,8 @@ const AdminFeedbackPage = () => {
                         {/* Details Column */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${
-                              item.type === 'feedback' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'
-                            }`}>
+                            <div className={`p-2 rounded-lg ${item.type === 'feedback' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'
+                              }`}>
                               {item.type === 'feedback' ? (
                                 <MessageSquare className="w-5 h-5" />
                               ) : (
@@ -589,9 +582,8 @@ const AdminFeedbackPage = () => {
                           <select
                             value={item.status}
                             onChange={(e) => handleStatusUpdate(item._id, e.target.value)}
-                            className={`px-3 py-1.5 rounded text-sm font-medium border-0 focus:ring-2 focus:ring-blue-500 ${
-                              statusOptions.find(s => s.value === item.status)?.color || 'bg-gray-100'
-                            }`}
+                            className={`px-3 py-1.5 rounded text-sm font-medium border-0 focus:ring-2 focus:ring-blue-500 ${statusOptions.find(s => s.value === item.status)?.color || 'bg-gray-100'
+                              }`}
                           >
                             {statusOptions.map(opt => (
                               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -691,9 +683,8 @@ const AdminFeedbackPage = () => {
                                         key={status.value}
                                         onClick={() => handleStatusUpdate(item._id, status.value)}
                                         disabled={updating}
-                                        className={`px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1 ${
-                                          status.color
-                                        } ${updating ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
+                                        className={`px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1 ${status.color
+                                          } ${updating ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
                                       >
                                         {status.icon}
                                         {status.label}
@@ -758,7 +749,7 @@ const AdminFeedbackPage = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-900 mb-1">
                 <span className="font-medium">User:</span> {selectedFeedback.userId?.userName || 'Guest'}
@@ -797,9 +788,8 @@ const AdminFeedbackPage = () => {
               <button
                 onClick={() => handleStatusUpdate(selectedFeedback._id, selectedFeedback.status)}
                 disabled={updating}
-                className={`px-4 py-2 text-sm text-white rounded-lg ${
-                  updating ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                className={`px-4 py-2 text-sm text-white rounded-lg ${updating ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
               >
                 {updating ? (
                   <span className="flex items-center gap-2">

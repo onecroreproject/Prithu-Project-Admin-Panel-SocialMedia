@@ -113,7 +113,7 @@ const AdminCompanyPage = () => {
         },
         isActive: data.isActive !== undefined ? data.isActive : true
       });
-      
+
       if (data.logoUrl) setLogoPreview(data.logoUrl);
       if (data.faviconUrl) setFaviconPreview(data.faviconUrl);
     } catch (error) {
@@ -126,7 +126,7 @@ const AdminCompanyPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name.startsWith('socialMedia.')) {
       const socialField = name.split('.')[1];
       setFormData(prev => ({
@@ -225,18 +225,18 @@ const AdminCompanyPage = () => {
 
       const response = await axios.post('/api/admin/company', payload);
       setCompanyData(response.data.data);
-      
+
       // Handle file uploads if needed (you might want to upload to S3/CDN)
       if (logoFile) {
         // Upload logo to your storage service
         console.log('Logo file to upload:', logoFile);
       }
-      
+
       if (faviconFile) {
         // Upload favicon to your storage service
         console.log('Favicon file to upload:', faviconFile);
       }
-      
+
       alert('Company information saved successfully!');
     } catch (error) {
       console.error('Error saving company data:', error);
@@ -252,7 +252,7 @@ const AdminCompanyPage = () => {
       const response = await axios.patch('/api/admin/company/status', {
         isActive: newStatus
       });
-      
+
       setFormData(prev => ({ ...prev, isActive: newStatus }));
       setCompanyData(response.data.data);
       alert(`Company ${newStatus ? 'activated' : 'deactivated'} successfully`);
@@ -317,11 +317,10 @@ const AdminCompanyPage = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={toggleCompanyStatus}
-                className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${
-                  formData.isActive
+                className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${formData.isActive
                     ? 'bg-red-100 text-red-700 hover:bg-red-200'
                     : 'bg-green-100 text-green-700 hover:bg-green-200'
-                }`}
+                  }`}
               >
                 {formData.isActive ? (
                   <>
@@ -346,11 +345,10 @@ const AdminCompanyPage = () => {
           </div>
 
           {/* Status Indicator */}
-          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-            formData.isActive
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${formData.isActive
               ? 'bg-green-100 text-green-800'
               : 'bg-red-100 text-red-800'
-          }`}>
+            }`}>
             {formData.isActive ? (
               <>
                 <CheckCircle className="w-4 h-4" />
@@ -377,15 +375,15 @@ const AdminCompanyPage = () => {
                 Close Preview
               </button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Logo & Basic Info */}
               <div className="space-y-4">
                 {logoPreview && (
                   <div className="mb-4">
-                    <img 
-                      src={logoPreview} 
-                      alt="Company Logo" 
+                    <img
+                      src={logoPreview}
+                      alt="Company Logo"
                       className="h-16 object-contain"
                     />
                   </div>
@@ -460,11 +458,10 @@ const AdminCompanyPage = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${
-                    activeTab === tab.id
+                  className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   {tab.icon}
                   {tab.label}
@@ -641,9 +638,9 @@ const AdminCompanyPage = () => {
                         <label htmlFor="logo-upload" className="cursor-pointer">
                           {logoPreview ? (
                             <div className="flex items-center justify-center gap-3">
-                              <img 
-                                src={logoPreview} 
-                                alt="Logo preview" 
+                              <img
+                                src={logoPreview}
+                                alt="Logo preview"
                                 className="h-20 object-contain"
                               />
                               <div className="text-left">
@@ -690,9 +687,9 @@ const AdminCompanyPage = () => {
                         <label htmlFor="favicon-upload" className="cursor-pointer">
                           {faviconPreview ? (
                             <div className="flex items-center justify-center gap-3">
-                              <img 
-                                src={faviconPreview} 
-                                alt="Favicon preview" 
+                              <img
+                                src={faviconPreview}
+                                alt="Favicon preview"
                                 className="h-16 object-contain"
                               />
                               <div className="text-left">
@@ -841,7 +838,7 @@ const AdminCompanyPage = () => {
                       Add
                     </button>
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-2">
                     {formData.seo.keywords?.map((keyword, index) => (
                       <div
@@ -865,15 +862,8 @@ const AdminCompanyPage = () => {
 
             {/* Form Actions */}
             <div className="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg flex items-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Reset Changes
-              </button>
-              
+
+
               <div className="flex gap-3">
                 <button
                   type="submit"

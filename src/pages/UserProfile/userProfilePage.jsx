@@ -4,13 +4,13 @@ import UserProfileMetricks from "./userProfileMetricks";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import UserTable from "../../components/tables/UserTabel/UserTable";
- 
+
 const dashboardFade = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
   exit: { opacity: 0, y: 20, transition: { duration: 0.3 } },
 };
- 
+
 export default function UserProfilePage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -23,7 +23,7 @@ export default function UserProfilePage() {
     registered: "all",
     lastActive: "all"
   });
- 
+
   const handleStatusChange = (status) => {
     setFilters(prev => ({
       ...prev,
@@ -33,19 +33,19 @@ export default function UserProfilePage() {
       }
     }));
   };
- 
+
   const handleGenderChange = (gender) => {
     setFilters(prev => ({ ...prev, gender }));
   };
- 
+
   const handleRegisteredChange = (period) => {
     setFilters(prev => ({ ...prev, registered: period }));
   };
- 
+
   const handleLastActiveChange = (period) => {
     setFilters(prev => ({ ...prev, lastActive: period }));
   };
- 
+
   const handleClearAll = () => {
     setFilters({
       status: {
@@ -58,13 +58,15 @@ export default function UserProfilePage() {
       lastActive: "all"
     });
   };
- 
+
   const handleApplyFilters = () => {
     setIsFilterOpen(false);
     // Here you would typically apply filters to your data
     console.log("Applied filters:", filters);
   };
- 
+
+  const [metricFilter, setMetricFilter] = useState(null);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -85,7 +87,7 @@ export default function UserProfilePage() {
             </div>
           </div>
         </div>
- 
+
         {/* Main Content */}
         <div className="max-w-7xl mx-auto p-4 sm:p-6">
           {/* Metrics Section */}
@@ -101,11 +103,11 @@ export default function UserProfilePage() {
                 <h2 className="text-lg font-semibold text-gray-900">User Overview</h2>
                 <p className="text-sm text-gray-500">Real-time user statistics and metrics</p>
               </div>
-              <UserProfileMetricks />
+              <UserProfileMetricks onMetricClick={setMetricFilter} activeMetric={metricFilter} />
             </div>
           </motion.div>
- 
-         
+
+
           {/* User Table Section */}
           <motion.div
             variants={dashboardFade}
@@ -118,7 +120,7 @@ export default function UserProfilePage() {
               desc="Manage all user accounts and permissions"
               className="shadow-sm"
             >
-              <UserTable />
+              <UserTable externalFilter={metricFilter} onClearExternalFilter={() => setMetricFilter(null)} />
             </ComponentCard>
           </motion.div>
         </div>
@@ -126,4 +128,3 @@ export default function UserProfilePage() {
     </AnimatePresence>
   );
 }
- 

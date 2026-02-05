@@ -35,24 +35,24 @@ const DEFAULT_AVATARS = {
 // Helper function to get default avatar based on username
 const getDefaultAvatar = (username = "") => {
   const lowerUsername = username.toLowerCase();
-  
+
   if (lowerUsername.includes('john') || lowerUsername.includes('james') ||
-      lowerUsername.includes('mike') || lowerUsername.includes('david') ||
-      lowerUsername.includes('chris') || lowerUsername.includes('tom')) {
+    lowerUsername.includes('mike') || lowerUsername.includes('david') ||
+    lowerUsername.includes('chris') || lowerUsername.includes('tom')) {
     return DEFAULT_AVATARS.male;
   } else if (lowerUsername.includes('sarah') || lowerUsername.includes('emma') ||
-             lowerUsername.includes('lisa') || lowerUsername.includes('natalie') ||
-             lowerUsername.includes('jennifer') || lowerUsername.includes('sophia')) {
+    lowerUsername.includes('lisa') || lowerUsername.includes('natalie') ||
+    lowerUsername.includes('jennifer') || lowerUsername.includes('sophia')) {
     return DEFAULT_AVATARS.female;
   }
-  
+
   return DEFAULT_AVATARS.default;
 };
 
 // Helper function to get user initials
 const getUserInitials = (username = "") => {
   if (!username || typeof username !== 'string') return "U";
-  
+
   const parts = username.split(' ');
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -69,49 +69,49 @@ export default function UserFeedReportTable() {
   const [targetTypeFilter, setTargetTypeFilter] = useState("all");
   const [viewDetails, setViewDetails] = useState(null);
   const [showRejected, setShowRejected] = useState(false);
-  
+
   const queryClient = useQueryClient();
-  
+
   // Fetch reports with proper error handling
-  const { 
-    data: apiResponse, 
-    isLoading, 
-    isError, 
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
     error,
-    refetch 
+    refetch
   } = useQuery({
     queryKey: ["reports"],
     queryFn: getReports,
     retry: 2,
     staleTime: 30000, // 30 seconds
   });
-  
+
   // Safely extract reports from API response
   const reports = useMemo(() => {
     try {
       console.log("Raw API Response:", apiResponse);
-      
+
       // If response is already an array, return it
       if (Array.isArray(apiResponse)) {
         return apiResponse;
       }
-      
+
       // If response has a data property that's an array
       if (apiResponse?.data && Array.isArray(apiResponse.data)) {
         return apiResponse.data;
       }
-      
+
       // If response has nested data.data property
       if (apiResponse?.data?.data && Array.isArray(apiResponse.data.data)) {
         return apiResponse.data.data;
       }
-      
+
       // If response has message but no data (empty state)
       if (apiResponse?.message) {
         console.log("API Message:", apiResponse.message);
         return [];
       }
-      
+
       // Default empty array
       return [];
     } catch (err) {
@@ -119,22 +119,22 @@ export default function UserFeedReportTable() {
       return [];
     }
   }, [apiResponse]);
-  
+
   console.log("Processed reports:", reports);
-  
+
   // Initialize selectedStatus for each report when data loads
   useEffect(() => {
     if (!reports || !Array.isArray(reports) || reports.length === 0) {
       return;
     }
-    
+
     const initialStatus = {};
     reports.forEach((report) => {
       if (report && report._id) {
         initialStatus[report._id] = report.status || "Pending";
       }
     });
-    
+
     setSelectedStatus((prev) => {
       const hasChanged = Object.keys(initialStatus).some(
         (key) => prev[key] !== initialStatus[key]
@@ -142,7 +142,7 @@ export default function UserFeedReportTable() {
       return hasChanged ? initialStatus : prev;
     });
   }, [reports]);
-  
+
   // Mutation to update report status
   const mutation = useMutation({
     mutationFn: ({ reportId, status }) => updateReportAction(reportId, { status }),
@@ -155,24 +155,24 @@ export default function UserFeedReportTable() {
       alert("Failed to update report.");
     },
   });
-  
+
   const handleStatusChange = (reportId, value) => {
     setSelectedStatus((prev) => ({ ...prev, [reportId]: value }));
     setStatusChanged((prev) => ({ ...prev, [reportId]: true }));
   };
-  
+
   const handleProceed = (reportId) => {
     const status = selectedStatus[reportId];
     if (!status) return;
-    
+
     mutation.mutate({ reportId, status });
     setStatusChanged((prev) => ({ ...prev, [reportId]: false }));
   };
-  
+
   // Status functions
   const getStatusColor = (status) => {
     if (!status) return 'bg-gray-50 text-gray-700 border border-gray-200';
-    
+
     switch (status.toLowerCase()) {
       case 'pending':
         return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
@@ -186,10 +186,10 @@ export default function UserFeedReportTable() {
         return 'bg-gray-50 text-gray-700 border border-gray-200';
     }
   };
-  
+
   const getStatusIcon = (status) => {
     if (!status) return <FaFlag className="w-3 h-3" />;
-    
+
     switch (status.toLowerCase()) {
       case 'pending': return <FaClock className="w-3 h-3" />;
       case 'reviewed': return <FaEye className="w-3 h-3" />;
@@ -198,10 +198,10 @@ export default function UserFeedReportTable() {
       default: return <FaFlag className="w-3 h-3" />;
     }
   };
-  
+
   const getTypeIcon = (type) => {
     if (!type) return <FaFlag className="text-gray-500 w-4 h-4" />;
-    
+
     const lowerType = type.toLowerCase();
     if (lowerType.includes('bullying') || lowerType.includes('harassment')) {
       return <FaExclamationTriangle className="text-red-500 w-4 h-4" />;
@@ -216,10 +216,10 @@ export default function UserFeedReportTable() {
     }
     return <FaFlag className="text-gray-500 w-4 h-4" />;
   };
-  
+
   const getTargetTypeIcon = (targetType) => {
     if (!targetType) return <FaFlag className="text-gray-500 w-4 h-4" />;
-    
+
     switch (targetType.toLowerCase()) {
       case 'feed': return <FaImage className="text-blue-500 w-4 h-4" />;
       case 'user': return <FaUser className="text-green-500 w-4 h-4" />;
@@ -227,18 +227,18 @@ export default function UserFeedReportTable() {
       default: return <FaFlag className="text-gray-500 w-4 h-4" />;
     }
   };
-  
+
   // Filter reports
   const filteredReports = useMemo(() => {
     if (!reports || !Array.isArray(reports)) return [];
-    
+
     return reports.filter(report => {
       if (!report || typeof report !== 'object') return false;
-      
+
       // Filter by rejected status
       if (showRejected && report.status !== "Rejected") return false;
       if (!showRejected && report.status === "Rejected") return false;
-      
+
       // Filter by search term
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
@@ -247,24 +247,24 @@ export default function UserFeedReportTable() {
           (report.reportedTo?.userName?.toLowerCase() || '').includes(searchLower) ||
           (report.type?.toLowerCase() || '').includes(searchLower) ||
           (report._id?.toLowerCase() || '').includes(searchLower);
-        
+
         if (!matchesSearch) return false;
       }
-      
+
       // Filter by report type
       if (reportTypeFilter !== "all" && report.type !== reportTypeFilter) {
         return false;
       }
-      
+
       // Filter by target type
       if (targetTypeFilter !== "all" && report.targetType !== targetTypeFilter) {
         return false;
       }
-      
+
       return true;
     });
   }, [reports, searchTerm, reportTypeFilter, targetTypeFilter, showRejected]);
-  
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
@@ -277,7 +277,7 @@ export default function UserFeedReportTable() {
       return 'Invalid Date';
     }
   };
-  
+
   const formatTime = (dateString) => {
     if (!dateString) return '';
     try {
@@ -290,7 +290,7 @@ export default function UserFeedReportTable() {
       return '';
     }
   };
-  
+
   // StatusBadge component
   const StatusBadge = ({ status }) => (
     <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
@@ -298,22 +298,22 @@ export default function UserFeedReportTable() {
       <span>{status || "Unknown"}</span>
     </div>
   );
-  
+
   // Helper function to get first description from answers
   const getFirstDescription = (report) => {
     if (!report) return "No description available";
-    
+
     if (Array.isArray(report.answers) && report.answers.length > 0) {
       const firstAnswer = report.answers[0];
       return firstAnswer.selectedOption || firstAnswer.questionText || "No description";
     }
     return "No description available";
   };
-  
+
   // Component for user avatar with fallback
   const UserAvatar = ({ user, alt = "User" }) => {
     const [imgError, setImgError] = useState(false);
-    
+
     if (!user || typeof user !== 'object') {
       return (
         <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white font-medium text-sm">
@@ -321,10 +321,10 @@ export default function UserFeedReportTable() {
         </div>
       );
     }
-    
+
     const defaultAvatar = getDefaultAvatar(user?.userName);
     const initials = getUserInitials(user?.userName);
-    
+
     return (
       <div className="relative">
         {(!user?.avatar || imgError) ? (
@@ -342,11 +342,11 @@ export default function UserFeedReportTable() {
       </div>
     );
   };
-  
+
   // Component for larger user avatar in modal
   const LargeUserAvatar = ({ user, alt = "User" }) => {
     const [imgError, setImgError] = useState(false);
-    
+
     if (!user || typeof user !== 'object') {
       return (
         <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-medium text-base">
@@ -354,10 +354,10 @@ export default function UserFeedReportTable() {
         </div>
       );
     }
-    
+
     const defaultAvatar = getDefaultAvatar(user?.userName);
     const initials = getUserInitials(user?.userName);
-    
+
     return (
       <div className="relative">
         {(!user?.avatar || imgError) ? (
@@ -375,11 +375,11 @@ export default function UserFeedReportTable() {
       </div>
     );
   };
-  
+
   // Get unique report types for filter dropdown
   const uniqueReportTypes = useMemo(() => {
     if (!reports || !Array.isArray(reports)) return ["all"];
-    
+
     const types = ["all"];
     reports.forEach(report => {
       if (report.type && !types.includes(report.type)) {
@@ -388,7 +388,7 @@ export default function UserFeedReportTable() {
     });
     return types;
   }, [reports]);
-  
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -399,7 +399,7 @@ export default function UserFeedReportTable() {
       </div>
     );
   }
-  
+
   if (isError) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -426,11 +426,11 @@ export default function UserFeedReportTable() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
-     
-      
+
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex justify-between items-center">
@@ -439,13 +439,7 @@ export default function UserFeedReportTable() {
             <p className="text-gray-600 mt-1">Manage and review reported content ({reports.length} total)</p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => refetch()}
-              disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors disabled:opacity-50"
-            >
-              <FaSync className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
-            </button>
+
             <button
               onClick={() => alert("Export feature would download CSV file")}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
@@ -455,7 +449,7 @@ export default function UserFeedReportTable() {
           </div>
         </div>
       </div>
-      
+
       {/* Main Content */}
       <div className="p-6">
         {/* Filters Bar */}
@@ -474,7 +468,7 @@ export default function UserFeedReportTable() {
                 />
               </div>
             </div>
-            
+
             {/* Type Filter */}
             <div className="w-full md:w-48">
               <select
@@ -489,7 +483,7 @@ export default function UserFeedReportTable() {
                 ))}
               </select>
             </div>
-            
+
             {/* Target Type Filter */}
             <div className="w-full md:w-48">
               <select
@@ -503,7 +497,7 @@ export default function UserFeedReportTable() {
                 <option value="Comment">Comments</option>
               </select>
             </div>
-            
+
             {/* Toggle Rejected */}
             <div className="flex items-center">
               <label className="flex items-center cursor-pointer">
@@ -524,7 +518,7 @@ export default function UserFeedReportTable() {
             </div>
           </div>
         </div>
-        
+
         {/* Reports Table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
@@ -617,7 +611,7 @@ export default function UserFeedReportTable() {
                           </p>
                         )}
                       </td>
-                      
+
                       {/* Type */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -625,7 +619,7 @@ export default function UserFeedReportTable() {
                           <span className="text-sm font-medium text-gray-900">{report.type || "Unknown"}</span>
                         </div>
                       </td>
-                      
+
                       {/* Reporter */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -643,7 +637,7 @@ export default function UserFeedReportTable() {
                           </div>
                         </div>
                       </td>
-                      
+
                       {/* Reported User */}
                       <td className="px-6 py-4">
                         {report.reportedTo ? (
@@ -665,7 +659,7 @@ export default function UserFeedReportTable() {
                           <div className="text-sm text-gray-400 italic">Not specified</div>
                         )}
                       </td>
-                      
+
                       {/* Description */}
                       <td className="px-6 py-4">
                         <div className="max-w-[200px]">
@@ -682,7 +676,7 @@ export default function UserFeedReportTable() {
                           )}
                         </div>
                       </td>
-                      
+
                       {/* Status */}
                       <td className="px-6 py-4">
                         <div className="space-y-2">
@@ -690,7 +684,7 @@ export default function UserFeedReportTable() {
                           <div className="flex items-center gap-2">
                             <StatusBadge status={report.status || "Pending"} />
                           </div>
-                          
+
                           {/* Status Change Dropdown */}
                           <div className="relative">
                             <select
@@ -705,7 +699,7 @@ export default function UserFeedReportTable() {
                             </select>
                             <FaChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
                           </div>
-                          
+
                           {/* Update Button */}
                           {statusChanged[report._id] && (
                             <button
@@ -718,7 +712,7 @@ export default function UserFeedReportTable() {
                           )}
                         </div>
                       </td>
-                      
+
                       {/* Reported */}
                       <td className="px-6 py-4">
                         <div className="space-y-1">
@@ -730,7 +724,7 @@ export default function UserFeedReportTable() {
                           </div>
                         </div>
                       </td>
-                      
+
                       {/* Actions */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -760,7 +754,7 @@ export default function UserFeedReportTable() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Table Footer */}
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <div className="flex justify-between items-center">
@@ -785,7 +779,7 @@ export default function UserFeedReportTable() {
           </div>
         </div>
       </div>
-      
+
       {/* Media Modal */}
       <AnimatePresence>
         {mediaToView && (
@@ -833,7 +827,7 @@ export default function UserFeedReportTable() {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Details Modal */}
       <AnimatePresence>
         {viewDetails && (
@@ -866,7 +860,7 @@ export default function UserFeedReportTable() {
                   </button>
                 </div>
               </div>
-              
+
               {/* Modal Content */}
               <div className="p-6 overflow-y-auto max-h-[60vh]">
                 <div className="space-y-6">
@@ -900,7 +894,7 @@ export default function UserFeedReportTable() {
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Users */}
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-3">Involved Users</h4>
@@ -945,7 +939,7 @@ export default function UserFeedReportTable() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Content Preview */}
                   {viewDetails.target?.contentUrl && (
                     <div>
@@ -985,7 +979,7 @@ export default function UserFeedReportTable() {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Description */}
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-3">Report Details</h4>
@@ -1006,7 +1000,7 @@ export default function UserFeedReportTable() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Modal Footer */}
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
                 <div className="flex justify-end gap-3">

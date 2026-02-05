@@ -56,29 +56,29 @@ const userPostService = {
         }
       });
 
-   console.log(response.data)
-      
+      console.log(response.data)
+
       return response.data;
     } catch (error) {
       console.error('Error fetching users:', error);
       throw error.response?.data || error;
     }
   },
-  
+
   // Update user post permission status
   updateUserPostStatus: async (userId, allowToPost) => {
     try {
       const response = await api.put(`/api/update/user/post/status/${userId}`, {
         allowToPost
       });
-      
+
       return response.data;
     } catch (error) {
       console.error('Error updating user status:', error);
       throw error.response?.data || error;
     }
   },
-  
+
 
 };
 
@@ -148,12 +148,12 @@ const UsersWillingToPost = () => {
       };
 
       const response = await userPostService.getUsersWillingToPost(params);
-      
+
       if (response.success) {
         setUsers(response.users || []);
         setFilteredUsers(response.users || []);
         setTotalUsers(response.total || 0);
-        
+
         // Extract unique values for filters
         extractFilterOptions(response.users || []);
       } else {
@@ -171,7 +171,7 @@ const UsersWillingToPost = () => {
   const extractFilterOptions = (data) => {
     const countries = new Set();
     const cities = new Set();
-    
+
     data.forEach(user => {
       if (user.profile?.country) {
         countries.add(user.profile.country);
@@ -296,21 +296,21 @@ const UsersWillingToPost = () => {
   // Calculate time since last active
   const getTimeSince = (dateString) => {
     if (!dateString) return 'Never';
-    
+
     const now = new Date();
     const lastActive = new Date(dateString);
     const diffInMinutes = Math.floor((now - lastActive) / (1000 * 60));
     const diffInHours = Math.floor(diffInMinutes / 60);
     const diffInDays = Math.floor(diffInHours / 24);
-    
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
     if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
     if (diffInDays < 30) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-    
+
     const diffInMonths = Math.floor(diffInDays / 30);
     if (diffInMonths < 12) return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
-    
+
     const diffInYears = Math.floor(diffInMonths / 12);
     return `${diffInYears} year${diffInYears > 1 ? 's' : ''} ago`;
   };
@@ -334,19 +334,19 @@ const UsersWillingToPost = () => {
 
   const confirmUpdateStatus = async () => {
     if (!selectedUser || !newStatus) return;
-    
+
     try {
       const response = await userPostService.updateUserPostStatus(selectedUser._id, newStatus);
-      
+
       if (response.success) {
         // Update user in state
-        setUsers(prev => prev.map(user => 
+        setUsers(prev => prev.map(user =>
           user._id === selectedUser._id ? { ...user, allowToPost: newStatus } : user
         ));
-        setFilteredUsers(prev => prev.map(user => 
+        setFilteredUsers(prev => prev.map(user =>
           user._id === selectedUser._id ? { ...user, allowToPost: newStatus } : user
         ));
-        
+
         setSuccessMessage(`Successfully updated ${selectedUser.userName}'s post permission to ${newStatus}`);
         setShowStatusModal(false);
         setSelectedUser(null);
@@ -362,15 +362,15 @@ const UsersWillingToPost = () => {
 
   const confirmDelete = async () => {
     if (!selectedUser) return;
-    
+
     try {
       const response = await userPostService.deleteUser(selectedUser._id);
-      
+
       if (response.success) {
         // Remove user from state
         setUsers(prev => prev.filter(user => user._id !== selectedUser._id));
         setFilteredUsers(prev => prev.filter(user => user._id !== selectedUser._id));
-        
+
         setSuccessMessage(`Successfully deleted user ${selectedUser.userName}`);
         setShowDeleteModal(false);
         setSelectedUser(null);
@@ -421,7 +421,7 @@ const UsersWillingToPost = () => {
       enterprise: 'bg-indigo-100 text-indigo-800',
       free: 'bg-gray-100 text-gray-800'
     };
-    
+
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[type] || 'bg-gray-100 text-gray-800'}`}>
         {type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Free'}
@@ -468,14 +468,7 @@ const UsersWillingToPost = () => {
                 {totalUsers} {totalUsers === 1 ? 'user' : 'users'} interested in posting content
               </p>
             </div>
-            <button
-              onClick={fetchUsers}
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FaSync className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
+
           </div>
         </div>
 
@@ -666,11 +659,10 @@ const UsersWillingToPost = () => {
             <button
               onClick={() => handleSortChange('createdAt')}
               disabled={loading}
-              className={`px-3 py-1 text-sm rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''} ${
-                sortBy === 'createdAt'
+              className={`px-3 py-1 text-sm rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''} ${sortBy === 'createdAt'
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-gray-600 hover:bg-gray-100'
-              }`}
+                }`}
             >
               <FaCalendarAlt className="inline mr-1" />
               Newest {sortBy === 'createdAt' && (sortOrder === 'desc' ? '↓' : '↑')}
@@ -678,11 +670,10 @@ const UsersWillingToPost = () => {
             <button
               onClick={() => handleSortChange('lastActiveAt')}
               disabled={loading}
-              className={`px-3 py-1 text-sm rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''} ${
-                sortBy === 'lastActiveAt'
+              className={`px-3 py-1 text-sm rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''} ${sortBy === 'lastActiveAt'
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-gray-600 hover:bg-gray-100'
-              }`}
+                }`}
             >
               Last Active {sortBy === 'lastActiveAt' && (sortOrder === 'desc' ? '↓' : '↑')}
             </button>
@@ -954,7 +945,7 @@ const UsersWillingToPost = () => {
                     <FaTimes className="h-5 w-5" />
                   </button>
                 </div>
-                
+
                 <div className="space-y-6">
                   {/* Profile Header */}
                   <div className="flex items-start space-x-4">
@@ -1162,11 +1153,10 @@ const UsersWillingToPost = () => {
                   <button
                     onClick={confirmUpdateStatus}
                     disabled={loading}
-                    className={`px-4 py-2 text-white rounded-lg hover:opacity-90 transition-colors flex items-center ${
-                      newStatus === 'allow' ? 'bg-green-600' :
-                      newStatus === 'interest' ? 'bg-yellow-600' :
-                      'bg-red-600'
-                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`px-4 py-2 text-white rounded-lg hover:opacity-90 transition-colors flex items-center ${newStatus === 'allow' ? 'bg-green-600' :
+                        newStatus === 'interest' ? 'bg-yellow-600' :
+                          'bg-red-600'
+                      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {loading ? (
                       <>

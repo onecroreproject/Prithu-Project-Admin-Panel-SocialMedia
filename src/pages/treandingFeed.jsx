@@ -56,22 +56,22 @@ export default function TrendingFeedsTable() {
   });
   const [selectedFeed, setSelectedFeed] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-  
+
   // Fetch trending feeds
   const { data: apiResponse, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['trendingFeeds', filters],
     queryFn: () => fetchTrendingFeeds(filters),
     staleTime: 30000, // 30 seconds
   });
-  
+
   console.log("API Response:", apiResponse);
   const trendingFeeds = apiResponse?.data || [];
-  
+
   // Handle filter changes
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
-  
+
   const handleSort = (column) => {
     if (filters.sortBy === column) {
       setFilters(prev => ({
@@ -86,7 +86,7 @@ export default function TrendingFeedsTable() {
       }));
     }
   };
-  
+
   const clearFilters = () => {
     setFilters({
       type: 'all',
@@ -96,7 +96,7 @@ export default function TrendingFeedsTable() {
       limit: 20
     });
   };
-  
+
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -107,19 +107,19 @@ export default function TrendingFeedsTable() {
       year: 'numeric'
     });
   };
-  
+
   const formatTimeAgo = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now - date;
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    
+
     if (diffHours < 1) return 'Just now';
     if (diffHours < 24) return `${diffHours}h ago`;
     return `${Math.floor(diffHours / 24)}d ago`;
   };
-  
+
   // Get trending badge color
   const getTrendingBadge = (trendingScore) => {
     if (trendingScore > 400) return 'bg-gradient-to-r from-red-500 to-orange-500 text-white';
@@ -127,29 +127,29 @@ export default function TrendingFeedsTable() {
     if (trendingScore > 100) return 'bg-gradient-to-r from-yellow-500 to-green-500 text-white';
     return 'bg-gradient-to-r from-blue-500 to-purple-500 text-white';
   };
-  
+
   // Format large numbers
   const formatNumber = (num) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
   };
-  
+
   // Sort feeds based on current sort settings
   const sortedFeeds = [...trendingFeeds].sort((a, b) => {
     const aValue = a[filters.sortBy] || a.trendingScore || 0;
     const bValue = b[filters.sortBy] || b.trendingScore || 0;
-    
+
     if (filters.sortOrder === 'asc') {
       return aValue - bValue;
     }
     return bValue - aValue;
   });
-  
+
   // Search filter
   const filteredFeeds = sortedFeeds.filter(feed => {
     if (!filters.search) return true;
-    
+
     const searchTerm = filters.search.toLowerCase();
     return (
       (feed.createdBy?.userName?.toLowerCase().includes(searchTerm)) ||
@@ -157,7 +157,7 @@ export default function TrendingFeedsTable() {
       (feed.type?.toLowerCase().includes(searchTerm))
     );
   });
-  
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -168,7 +168,7 @@ export default function TrendingFeedsTable() {
       </div>
     );
   }
-  
+
   if (isError) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
@@ -186,7 +186,7 @@ export default function TrendingFeedsTable() {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -210,19 +210,13 @@ export default function TrendingFeedsTable() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => refetch()}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors"
-            >
-              <FaSync className="w-4 h-4" /> Refresh
-            </button>
             <span className="text-sm text-gray-500">
               {new Date().toLocaleDateString()}
             </span>
           </div>
         </div>
       </div>
-      
+
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex flex-col md:flex-row gap-4">
@@ -239,7 +233,7 @@ export default function TrendingFeedsTable() {
               />
             </div>
           </div>
-          
+
           {/* Type Filter */}
           <div className="w-full md:w-48">
             <select
@@ -252,7 +246,7 @@ export default function TrendingFeedsTable() {
               <option value="video">Videos</option>
             </select>
           </div>
-          
+
           {/* Sort By */}
           <div className="w-full md:w-48">
             <select
@@ -268,7 +262,7 @@ export default function TrendingFeedsTable() {
               <option value="createdAt">Date Posted</option>
             </select>
           </div>
-          
+
           {/* Clear Filters */}
           <button
             onClick={clearFilters}
@@ -278,7 +272,7 @@ export default function TrendingFeedsTable() {
           </button>
         </div>
       </div>
-      
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4">
@@ -292,7 +286,7 @@ export default function TrendingFeedsTable() {
             <FaEye className="text-orange-500 text-xl" />
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -304,7 +298,7 @@ export default function TrendingFeedsTable() {
             <FaHeart className="text-red-500 text-xl" />
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -316,7 +310,7 @@ export default function TrendingFeedsTable() {
             <FaShare className="text-green-500 text-xl" />
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -329,7 +323,7 @@ export default function TrendingFeedsTable() {
           </div>
         </div>
       </div>
-      
+
       {/* Trending Feeds Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
@@ -342,7 +336,7 @@ export default function TrendingFeedsTable() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Content
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort('trendingScore')}
                 >
@@ -353,7 +347,7 @@ export default function TrendingFeedsTable() {
                     )}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort('views')}
                 >
@@ -364,7 +358,7 @@ export default function TrendingFeedsTable() {
                     )}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort('likes')}
                 >
@@ -375,7 +369,7 @@ export default function TrendingFeedsTable() {
                     )}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort('shares')}
                 >
@@ -386,7 +380,7 @@ export default function TrendingFeedsTable() {
                     )}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort('createdAt')}
                 >
@@ -427,24 +421,22 @@ export default function TrendingFeedsTable() {
                     {/* Rank */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                          index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white' :
-                          index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                          index === 2 ? 'bg-gradient-to-r from-amber-600 to-amber-800 text-white' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white' :
+                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                              index === 2 ? 'bg-gradient-to-r from-amber-600 to-amber-800 text-white' :
+                                'bg-gray-100 text-gray-700'
+                          }`}>
                           {index + 1}
                         </div>
                         {index < 3 && (
-                          <FaCrown className={`mt-1 ${
-                            index === 0 ? 'text-yellow-500' :
-                            index === 1 ? 'text-gray-400' :
-                            'text-amber-700'
-                          }`} />
+                          <FaCrown className={`mt-1 ${index === 0 ? 'text-yellow-500' :
+                              index === 1 ? 'text-gray-400' :
+                                'text-amber-700'
+                            }`} />
                         )}
                       </div>
                     </td>
-                    
+
                     {/* Content */}
                     <td className="px-6 py-4">
                       <div className="flex items-start gap-3">
@@ -490,7 +482,7 @@ export default function TrendingFeedsTable() {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <div className="flex items-center gap-2">
@@ -510,11 +502,11 @@ export default function TrendingFeedsTable() {
                               </span>
                             </div>
                           </div>
-                          
+
                           <div className="text-xs text-gray-500 mb-2">
                             ID: {feed.feedId?.slice(0, 8) || 'N/A'}...
                           </div>
-                          
+
                           <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${getTrendingBadge(feed.trendingScore || 0)}`}>
                             <FaFire className="w-3 h-3" />
                             {feed.trendingScore || 0} pts
@@ -522,7 +514,7 @@ export default function TrendingFeedsTable() {
                         </div>
                       </div>
                     </td>
-                    
+
                     {/* Trend Score */}
                     <td className="px-6 py-4">
                       <div className="space-y-1">
@@ -535,7 +527,7 @@ export default function TrendingFeedsTable() {
                         </div>
                       </div>
                     </td>
-                    
+
                     {/* Views */}
                     <td className="px-6 py-4">
                       <div className="space-y-1">
@@ -553,7 +545,7 @@ export default function TrendingFeedsTable() {
                         )}
                       </div>
                     </td>
-                    
+
                     {/* Likes */}
                     <td className="px-6 py-4">
                       <div className="space-y-1">
@@ -565,7 +557,7 @@ export default function TrendingFeedsTable() {
                         </div>
                       </div>
                     </td>
-                    
+
                     {/* Shares */}
                     <td className="px-6 py-4">
                       <div className="space-y-1">
@@ -577,7 +569,7 @@ export default function TrendingFeedsTable() {
                         </div>
                       </div>
                     </td>
-                    
+
                     {/* Posted */}
                     <td className="px-6 py-4">
                       <div className="space-y-1">
@@ -591,7 +583,7 @@ export default function TrendingFeedsTable() {
                         )}
                       </div>
                     </td>
-                    
+
                     {/* Actions */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -605,7 +597,7 @@ export default function TrendingFeedsTable() {
                         >
                           <FaEye className="w-4 h-4" />
                         </button>
-                        
+
                         {feed.contentUrl && (
                           <button
                             onClick={() => window.open(feed.contentUrl, '_blank')}
@@ -615,7 +607,7 @@ export default function TrendingFeedsTable() {
                             <FaExternalLinkAlt className="w-4 h-4" />
                           </button>
                         )}
-                        
+
                         <button
                           onClick={() => alert(`Would send notification to ${feed.createdBy?.userName} about trending performance`)}
                           className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
@@ -623,7 +615,7 @@ export default function TrendingFeedsTable() {
                         >
                           <FaChartLine className="w-4 h-4" />
                         </button>
-                        
+
                         <button
                           onClick={() => alert(`Would boost or hide feed ${feed.feedId}`)}
                           className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
@@ -639,7 +631,7 @@ export default function TrendingFeedsTable() {
             </tbody>
           </table>
         </div>
-        
+
         {/* Table Footer */}
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -651,7 +643,7 @@ export default function TrendingFeedsTable() {
                 </span>
               )}
             </div>
-            
+
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-700">Show:</span>
@@ -666,7 +658,7 @@ export default function TrendingFeedsTable() {
                   <option value={100}>100</option>
                 </select>
               </div>
-              
+
               <div className="text-sm text-gray-700">
                 Sorted by: <span className="font-semibold capitalize">{filters.sortBy}</span>
                 <span className="ml-1">{filters.sortOrder === 'desc' ? '↓' : '↑'}</span>
@@ -675,7 +667,7 @@ export default function TrendingFeedsTable() {
           </div>
         </div>
       </div>
-      
+
       {/* Feed Preview Modal */}
       <AnimatePresence>
         {showPreview && selectedFeed && (
@@ -715,7 +707,7 @@ export default function TrendingFeedsTable() {
                   </button>
                 </div>
               </div>
-              
+
               {/* Modal Content */}
               <div className="flex-1 overflow-y-auto">
                 <div className="p-6">
@@ -747,7 +739,7 @@ export default function TrendingFeedsTable() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex justify-center gap-3">
                         {selectedFeed.contentUrl && (
                           <button
@@ -765,7 +757,7 @@ export default function TrendingFeedsTable() {
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* Right: Stats & Info */}
                     <div className="space-y-6">
                       {/* Creator Info */}
@@ -788,7 +780,7 @@ export default function TrendingFeedsTable() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Engagement Stats */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <h4 className="text-sm font-medium text-gray-700 mb-3">Engagement Statistics</h4>
@@ -800,7 +792,7 @@ export default function TrendingFeedsTable() {
                             </div>
                             <p className="text-2xl font-bold text-gray-900">{formatNumber(selectedFeed.views || 0)}</p>
                           </div>
-                          
+
                           <div className="bg-white p-3 rounded-lg border border-gray-200">
                             <div className="flex items-center gap-2 mb-1">
                               <FaHeart className="text-red-500" />
@@ -808,7 +800,7 @@ export default function TrendingFeedsTable() {
                             </div>
                             <p className="text-2xl font-bold text-gray-900">{formatNumber(selectedFeed.likes || 0)}</p>
                           </div>
-                          
+
                           <div className="bg-white p-3 rounded-lg border border-gray-200">
                             <div className="flex items-center gap-2 mb-1">
                               <FaShare className="text-green-500" />
@@ -816,7 +808,7 @@ export default function TrendingFeedsTable() {
                             </div>
                             <p className="text-2xl font-bold text-gray-900">{formatNumber(selectedFeed.shares || 0)}</p>
                           </div>
-                          
+
                           <div className="bg-white p-3 rounded-lg border border-gray-200">
                             <div className="flex items-center gap-2 mb-1">
                               <FaDownload className="text-purple-500" />
@@ -826,7 +818,7 @@ export default function TrendingFeedsTable() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Trending Info */}
                       <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-200">
                         <h4 className="text-sm font-medium text-gray-700 mb-3">Trending Analysis</h4>
@@ -837,21 +829,21 @@ export default function TrendingFeedsTable() {
                               {selectedFeed.trendingScore || 0}
                             </span>
                           </div>
-                          
+
                           <div className="flex justify-between items-center">
                             <span className="text-gray-600">Content Type:</span>
                             <span className="font-medium capitalize">
                               {selectedFeed.type}
                             </span>
                           </div>
-                          
+
                           <div className="flex justify-between items-center">
                             <span className="text-gray-600">Feed ID:</span>
                             <span className="font-medium text-sm">
                               {selectedFeed.feedId?.slice(0, 8)}...
                             </span>
                           </div>
-                          
+
                           {selectedFeed.lastViewed && (
                             <div className="flex justify-between items-center">
                               <span className="text-gray-600">Last Viewed:</span>
@@ -860,7 +852,7 @@ export default function TrendingFeedsTable() {
                               </span>
                             </div>
                           )}
-                          
+
                           <div className="flex justify-between items-center">
                             <span className="text-gray-600">Created:</span>
                             <span className="font-medium">
@@ -873,7 +865,7 @@ export default function TrendingFeedsTable() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Modal Footer */}
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
                 <div className="flex justify-end gap-3">

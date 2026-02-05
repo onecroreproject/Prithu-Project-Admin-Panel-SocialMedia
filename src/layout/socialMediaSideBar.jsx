@@ -61,7 +61,6 @@ const mainNavItems = [
     permission: "canManageFeeds",
     subItems: [
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
-      { name: "Frame Upload", path: "/social/frame/upload/page", permission: "canManageFrames" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
     ],
   },
@@ -81,8 +80,6 @@ const mainNavItems = [
       { name: "Dashboard", path: "/settings/dashboard", permission: "canViewSettingsDashboard" },
       { name: "ChildAdmin Creation", path: "/settings/child/admin/page", permission: "canManageChildAdminsCreation" },
       { name: "Admin Roles", path: "/settings/admin/roles", permission: "canManageAdminRoles" },
-      { name: "Permissions", path: "/settings/admin/permissions", permission: "canManagePermissions" },
-      { name: "Studio", path: "/settings/admin/studio", permission: "canManageStudio" },
     ],
   },
   {
@@ -120,12 +117,6 @@ const mainNavItems = [
       { name: "User Feedbacks", path: "/settings/reportandfeedback/management", permission: "canManageUserFeedbacks" },
       { name: "Company Info", path: "/settings/company/info", permission: "canViewSystemLogs" },
     ],
-  },
-  {
-    icon: <HardDrive className="w-5 h-5" />,
-    name: "Manage Drive",
-    path: "/drive/dashboard",
-    permission: "canManageGoogleDrive",
   },
 ];
 
@@ -565,12 +556,7 @@ const SocialMediaSidebar = ({ user }) => {
                   exit="hidden"
                   className="flex flex-col"
                 >
-                  <p className="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                    Social Media
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Main Portal
-                  </p>
+                  {/* Content removed per request */}
                 </motion.div>
               )}
             </AnimatePresence>

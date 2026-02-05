@@ -4,9 +4,9 @@ import { useState, useMemo } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "../../icons";
-import { 
-  FiTrendingUp, 
-  FiTrendingDown, 
+import {
+  FiTrendingUp,
+  FiTrendingDown,
   FiUsers,
   FiUserCheck,
   FiUserX,
@@ -115,8 +115,8 @@ export default function UserRegistrationRatio() {
       fontFamily: "Inter, -apple-system, sans-serif",
       type: "bar",
       height: 220,
-      toolbar: { 
-        show: false 
+      toolbar: {
+        show: false
       },
       animations: {
         enabled: true,
@@ -140,7 +140,7 @@ export default function UserRegistrationRatio() {
     },
     dataLabels: {
       enabled: true,
-      formatter: function(val) {
+      formatter: function (val) {
         return val > 0 ? val : "";
       },
       offsetY: -20,
@@ -184,8 +184,8 @@ export default function UserRegistrationRatio() {
           colors: "#6b7280",
           fontSize: "11px"
         },
-        formatter: function(val) {
-          return val >= 1000 ? (val/1000).toFixed(0) + 'k' : val;
+        formatter: function (val) {
+          return val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val;
         }
       },
       min: 0
@@ -227,17 +227,17 @@ export default function UserRegistrationRatio() {
         fontFamily: "Inter, sans-serif"
       },
       y: {
-        formatter: function(val) {
+        formatter: function (val) {
           return val + " users";
         },
         title: {
-          formatter: function(seriesName) {
+          formatter: function (seriesName) {
             return seriesName + ":";
           }
         }
       },
       x: {
-        formatter: function(val) {
+        formatter: function (val) {
           return val + " " + processedData.currentYear;
         }
       }
@@ -320,8 +320,8 @@ export default function UserRegistrationRatio() {
   }
 
   const ViewIcon = getViewIcon();
-  const growthIcon = parseFloat(processedData.totals.avgGrowth) >= 0 ? 
-    <FiTrendingUp className="text-emerald-500" /> : 
+  const growthIcon = parseFloat(processedData.totals.avgGrowth) >= 0 ?
+    <FiTrendingUp className="text-emerald-500" /> :
     <FiTrendingDown className="text-red-500" />;
 
   return (
@@ -342,7 +342,7 @@ export default function UserRegistrationRatio() {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {/* View Mode Selector */}
             <div className="flex bg-gray-100 p-1 rounded-lg">
@@ -356,11 +356,10 @@ export default function UserRegistrationRatio() {
                   <button
                     key={item.id}
                     onClick={() => handleViewChange(item.id)}
-                    className={`p-2 rounded-md flex items-center gap-1.5 text-sm transition-all ${
-                      viewMode === item.id
+                    className={`p-2 rounded-md flex items-center gap-1.5 text-sm transition-all ${viewMode === item.id
                         ? "bg-white text-blue-600 shadow-sm"
                         : "text-gray-600 hover:text-gray-800"
-                    }`}
+                      }`}
                     title={item.label === "Reg" ? "Registrations" : item.label}
                   >
                     <Icon className="text-base" />
@@ -372,16 +371,16 @@ export default function UserRegistrationRatio() {
 
             {/* Dropdown Menu */}
             <div className="relative inline-block">
-              <button 
+              <button
                 onClick={toggleDropdown}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 aria-label="More options"
               >
                 <MoreDotIcon className="text-gray-400 hover:text-gray-700 size-5" />
               </button>
-              <Dropdown 
-                isOpen={isOpen} 
-                onClose={closeDropdown} 
+              <Dropdown
+                isOpen={isOpen}
+                onClose={closeDropdown}
                 className="w-48 p-2 shadow-lg border border-gray-200"
               >
                 <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -391,24 +390,17 @@ export default function UserRegistrationRatio() {
                   <DropdownItem
                     key={range}
                     onItemClick={() => handleTimeRangeChange(range.toLowerCase())}
-                    className={`flex items-center gap-2 p-2 rounded-md text-sm ${
-                      timeRange === range.toLowerCase()
+                    className={`flex items-center gap-2 p-2 rounded-md text-sm ${timeRange === range.toLowerCase()
                         ? "bg-blue-50 text-blue-600"
                         : "text-gray-700 hover:bg-gray-100"
-                    }`}
+                      }`}
                   >
                     <FiCalendar />
                     {range} View
                   </DropdownItem>
                 ))}
                 <div className="border-t border-gray-200 my-2"></div>
-                <DropdownItem
-                  onItemClick={() => refetch()}
-                  className="flex items-center gap-2 p-2 rounded-md text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  <FiRefreshCw />
-                  Refresh Data
-                </DropdownItem>
+
               </Dropdown>
             </div>
           </div>
@@ -445,14 +437,14 @@ export default function UserRegistrationRatio() {
       {/* Chart Section */}
       <div className="p-4 sm:p-6">
         <div className="relative">
-          <Chart 
-            options={chartOptions} 
-            series={chartSeries} 
-            type="bar" 
-            height={220} 
+          <Chart
+            options={chartOptions}
+            series={chartSeries}
+            type="bar"
+            height={220}
             className="w-full"
           />
-          
+
           {/* Current Month Highlight */}
           <div className="absolute top-0 right-4 bg-blue-50 border border-blue-100 rounded-lg px-3 py-1.5">
             <div className="text-xs text-blue-700 font-medium">
@@ -467,12 +459,11 @@ export default function UserRegistrationRatio() {
             {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((month, index) => (
               <button
                 key={month}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap ${
-                  index === new Date().getMonth()
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap ${index === new Date().getMonth()
                     ? "bg-blue-100 text-blue-700"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-                onClick={() => {/* Scroll to month */}}
+                  }`}
+                onClick={() => {/* Scroll to month */ }}
               >
                 {month}
               </button>

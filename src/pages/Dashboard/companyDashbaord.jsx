@@ -1,10 +1,10 @@
 // CompanyDashboard.jsx - Platform Monitoring Dashboard
 import { useEffect, useState } from "react";
 import api from "../../Utils/axiosApi";
-import { 
-  BarChart3, 
-  Users, 
-  Briefcase, 
+import {
+  BarChart3,
+  Users,
+  Briefcase,
   TrendingUp,
   FileText,
   Building,
@@ -63,7 +63,7 @@ const CompanyDashboard = () => {
     if (!date) return "Never";
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     let interval = seconds / 31536000;
-    
+
     if (interval > 1) return Math.floor(interval) + " years ago";
     interval = seconds / 2592000;
     if (interval > 1) return Math.floor(interval) + " months ago";
@@ -92,12 +92,12 @@ const CompanyDashboard = () => {
 
         // Fetch platform monitoring stats
         const statsRes = await api.get('/api/get/comapany/status');
-        
+
         console.log("Platform Monitoring API Response:", statsRes.data);
 
         if (statsRes.data?.success) {
           const apiData = statsRes.data.data;
-          console.log( apiData.totalApplications)
+          console.log(apiData.totalApplications)
           // Set main stats
           setStats({
             activeJobs: apiData.activeJobs || 0,
@@ -108,14 +108,14 @@ const CompanyDashboard = () => {
             pendingReviews: Math.floor((apiData.pendingJobApproval || 0) * 0.7), // 70% need review
             rejectedJobs: Math.floor((apiData.pendingJobApproval || 0) * 0.1), // 10% rejected
             approvedToday: Math.floor((apiData.pendingJobApproval || 0) * 0.2), // 20% approved today
-            updateJobs: apiData.updatedJobs  || 0
+            updateJobs: apiData.updatedJobs || 0
           });
 
           // Calculate platform metrics
-          const approvalRate = apiData.activeJobs > 0 
+          const approvalRate = apiData.activeJobs > 0
             ? Math.round((apiData.activeJobs / (apiData.activeJobs + (apiData.pendingJobApproval || 0))) * 100)
             : 0;
-          
+
           const avgResponseTime = 24; // hours
           const activeCompanies = Math.floor((apiData.totalCompanies || 0) * 0.8); // 80% active
           const dailyApplications = Math.floor((apiData.totalApplications || 0) / 30); // Average daily
@@ -129,69 +129,69 @@ const CompanyDashboard = () => {
 
           // Generate monitoring activity
           const generatedActivity = apiData.pendingJobApproval > 0 ? [
-            { 
-              id: 1, 
-              action: "Jobs Pending Approval", 
-              details: `${apiData.pendingJobApproval} job postings require review`, 
-              time: "Now", 
-              icon: <AlertCircle className="w-4 h-4" />, 
+            {
+              id: 1,
+              action: "Jobs Pending Approval",
+              details: `${apiData.pendingJobApproval} job postings require review`,
+              time: "Now",
+              icon: <AlertCircle className="w-4 h-4" />,
               color: "bg-amber-100 text-amber-600",
               priority: "high",
               type: "approval"
             },
-            { 
-              id: 2, 
-              action: "Platform Active", 
-              details: `${apiData.activeJobs} live jobs | ${apiData.totalApplications} total applications`, 
-              time: "Today", 
-              icon: <BarChart3 className="w-4 h-4" />, 
+            {
+              id: 2,
+              action: "Platform Active",
+              details: `${apiData.activeJobs} live jobs | ${apiData.totalApplications} total applications`,
+              time: "Today",
+              icon: <BarChart3 className="w-4 h-4" />,
               color: "bg-blue-100 text-blue-600",
               priority: "medium",
               type: "monitoring"
             },
-            { 
-              id: 3, 
-              action: "Companies Registered", 
-              details: `${apiData.totalCompanies} companies on platform`, 
-              time: "Today", 
-              icon: <Building className="w-4 h-4" />, 
+            {
+              id: 3,
+              action: "Companies Registered",
+              details: `${apiData.totalCompanies} companies on platform`,
+              time: "Today",
+              icon: <Building className="w-4 h-4" />,
               color: "bg-green-100 text-green-600",
               priority: "low",
               type: "monitoring"
             },
-            { 
-              id: 4, 
-              action: "Successful Matches", 
-              details: `${apiData.totalHires} candidates hired through platform`, 
-              time: "This month", 
-              icon: <CheckCircle className="w-4 h-4" />, 
+            {
+              id: 4,
+              action: "Successful Matches",
+              details: `${apiData.totalHires} candidates hired through platform`,
+              time: "This month",
+              icon: <CheckCircle className="w-4 h-4" />,
               color: "bg-emerald-100 text-emerald-600",
               priority: "medium",
               type: "success"
             },
           ] : [
-            { 
-              id: 1, 
-              action: "All Caught Up", 
-              details: "No pending approvals at this time", 
-              time: "Now", 
-              icon: <CheckCircle className="w-4 h-4" />, 
+            {
+              id: 1,
+              action: "All Caught Up",
+              details: "No pending approvals at this time",
+              time: "Now",
+              icon: <CheckCircle className="w-4 h-4" />,
               color: "bg-emerald-100 text-emerald-600",
               priority: "low",
               type: "success"
             },
-            { 
-              id: 2, 
-              action: "Platform Monitoring", 
-              details: `${apiData.activeJobs} active jobs being monitored`, 
-              time: "Now", 
-              icon: <Eye className="w-4 h-4" />, 
+            {
+              id: 2,
+              action: "Platform Monitoring",
+              details: `${apiData.activeJobs} active jobs being monitored`,
+              time: "Now",
+              icon: <Eye className="w-4 h-4" />,
               color: "bg-blue-100 text-blue-600",
               priority: "medium",
               type: "monitoring"
             },
           ];
-          
+
           setRecentActivity(generatedActivity);
         } else {
           throw new Error("Invalid response format");
@@ -200,7 +200,7 @@ const CompanyDashboard = () => {
       } catch (error) {
         console.error("Error fetching monitoring data:", error);
         setError("Unable to load monitoring data. API endpoint may be unavailable.");
-        
+
         // Show empty state instead of demo data
         setStats({
           activeJobs: 0,
@@ -228,7 +228,7 @@ const CompanyDashboard = () => {
     };
 
     fetchDashboardData();
-    
+
     // Refresh data every 2 minutes for monitoring
     const interval = setInterval(fetchDashboardData, 120000);
     return () => clearInterval(interval);
@@ -298,21 +298,21 @@ const CompanyDashboard = () => {
       title: "Approval Rate",
       value: `${platformMetrics.approvalRate}%`,
       icon: <Percent className="w-5 h-5" />,
-      color: platformMetrics.approvalRate > 80 ? "bg-emerald-100 text-emerald-600" : 
-             platformMetrics.approvalRate > 60 ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600",
+      color: platformMetrics.approvalRate > 80 ? "bg-emerald-100 text-emerald-600" :
+        platformMetrics.approvalRate > 60 ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600",
       description: "Job approval success rate",
-      trend: platformMetrics.approvalRate > 80 ? "Excellent" : 
-             platformMetrics.approvalRate > 60 ? "Good" : "Needs improvement"
+      trend: platformMetrics.approvalRate > 80 ? "Excellent" :
+        platformMetrics.approvalRate > 60 ? "Good" : "Needs improvement"
     },
     {
       title: "Avg Response Time",
       value: `${platformMetrics.avgResponseTime}h`,
       icon: <Clock className="w-5 h-5" />,
-      color: platformMetrics.avgResponseTime < 12 ? "bg-emerald-100 text-emerald-600" : 
-             platformMetrics.avgResponseTime < 24 ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600",
+      color: platformMetrics.avgResponseTime < 12 ? "bg-emerald-100 text-emerald-600" :
+        platformMetrics.avgResponseTime < 24 ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600",
       description: "Average approval time",
-      trend: platformMetrics.avgResponseTime < 12 ? "Fast" : 
-             platformMetrics.avgResponseTime < 24 ? "Normal" : "Slow"
+      trend: platformMetrics.avgResponseTime < 12 ? "Fast" :
+        platformMetrics.avgResponseTime < 24 ? "Normal" : "Slow"
     },
     {
       title: "Successful Hires",
@@ -340,7 +340,7 @@ const CompanyDashboard = () => {
       medium: { color: "bg-amber-100 text-amber-800", text: "Medium" },
       low: { color: "bg-blue-100 text-blue-800", text: "Low" }
     };
-    
+
     return priorityConfig[priority] || priorityConfig.medium;
   };
 
@@ -399,8 +399,8 @@ const CompanyDashboard = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          
-          <select 
+
+          <select
             value={timeFilter}
             onChange={(e) => setTimeFilter(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
@@ -410,15 +410,8 @@ const CompanyDashboard = () => {
             <option value="month">This Month</option>
             <option value="all">All Time</option>
           </select>
-        
-          <button 
-            onClick={refreshData}
-            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-            disabled={loading}
-          >
-            <RefreshCw className={`w-4 h-4 text-gray-600 ${loading ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline text-sm">Refresh</span>
-          </button>
+
+
         </div>
       </div>
 
@@ -446,12 +439,7 @@ const CompanyDashboard = () => {
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No Activity to Monitor</h3>
           <p className="text-gray-600 mb-4">There are currently no jobs or approvals to monitor.</p>
-          <button 
-            onClick={refreshData}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Refresh Monitoring
-          </button>
+
         </div>
       )}
 
@@ -519,11 +507,10 @@ const CompanyDashboard = () => {
                     <p className="text-xl md:text-2xl font-bold">{stat.value}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 font-medium">{stat.title}</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{stat.description}</p>
-                    <p className={`text-xs mt-2 font-medium ${
-                      stat.trend === "Excellent" || stat.trend === "Fast" ? "text-emerald-600" :
-                      stat.trend === "Good" || stat.trend === "Normal" ? "text-blue-600" :
-                      "text-amber-600"
-                    }`}>
+                    <p className={`text-xs mt-2 font-medium ${stat.trend === "Excellent" || stat.trend === "Fast" ? "text-emerald-600" :
+                        stat.trend === "Good" || stat.trend === "Normal" ? "text-blue-600" :
+                          "text-amber-600"
+                      }`}>
                       {stat.trend}
                     </p>
                   </div>
@@ -532,7 +519,7 @@ const CompanyDashboard = () => {
             </div>
           </div>
 
-      
+
 
           {/* Approval Statistics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -555,7 +542,7 @@ const CompanyDashboard = () => {
                       </span>
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${platformMetrics.approvalRate}%` }}
                         transition={{ duration: 1, delay: 0.2 }}
@@ -566,7 +553,7 @@ const CompanyDashboard = () => {
                       {stats.activeJobs} approved of {stats.activeJobs + stats.pendingJobApproval} total
                     </p>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-gray-600 font-medium">Response Time</span>
@@ -575,21 +562,20 @@ const CompanyDashboard = () => {
                       </span>
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min(platformMetrics.avgResponseTime * 4, 100)}%` }}
                         transition={{ duration: 1, delay: 0.4 }}
-                        className={`h-full ${
-                          platformMetrics.avgResponseTime < 12 ? "bg-emerald-500" :
-                          platformMetrics.avgResponseTime < 24 ? "bg-blue-500" : "bg-amber-500"
-                        } rounded-full`}
+                        className={`h-full ${platformMetrics.avgResponseTime < 12 ? "bg-emerald-500" :
+                            platformMetrics.avgResponseTime < 24 ? "bg-blue-500" : "bg-amber-500"
+                          } rounded-full`}
                       />
                     </div>
                     <p className="text-xs text-gray-400 mt-2">
                       Average time to review and approve jobs
                     </p>
                   </div>
-                  
+
                   <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
                     <div className="grid grid-cols-3 gap-4">
                       <div className="text-center">
@@ -622,25 +608,25 @@ const CompanyDashboard = () => {
               <div className="p-4 md:p-5">
                 <div className="space-y-4">
                   {[
-                    { 
-                      label: "Job Posting System", 
-                      status: stats.activeJobs > 0 ? "operational" : "idle", 
-                      color: stats.activeJobs > 0 ? "bg-emerald-500" : "bg-gray-400" 
+                    {
+                      label: "Job Posting System",
+                      status: stats.activeJobs > 0 ? "operational" : "idle",
+                      color: stats.activeJobs > 0 ? "bg-emerald-500" : "bg-gray-400"
                     },
-                    { 
-                      label: "Approval System", 
-                      status: stats.pendingJobApproval > 0 ? "active" : "idle", 
-                      color: stats.pendingJobApproval > 0 ? "bg-blue-500" : "bg-gray-400" 
+                    {
+                      label: "Approval System",
+                      status: stats.pendingJobApproval > 0 ? "active" : "idle",
+                      color: stats.pendingJobApproval > 0 ? "bg-blue-500" : "bg-gray-400"
                     },
-                    { 
-                      label: "Company Registration", 
-                      status: stats.totalCompanies > 0 ? "operational" : "idle", 
-                      color: stats.totalCompanies > 0 ? "bg-emerald-500" : "bg-gray-400" 
+                    {
+                      label: "Company Registration",
+                      status: stats.totalCompanies > 0 ? "operational" : "idle",
+                      color: stats.totalCompanies > 0 ? "bg-emerald-500" : "bg-gray-400"
                     },
-                    { 
-                      label: "Application Processing", 
-                      status: stats.totalApplications > 0 ? "active" : "idle", 
-                      color: stats.totalApplications > 0 ? "bg-blue-500" : "bg-gray-400" 
+                    {
+                      label: "Application Processing",
+                      status: stats.totalApplications > 0 ? "active" : "idle",
+                      color: stats.totalApplications > 0 ? "bg-blue-500" : "bg-gray-400"
                     },
                   ].map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
@@ -648,29 +634,27 @@ const CompanyDashboard = () => {
                         <div className={`w-2 h-2 rounded-full ${item.color}`}></div>
                         <span className="text-sm text-gray-600">{item.label}</span>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        item.status === "operational" ? "bg-emerald-100 text-emerald-800" :
-                        item.status === "active" ? "bg-blue-100 text-blue-800" :
-                        "bg-gray-100 text-gray-800"
-                      }`}>
+                      <span className={`text-xs px-2 py-1 rounded-full ${item.status === "operational" ? "bg-emerald-100 text-emerald-800" :
+                          item.status === "active" ? "bg-blue-100 text-blue-800" :
+                            "bg-gray-100 text-gray-800"
+                        }`}>
                         {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                       </span>
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                   <div className="text-center">
                     <div className="inline-flex items-center gap-2 mb-2">
-                      <div className={`w-3 h-3 rounded-full ${
-                        stats.pendingJobApproval > 0 ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
-                      }`}></div>
+                      <div className={`w-3 h-3 rounded-full ${stats.pendingJobApproval > 0 ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
+                        }`}></div>
                       <p className="text-lg font-bold">
                         {stats.pendingJobApproval > 0 ? "Action Required" : "All Systems Normal"}
                       </p>
                     </div>
                     <p className="text-sm text-gray-500">
-                      {stats.pendingJobApproval > 0 
+                      {stats.pendingJobApproval > 0
                         ? `${stats.pendingJobApproval} jobs require approval attention`
                         : "Platform is operating normally"}
                     </p>
