@@ -24,6 +24,7 @@ import UploadPage from "./pages/uploadPage";
 import UserProfiles from "./pages/UserProfile/UserProfiles";
 import UserProfilePage from "./pages/UserProfile/userProfilePage";
 import IndividualUserProfilePage from "./pages/UserProfile/UserAnalitical/individualUserProfilePage";
+import UserAnalytics from "./pages/UserProfile/UserAnalitical/userAnaliticalPage";
 import ReferralTreePage from "./pages/userTree";
 import CreatorTable from "./components/tables/UserTabel/creatorTable";
 import TrendingCreatorsPage from "./pages/trendingCreator";
@@ -119,6 +120,7 @@ function AnimatedRoutes() {
           {/* User Management */}
           <Route path="/social/profile" element={<UserProfilePage />} />
           <Route path="/social/individual/user/profile/:id" element={<IndividualUserProfilePage />} />
+          <Route path="/social/user/analitical/page/:userId" element={<UserAnalytics />} />
           <Route path="/social/referal/tree/page/:userId" element={<ReferralTreePage />} />
           <Route path="/social/tree" element={<ReferralTreePage />} />
           <Route path="/social/trending/feed" element={<TrendingFeedsTable />} />

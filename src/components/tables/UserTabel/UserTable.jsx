@@ -1,9 +1,37 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, Ban, Trash2, User, Calendar, Clock, Shield, FileText, Users, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, X, Filter, Check, Phone } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Download,
+  MoreVertical,
+  Trash2,
+  User,
+  Check,
+  AlertCircle,
+  Ban,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  ShieldAlert,
+  Smartphone,
+  CheckCircle,
+  FileDown,
+  Calendar,
+  Clock,
+  Phone,
+  Shield,
+  Users,
+  ChevronsLeft,
+  ChevronsRight,
+  X,
+  Eye,
+  FileText
+} from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router";
-import { fetchUsers, blockUser, deleteUser, searchUsers } from "../../../Services/UserServices/userServices.js";
+import { useNavigate } from "react-router-dom";
+import { fetchUsers, searchUsers, deleteUser, blockUser } from "../../../Services/UserServices/userServices";
+import { exportToCSV } from "../../../Utils/exportUtils";
 
 // Pagination hook
 function usePagination(items = [], itemsPerPage = 10) {
@@ -404,6 +432,45 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
     },
   });
 
+  // Handle Export to CSV
+  const handleExport = () => {
+    if (!filteredUsers || filteredUsers.length === 0) {
+      toast.error("No users found to export");
+      return;
+    }
+
+    const headers = [
+      { label: "Name", key: "userName" },
+      { label: "Email", key: "email" },
+      { label: "Phone", key: "phoneNumber" },
+      { label: "Gender", key: "gender" },
+      { label: "Status", key: "status" },
+      { label: "Trial Status", key: "trialStatus" },
+      { label: "Trial Used", key: "trialUsed" },
+      { label: "Online Status", key: "isOnline" },
+      { label: "Subscription Active", key: "subscriptionActive" },
+      { label: "Registered At", key: "createdAt" },
+      { label: "Referral Code", key: "referralCode" },
+    ];
+
+    // Map data to handle boolean displays or formatting if needed
+    const dataToExport = filteredUsers.map(user => ({
+      ...user,
+      userName: user.userName || "N/A",
+      phoneNumber: user.phone || user.phoneNumber || "N/A",
+      gender: user.gender || "N/A",
+      referralCode: user.referralCode || user.referalCode || user.referealCode || "N/A",
+      status: user.isBlocked ? "Blocked" : (user.isOnline ? "Active" : "Inactive"),
+      trialUsed: user.trialUsed ? "Yes" : "No",
+      isOnline: user.isOnline ? "Online" : "Offline",
+      subscriptionActive: user.subscriptionActive ? "Active" : "Inactive",
+      createdAt: formatDate(user.createdAt)
+    }));
+
+    exportToCSV(dataToExport, "User_Directory", headers);
+    toast.success("Users exported successfully");
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -514,208 +581,218 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
                 <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
               )}
             </button>
+          </div>
 
-            {/* Filter Dropdown */}
-            {isFilterOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                <div className="py-1 max-h-96 overflow-y-auto">
-                  {/* Active Filters Info */}
-                  {isFilterActive && (
-                    <div className="px-4 py-2 bg-blue-50 border-b border-blue-100">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-blue-700">Active Filters</span>
-                        <button
-                          onClick={handleClearAllFilters}
-                          className="text-xs text-blue-600 hover:text-blue-800"
-                        >
-                          Clear All
-                        </button>
-                      </div>
-                    </div>
-                  )}
+          {/* Export Button */}
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            title="Export to CSV"
+          >
+            <FileDown className="w-5 h-5 text-gray-500" />
+            <span className="text-sm font-medium">Export</span>
+          </button>
 
-                  {/* Status Filter */}
-                  <div className="px-4 py-2">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Status</h4>
-                    <div className="space-y-2">
-                      {["active", "inactive", "blocked", "suspended"].map((status) => (
-                        <label key={status} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="rounded text-blue-600 focus:ring-blue-500"
-                            checked={filters.status[status]}
-                            onChange={() => handleStatusChange(status)}
-                          />
-                          <span className="text-sm text-gray-700 capitalize">{status}</span>
-                        </label>
-                      ))}
+          {/* Filter Dropdown */}
+          {isFilterOpen && (
+            <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+              <div className="py-1 max-h-96 overflow-y-auto">
+                {/* Active Filters Info */}
+                {isFilterActive && (
+                  <div className="px-4 py-2 bg-blue-50 border-b border-blue-100">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-blue-700">Active Filters</span>
+                      <button
+                        onClick={handleClearAllFilters}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Clear All
+                      </button>
                     </div>
                   </div>
+                )}
 
-                  <div className="border-t border-gray-100"></div>
-
-                  {/* Gender Filter */}
-                  <div className="px-4 py-2">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Gender</h4>
-                    <div className="space-y-2">
-                      {["all", "male", "female", "other"].map((gender) => (
-                        <label key={gender} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="gender"
-                            className="rounded-full text-blue-600 focus:ring-blue-500"
-                            checked={filters.gender === gender}
-                            onChange={() => handleGenderChange(gender)}
-                          />
-                          <span className="text-sm text-gray-700 capitalize">
-                            {gender === "all" ? "All Genders" : gender}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-100"></div>
-
-                  {/* Registered Date Filter */}
-                  <div className="px-4 py-2">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Registered Date</h4>
-                    <div className="space-y-2">
-                      {["all", "7days", "30days", "90days"].map((period) => (
-                        <label key={period} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="registered"
-                            className="rounded-full text-blue-600 focus:ring-blue-500"
-                            checked={filters.registered === period}
-                            onChange={() => handleRegisteredChange(period)}
-                          />
-                          <span className="text-sm text-gray-700">
-                            {period === "all" ? "All Time" : `Last ${period.replace("days", " Days")}`}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-100"></div>
-
-                  {/* Last Active Filter */}
-                  <div className="px-4 py-2">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Last Active</h4>
-                    <div className="space-y-2">
-                      {["all", "today", "week", "month"].map((period) => (
-                        <label key={period} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="lastActive"
-                            className="rounded-full text-blue-600 focus:ring-blue-500"
-                            checked={filters.lastActive === period}
-                            onChange={() => handleLastActiveChange(period)}
-                          />
-                          <span className="text-sm text-gray-700 capitalize">
-                            {period === "all" ? "Any Time" : period === "week" ? "This Week" : period === "month" ? "This Month" : "Today"}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-100"></div>
-
-                  {/* Subscription Filter */}
-                  <div className="px-4 py-2">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Subscription</h4>
-                    <div className="space-y-2">
-                      {["all", "subscribed", "free"].map((type) => (
-                        <label key={type} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="subscription"
-                            className="rounded-full text-blue-600 focus:ring-blue-500"
-                            checked={filters.subscription === type}
-                            onChange={() => handleSubscriptionChange(type)}
-                          />
-                          <span className="text-sm text-gray-700 capitalize">
-                            {type === "all" ? "All" : type}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-100"></div>
-
-                  <div className="px-4 py-2">
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Trial Status</h4>
-                    <div className="space-y-2">
-                      {["all", "Used", "Active", "Expired", "Not Used"].map((status) => (
-                        <label key={status} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="trialStatus"
-                            className="rounded-full text-blue-600 focus:ring-blue-500"
-                            checked={trialStatusFilter === status}
-                            onChange={() => setTrialStatusFilter(status)}
-                          />
-                          <span className="text-sm text-gray-700">{status === "all" ? "All" : status}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="border-t border-gray-100"></div>
-                  <div className="flex gap-2 p-3">
-                    <button
-                      onClick={handleClearAllFilters}
-                      className="flex-1 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                    >
-                      Reset Filters
-                    </button>
-                    <button
-                      onClick={handleApplyFilters}
-                      className="flex-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                    >
-                      Apply
-                    </button>
+                {/* Status Filter */}
+                <div className="px-4 py-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Status</h4>
+                  <div className="space-y-2">
+                    {["active", "inactive", "blocked", "suspended"].map((status) => (
+                      <label key={status} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded text-blue-600 focus:ring-blue-500"
+                          checked={filters.status[status]}
+                          onChange={() => handleStatusChange(status)}
+                        />
+                        <span className="text-sm text-gray-700 capitalize">{status}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </div >
 
-        {/* Search and Filter Status */}
-        < div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600" >
-          {searchQuery && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded">
-              Search: "{searchQuery}"
-              <button onClick={clearSearch} className="text-blue-500 hover:text-blue-700">
+                <div className="border-t border-gray-100"></div>
+
+                {/* Gender Filter */}
+                <div className="px-4 py-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Gender</h4>
+                  <div className="space-y-2">
+                    {["all", "male", "female", "other"].map((gender) => (
+                      <label key={gender} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="gender"
+                          className="rounded-full text-blue-600 focus:ring-blue-500"
+                          checked={filters.gender === gender}
+                          onChange={() => handleGenderChange(gender)}
+                        />
+                        <span className="text-sm text-gray-700 capitalize">
+                          {gender === "all" ? "All Genders" : gender}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100"></div>
+
+                {/* Registered Date Filter */}
+                <div className="px-4 py-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Registered Date</h4>
+                  <div className="space-y-2">
+                    {["all", "7days", "30days", "90days"].map((period) => (
+                      <label key={period} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="registered"
+                          className="rounded-full text-blue-600 focus:ring-blue-500"
+                          checked={filters.registered === period}
+                          onChange={() => handleRegisteredChange(period)}
+                        />
+                        <span className="text-sm text-gray-700">
+                          {period === "all" ? "All Time" : `Last ${period.replace("days", " Days")}`}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100"></div>
+
+                {/* Last Active Filter */}
+                <div className="px-4 py-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Last Active</h4>
+                  <div className="space-y-2">
+                    {["all", "today", "week", "month"].map((period) => (
+                      <label key={period} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="lastActive"
+                          className="rounded-full text-blue-600 focus:ring-blue-500"
+                          checked={filters.lastActive === period}
+                          onChange={() => handleLastActiveChange(period)}
+                        />
+                        <span className="text-sm text-gray-700 capitalize">
+                          {period === "all" ? "Any Time" : period === "week" ? "This Week" : period === "month" ? "This Month" : "Today"}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100"></div>
+
+                {/* Subscription Filter */}
+                <div className="px-4 py-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Subscription</h4>
+                  <div className="space-y-2">
+                    {["all", "subscribed", "free"].map((type) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="subscription"
+                          className="rounded-full text-blue-600 focus:ring-blue-500"
+                          checked={filters.subscription === type}
+                          onChange={() => handleSubscriptionChange(type)}
+                        />
+                        <span className="text-sm text-gray-700 capitalize">
+                          {type === "all" ? "All" : type}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100"></div>
+
+                <div className="px-4 py-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Trial Status</h4>
+                  <div className="space-y-2">
+                    {["all", "Used", "Active", "Expired", "Not Used"].map((status) => (
+                      <label key={status} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="trialStatus"
+                          className="rounded-full text-blue-600 focus:ring-blue-500"
+                          checked={trialStatusFilter === status}
+                          onChange={() => setTrialStatusFilter(status)}
+                        />
+                        <span className="text-sm text-gray-700">{status === "all" ? "All" : status}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="border-t border-gray-100"></div>
+                <div className="flex gap-2 p-3">
+                  <button
+                    onClick={handleClearAllFilters}
+                    className="flex-1 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                  >
+                    Reset Filters
+                  </button>
+                  <button
+                    onClick={handleApplyFilters}
+                    className="flex-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div >
+
+      {/* Search and Filter Status */}
+      < div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600" >
+        {searchQuery && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded">
+            Search: "{searchQuery}"
+            <button onClick={clearSearch} className="text-blue-500 hover:text-blue-700">
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        )
+        }
+        {
+          isFilterActive && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded">
+              Filters Active
+              <button onClick={handleClearAllFilters} className="text-green-500 hover:text-green-700">
                 <X className="w-3 h-3" />
               </button>
             </span>
           )
-          }
-          {
-            isFilterActive && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded">
-                Filters Active
-                <button onClick={handleClearAllFilters} className="text-green-500 hover:text-green-700">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )
-          }
-          {
-            (searchQuery || isFilterActive) && (
-              <span className="text-gray-500">
-                Showing {filteredUsers.length} of {users.length} users
-              </span>
-            )
-          }
-        </div >
-      </div >
+        }
+        {
+          (searchQuery || isFilterActive) && (
+            <span className="text-gray-500">
+              Showing {filteredUsers.length} of {users.length} users
+            </span>
+          )
+        }
+      </div>
 
       {/* Table */}
       < div className="overflow-x-auto rounded-lg border border-gray-200" >

@@ -163,9 +163,9 @@ const UploadFeedsPage = () => {
 
             {/* File Selector */}
             <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-                <FileSelect 
-                    onSelect={handleSelectFiles} 
-                    className={files.length > 0 ? "py-12" : "py-24"}
+                <FileSelect
+                    onSelect={handleSelectFiles}
+                    className={files.length > 0 ? "py-8" : "py-16"}
                     isActive={files.length === 0}
                 />
             </div>

@@ -81,10 +81,7 @@ export default function UserProfilePage() {
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
           <div className="max-w-7xl mx-auto">
             <PageBreadcrumb pageTitle="User Management" />
-            <div className="mb-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">User Management Dashboard</h1>
-              <p className="text-sm text-gray-600 mt-1">Monitor and manage all user accounts and activities</p>
-            </div>
+            
           </div>
         </div>
 

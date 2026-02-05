@@ -5,7 +5,7 @@ import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 
 const AppHeader = () => {
-  const { isMobileOpen, toggleMobileSidebar } = useSidebar();
+  const { isMobileOpen, toggleMainSidebar } = useSidebar();
   const [scrolled, setScrolled] = useState(false);
 
   // Track scroll for subtle shadow effect
@@ -33,7 +33,7 @@ const AppHeader = () => {
           {/* Left: Only Menu Button */}
           <div className="flex items-center">
             <button
-              onClick={toggleMobileSidebar}
+              onClick={toggleMainSidebar}
               className={`
                 p-2 rounded-xl transition-all duration-300
                 hover:bg-gray-100 dark:hover:bg-gray-800 
@@ -73,34 +73,6 @@ const AppHeader = () => {
                   />
                 </svg>
               )}
-            </button>
-
-            {/* Desktop: Show Menu Button with different style */}
-            <button
-              onClick={toggleMobileSidebar}
-              className={`
-                hidden lg:flex items-center justify-center
-                ml-2 w-10 h-10 rounded-xl transition-all duration-300
-                hover:bg-gray-100 dark:hover:bg-gray-800 
-                text-gray-600 dark:text-gray-300
-                active:scale-95
-                ${isMobileOpen ? "bg-gray-100 dark:bg-gray-800" : ""}
-              `}
-              aria-label="Toggle sidebar"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
             </button>
 
             {/* Page Title - Optional if you want to show current page */}

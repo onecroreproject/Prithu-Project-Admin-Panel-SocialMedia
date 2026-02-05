@@ -10,6 +10,9 @@ import SocialLinksCard from "./ComponentsForIndividualUserProfile/socialLinkCard
 import PerformanceMetrics from "./ComponentsForIndividualUserProfile/performaceMetricks";
 import ReportsCard from "./ComponentsForIndividualUserProfile/reportCard";
 import DeviceInfoCard from "./ComponentsForIndividualUserProfile/deviceInfocard";
+import ReferralInfoCard from "./ComponentsForIndividualUserProfile/ReferralInfoCard";
+import WatchAnalyticsCard from "./ComponentsForIndividualUserProfile/WatchAnalyticsCard";
+import FinancialsCard from "./ComponentsForIndividualUserProfile/FinancialsCard";
 
 const pageMotion = {
   initial: { opacity: 0, y: 10 },
@@ -128,16 +131,39 @@ export default function IndividualUserProfilePage() {
             </div>
           </div>
 
-          {/* Second Row: Performance Metrics */}
-          <div className="grid grid-cols-1 gap-8">
+          {/* Second Row: Performance Metrics & Watch Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Performance Metrics */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <PerformanceMetrics user={user} />
             </div>
+
+            {/* Watch Analytics */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+              <WatchAnalyticsCard user={user} />
+            </div>
           </div>
 
-          {/* Third Row: Social Links, Device Info, Reports */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Third Row: Financials */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <FinancialsCard user={user} />
+          </div>
+
+          {/* Fourth Row: Referral Info & Reports */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Referral Network */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+              <ReferralInfoCard user={user} />
+            </div>
+
+            {/* Reports */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+              <ReportsCard reports={user.reports} />
+            </div>
+          </div>
+
+          {/* Fifth Row: Social Links & Device Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Social Links */}
             {user.profile?.socialLinks && (
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
@@ -151,11 +177,6 @@ export default function IndividualUserProfilePage() {
                 <DeviceInfoCard device={user.device} />
               </div>
             )}
-
-            {/* Reports */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <ReportsCard reports={user.reports} />
-            </div>
           </div>
 
           {/* Fourth Row: Account Timeline */}

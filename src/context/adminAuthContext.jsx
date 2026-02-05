@@ -67,7 +67,7 @@ export const AdminAuthProvider = ({ children }) => {
 
       if (now - activeTime > twoHours) {
         console.log("Inactivity timeout reached. Logging out...");
-        logout();
+        logout(); // This will handle both local and server-side logout
       } else if (role === 'Child_Admin') {
         // Send heartbeat to backend
         api.post(API_ENDPOINTS.CHILD_ADMIN_HEARTBEAT).catch(err => console.error("Heartbeat failed", err));
@@ -116,19 +116,29 @@ export const AdminAuthProvider = ({ children }) => {
   };
 
   // ✅ Logout
-  const logout = () => {
-    // Clear state
-    setAdmin(null);
-    setRole(null);
+  const logout = useCallback(async () => {
+    try {
+      // 1. Notify Backend (Main Admin or Child Admin)
+      // This is crucial to update 'isOnline' status server-side
+      await api.post(API_ENDPOINTS.ADMIN_LOGOUT).catch(err => {
+        console.warn("Server-side logout failed or was already unauthorized:", err.response?.data || err.message);
+      });
+    } catch (err) {
+      console.error("Error during logout notification:", err);
+    } finally {
+      // 2. Clear state regardless of server response
+      setAdmin(null);
+      setRole(null);
 
-    // Clear localStorage
-    localStorage.removeItem("admin");
-    localStorage.removeItem("role");
-    localStorage.removeItem("token");
-    localStorage.removeItem("lastActive");
+      // 3. Clear localStorage
+      localStorage.removeItem("admin");
+      localStorage.removeItem("role");
+      localStorage.removeItem("token");
+      localStorage.removeItem("lastActive");
 
-    console.log("Logged out successfully");
-  };
+      console.log("Logged out successfully");
+    }
+  }, []);
 
 
   // ✅ Send OTP

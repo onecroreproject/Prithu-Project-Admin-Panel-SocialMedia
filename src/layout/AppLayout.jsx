@@ -130,8 +130,8 @@ const LayoutContent = () => {
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
 
-      {/* Render only the active sidebar on the left side */}
-      <div className="fixed top-0 left-0 z-40 transition-all duration-300 h-screen">
+      {/* Render only the active sidebar */}
+      <div className="z-50">
         <MainSidebar user={admin} />
       </div>
 
@@ -176,30 +176,7 @@ const LayoutContent = () => {
         {/* Main Content */}
         <main className={`py-4 sm:py-6 lg:py-8 ${contentDimensions.padding}`}>
           <div className={`${contentDimensions.maxWidth} mx-auto transition-all duration-300`}>
-            {/* Page Header */}
-            <div className="mb-6 sm:mb-8">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                      <MessageSquare className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-                        {location.pathname.includes('settings') ? 'Settings' :
-                          location.pathname.includes('drive') ? 'Google Drive' :
-                            'Dashboard'}
-                      </h1>
-                    </div>
-                  </div>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-2 sm:mt-3 max-w-3xl">
-                    {location.pathname.includes('settings') ? 'System configuration and administration' :
-                      location.pathname.includes('drive') ? 'Manage files and storage in Google Drive' :
-                        "Manage your data and monitor performance in real-time."}
-                  </p>
-                </div>
-              </div>
-            </div>
+
 
             {/* Content Card */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg dark:shadow-gray-900/30 border border-gray-100 dark:border-gray-700/50 overflow-hidden transition-all duration-300">

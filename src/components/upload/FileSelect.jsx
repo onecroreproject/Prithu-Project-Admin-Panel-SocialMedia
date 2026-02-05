@@ -23,7 +23,7 @@ const FileSelect = ({ onSelect, className, isActive = true }) => {
         e.preventDefault();
         setIsDragging(false);
         setIsLoading(true);
-        
+
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             // Simulate processing delay for animation
             setTimeout(() => {
@@ -71,9 +71,9 @@ const FileSelect = ({ onSelect, className, isActive = true }) => {
             onDragLeave={handleDragLeave}
             className={twMerge(
                 clsx(
-                    "relative border-2 border-dashed rounded-2xl p-10 cursor-pointer transition-all duration-300 flex flex-col items-center justify-center text-center overflow-hidden group",
-                    isDragging 
-                        ? "border-blue-500 bg-blue-500/10 scale-[1.02] shadow-2xl shadow-blue-500/20" 
+                    "relative border-2 border-dashed rounded-2xl p-6 cursor-pointer transition-all duration-300 flex flex-col items-center justify-center text-center overflow-hidden group",
+                    isDragging
+                        ? "border-blue-500 bg-blue-500/10 scale-[1.02] shadow-2xl shadow-blue-500/20"
                         : "border-gray-600 hover:border-blue-400 hover:bg-gray-800/30",
                     className
                 )
@@ -116,35 +116,35 @@ const FileSelect = ({ onSelect, className, isActive = true }) => {
             />
 
             <div className={clsx(
-                "relative bg-gradient-to-br from-gray-700/50 to-gray-800/30 p-5 rounded-2xl mb-6 transition-all duration-500 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-blue-500/20",
+                "relative bg-gradient-to-br from-gray-700/50 to-gray-800/30 p-3 rounded-2xl mb-4 transition-all duration-500 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-blue-500/20",
                 bounceAnimation && "animate-bounce-slow",
                 isDragging && "scale-110 rotate-6",
                 isLoading && "animate-pulse"
             )}>
                 {isLoading ? (
-                    <Loader2 className="w-10 h-10 text-blue-400 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
                 ) : (
                     <Upload className={clsx(
-                        "w-10 h-10 transition-all duration-300",
-                        isDragging 
-                            ? "text-blue-400 scale-110 animate-bounce" 
+                        "w-8 h-8 transition-all duration-300",
+                        isDragging
+                            ? "text-blue-400 scale-110 animate-bounce"
                             : "text-blue-400 group-hover:text-blue-300"
                     )} />
                 )}
-                
+
                 {/* Ring effect */}
                 <div className={clsx(
                     "absolute inset-0 rounded-2xl border-2 transition-all duration-700",
-                    isDragging 
-                        ? "border-blue-400/30 animate-ping" 
+                    isDragging
+                        ? "border-blue-400/30 animate-ping"
                         : "border-transparent group-hover:border-blue-400/20"
                 )} />
             </div>
 
             <h3 className={clsx(
-                "text-2xl font-bold mb-3 transition-all duration-300 relative",
-                isDragging 
-                    ? "text-blue-300 scale-105" 
+                "text-lg font-bold mb-2 transition-all duration-300 relative",
+                isDragging
+                    ? "text-blue-300 scale-105"
                     : "text-white group-hover:text-gray-200"
             )}>
                 {isLoading ? 'Processing...' : 'Upload Media'}
@@ -158,16 +158,16 @@ const FileSelect = ({ onSelect, className, isActive = true }) => {
                 isDragging && "text-blue-300/80",
                 isLoading && "animate-pulse"
             )}>
-                {isLoading 
-                    ? 'Preparing your files...' 
-                    : isDragging 
-                        ? 'Drop files to upload!' 
+                {isLoading
+                    ? 'Preparing your files...'
+                    : isDragging
+                        ? 'Drop files to upload!'
                         : 'Drag & drop images or videos here, or click to browse. Supports multiple files.'
                 }
             </p>
 
             <div className={clsx(
-                "flex gap-6 mt-8 transition-all duration-300",
+                "flex gap-6 mt-4 transition-all duration-300",
                 isDragging && "scale-105",
                 isLoading && "opacity-50"
             )}>

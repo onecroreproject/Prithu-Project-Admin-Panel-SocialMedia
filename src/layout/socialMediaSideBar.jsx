@@ -30,11 +30,18 @@ const mainNavItems = [
     permission: null
   },
   {
+    icon: <BarChart3 className="w-5 h-5" />,
+    name: "Sales Dashboard",
+    path: "/settings/sales/dashboard",
+    permission: "canManageSalesDashboard"
+  },
+  {
     icon: <User className="w-5 h-5" />,
     name: "User Profile",
     permission: "canManageUsers",
     subItems: [
       { name: "User Detail", path: "/social/profile", permission: "canManageUsersDetail" },
+      { name: "User Activity", path: "/social/profile", permission: "canManageUsersDetail" },
     ],
   },
   {
@@ -70,6 +77,7 @@ const mainNavItems = [
     permission: "canManageReport",
     subItems: [
       { name: "User Feed Reports", path: "/social/user-reportinfo", permission: "canManageUsersFeedReports" },
+      { name: "Report Management", path: "/settings/report/management", permission: "canManageAddReport" },
     ],
   },
   {
@@ -77,9 +85,7 @@ const mainNavItems = [
     name: "Admin Management",
     permission: "canManageChildAdmins",
     subItems: [
-      { name: "Dashboard", path: "/settings/dashboard", permission: "canViewSettingsDashboard" },
       { name: "ChildAdmin Creation", path: "/settings/child/admin/page", permission: "canManageChildAdminsCreation" },
-      { name: "Admin Roles", path: "/settings/admin/roles", permission: "canManageAdminRoles" },
     ],
   },
   {
@@ -93,25 +99,9 @@ const mainNavItems = [
     ],
   },
   {
-    icon: <DollarSign className="w-5 h-5" />,
-    name: "Sales",
-    permission: "canManageSalesSettings",
-    subItems: [
-      { name: "Sales Dashboard", path: "/settings/sales/dashboard", permission: "canManageSalesDashboard" },
-    ],
-  },
-  {
-    icon: <Users className="w-5 h-5" />,
-    name: "Settings Report",
-    permission: "canManageUsers",
-    subItems: [
-      { name: "Report Management", path: "/settings/report/management", permission: "canManageAddReport" },
-    ],
-  },
-  {
     icon: <Cog className="w-5 h-5" />,
     name: "Company Management",
-    permission: "canfaqmanagement",
+    permission: "canFaqManagement",
     subItems: [
       { name: "FAQ Settings", path: "/settings/faq/management", permission: "canFaqManagement" },
       { name: "User Feedbacks", path: "/settings/reportandfeedback/management", permission: "canManageUserFeedbacks" },
@@ -245,6 +235,7 @@ const SocialMediaSidebar = ({ user }) => {
   const sidebarVariants = {
     collapsed: {
       width: "85px",
+      x: isMobile ? "-100%" : 0,
       transition: {
         type: "spring",
         stiffness: 300,
@@ -254,6 +245,7 @@ const SocialMediaSidebar = ({ user }) => {
     },
     expanded: {
       width: "280px",
+      x: 0,
       transition: {
         type: "spring",
         stiffness: 300,
@@ -496,35 +488,25 @@ const SocialMediaSidebar = ({ user }) => {
 
   return (
     <>
-      {/* Mobile Overlay */}
-      {isMobileOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/40 lg:hidden z-40 backdrop-blur-sm"
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
-
       <motion.aside
         ref={sidebarRef}
-        layout
+        initial={isMobile ? "collapsed" : "expanded"}
+        animate={isMobile ? (isMobileOpen ? "expanded" : "collapsed") : (isHovered ? "expanded" : "collapsed")}
+        variants={sidebarVariants}
+        onMouseEnter={() => !isMobile && setIsHovered(true)}
+        onMouseLeave={() => !isMobileOpen && setIsHovered(false)}
         className={`
           h-screen flex flex-col 
           bg-white dark:bg-gray-900 text-gray-900
-          z-49 transition-all ease-in-out overflow-hidden
+          z-50 transition-all ease-in-out overflow-hidden
           shadow-xl dark:shadow-gray-900/50 border-r border-gray-200 dark:border-gray-800
-          ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} 
-          lg:translate-x-0
         `}
-        variants={sidebarVariants}
-        animate={isHovered || isMobileOpen ? "expanded" : "collapsed"}
-        onMouseEnter={() => !isMobile && setIsHovered(true)}
-        onMouseLeave={() => !isMobileOpen && setIsHovered(false)}
         style={{
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
+          position: "fixed",
+          top: 0,
+          left: 0,
         }}
       >
         {/* Logo section */}

@@ -35,7 +35,7 @@ export const SidebarProvider = ({ children }) => {
   // -----------------------------
   useEffect(() => {
     const check = () => {
-      const mobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
 
       if (!mobile) {
@@ -54,7 +54,7 @@ export const SidebarProvider = ({ children }) => {
   // -----------------------------
   // EXPAND/COLLAPSE/TOGGLE FUNCTIONS
   // -----------------------------
-  
+
   // Social Sidebar
   const expandMain = useCallback(() => {
     setIsExpanded(true);
@@ -124,7 +124,7 @@ export const SidebarProvider = ({ children }) => {
   // -----------------------------
   const selectModule = useCallback((module) => {
     console.log("selectModule called with:", module);
-    
+
     // First collapse all sidebars
     setIsExpanded(false);
     setIsCompanyExpanded(false);
@@ -134,12 +134,12 @@ export const SidebarProvider = ({ children }) => {
     setIsCompanyHovered(false);
     setIsSettingsHovered(false);
     setIsAptitudeHovered(false);
-    
+
     // Set active module
     setActiveModule(module);
-    
+
     // Expand the selected module's sidebar
-    switch(module) {
+    switch (module) {
       case "social":
         setIsExpanded(true);
         break;
@@ -171,7 +171,7 @@ export const SidebarProvider = ({ children }) => {
     setIsCompanyHovered(false);
     setIsSettingsHovered(false);
     setIsAptitudeHovered(false);
-    
+
     // Close mobile sidebars
     if (isMobile) {
       setIsMobileOpen(false);
@@ -186,8 +186,8 @@ export const SidebarProvider = ({ children }) => {
   // -----------------------------
   const toggleActiveSidebar = useCallback(() => {
     if (!activeModule) return;
-    
-    switch(activeModule) {
+
+    switch (activeModule) {
       case 'social':
         toggleMainSidebar();
         break;
@@ -278,8 +278,8 @@ export const SidebarProvider = ({ children }) => {
         // HELPER FUNCTIONS
         getActiveSidebarState: useCallback(() => {
           if (!activeModule) return null;
-          
-          switch(activeModule) {
+
+          switch (activeModule) {
             case 'social':
               return {
                 isExpanded: isExpanded || isHovered,
@@ -311,12 +311,12 @@ export const SidebarProvider = ({ children }) => {
 
         // Check if any sidebar is expanded
         isAnySidebarExpanded: useCallback(() => {
-          return isExpanded || isCompanyExpanded || isSettingsExpanded || isAptitudeExpanded || 
-                 isMobileOpen || isCompanyMobileOpen || isSettingsMobileOpen || isAptitudeMobileOpen ||
-                 isHovered || isCompanyHovered || isSettingsHovered || isAptitudeHovered;
-        }, [isExpanded, isCompanyExpanded, isSettingsExpanded, isAptitudeExpanded, 
-            isMobileOpen, isCompanyMobileOpen, isSettingsMobileOpen, isAptitudeMobileOpen,
-            isHovered, isCompanyHovered, isSettingsHovered, isAptitudeHovered])
+          return isExpanded || isCompanyExpanded || isSettingsExpanded || isAptitudeExpanded ||
+            isMobileOpen || isCompanyMobileOpen || isSettingsMobileOpen || isAptitudeMobileOpen ||
+            isHovered || isCompanyHovered || isSettingsHovered || isAptitudeHovered;
+        }, [isExpanded, isCompanyExpanded, isSettingsExpanded, isAptitudeExpanded,
+          isMobileOpen, isCompanyMobileOpen, isSettingsMobileOpen, isAptitudeMobileOpen,
+          isHovered, isCompanyHovered, isSettingsHovered, isAptitudeHovered])
       }}
     >
       {children}

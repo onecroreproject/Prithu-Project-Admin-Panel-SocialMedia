@@ -184,7 +184,7 @@ const FeedUploadPage = () => {
             )}
 
             {/* Central File Uploader */}
-            <div className="bg-gray-900/30 backdrop-blur-sm border-2 border-dashed border-gray-800 rounded-[2.5rem] p-12 hover:border-blue-500/30 transition-all">
+            <div className="bg-gray-900/30 backdrop-blur-sm border-2 border-dashed border-gray-800 rounded-3xl p-6 hover:border-blue-500/30 transition-all">
                 <FileSelect onSelect={handleSelectFiles} />
             </div>
 

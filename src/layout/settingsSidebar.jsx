@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // Changed from "react-router"
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ChevronDownIcon, 
-  BellIcon, 
-  CogIcon, 
-  CreditCardIcon, 
+import {
+  ChevronDownIcon,
+  BellIcon,
+  CogIcon,
+  CreditCardIcon,
   ShieldIcon,
   DollarSignIcon,
   HomeIcon,
@@ -52,13 +52,13 @@ const settingsNavItems = [
 
     ],
   },
- 
-    {
+
+  {
     icon: <UsersIcon className="w-5 h-5" />,
     name: "Report Management",
     permission: "canManageUsers",
     subItems: [
-     { name: "Report Management", path: "/settings/report/management", permission: "canManageAddReport" },
+      { name: "Report Management", path: "/settings/report/management", permission: "canManageAddReport" },
     ],
   },
 
@@ -74,10 +74,10 @@ const settingsNavItems = [
   //     { name: "SMS Settings", path: "/settings/notifications/sms", permission: "canManageSMSSettings" },
   //   ],
   // },
-   {
+  {
     icon: <CogIcon className="w-5 h-5" />,
     name: "Company Management",
-    permission: "canfaqmanagement",
+    permission: "canFaqManagement",
     subItems: [
       { name: "FAQ Settings", path: "/settings/faq/management", permission: "canFaqManagement" },
       { name: "User Feedbacks", path: "/settings/reportandfeedback/management", permission: "canManageUserFeedbacks" },
@@ -87,15 +87,15 @@ const settingsNavItems = [
 ];
 
 const SettingsSidebar = ({ user }) => {
-  const { 
-    isMobileOpen: isSettingsMobileOpen, 
-    setIsHovered: setIsSettingsHovered, 
+  const {
+    isMobileOpen: isSettingsMobileOpen,
+    setIsHovered: setIsSettingsHovered,
     isHovered: isSettingsHovered,
     isExpanded: isSettingsExpanded,
     setIsMobileOpen: setIsSettingsMobileOpen,
     expandSettings
   } = useSidebar();
-  
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -107,16 +107,16 @@ const SettingsSidebar = ({ user }) => {
   const isActive = useCallback((path) => {
     // Exact match
     if (location.pathname === path) return true;
-    
+
     // For dashboard, check if we're on any settings route
     if (path === "/settings/dashboard") {
-      return location.pathname.startsWith('/settings') || 
-             location.pathname.startsWith('/child') ||
-             location.pathname.startsWith('/subscription') ||
-             location.pathname.startsWith('/sales') ||
-             location.pathname === '/admin/profile/page';
+      return location.pathname.startsWith('/settings') ||
+        location.pathname.startsWith('/child') ||
+        location.pathname.startsWith('/subscription') ||
+        location.pathname.startsWith('/sales') ||
+        location.pathname === '/admin/profile/page';
     }
-    
+
     return false;
   }, [location.pathname]);
 
@@ -157,17 +157,17 @@ const SettingsSidebar = ({ user }) => {
   useEffect(() => {
     const findActiveItem = () => {
       let foundActive = false;
-      
+
       for (let i = 0; i < filteredNavItems.length; i++) {
         const item = filteredNavItems[i];
-        
+
         // Check main item path
         if (item.path && isActive(item.path)) {
           setActiveItem({ index: i, type: "settings", parentIndex: null });
           foundActive = true;
           return;
         }
-        
+
         // Check subitems
         if (item.subItems) {
           for (let j = 0; j < item.subItems.length; j++) {
@@ -180,10 +180,10 @@ const SettingsSidebar = ({ user }) => {
           }
         }
       }
-      
+
       // If no exact match found but we're on a settings route, highlight dashboard
       if (!foundActive && (
-        location.pathname.startsWith('/settings') || 
+        location.pathname.startsWith('/settings') ||
         location.pathname.startsWith('/child') ||
         location.pathname.startsWith('/subscription') ||
         location.pathname.startsWith('/sales') ||
@@ -195,14 +195,14 @@ const SettingsSidebar = ({ user }) => {
         }
       }
     };
-    
+
     findActiveItem();
   }, [location.pathname, filteredNavItems, isActive]);
 
   // Ensure sidebar is expanded on mount if we're on a settings route
   useEffect(() => {
     if (
-      location.pathname.startsWith('/settings') || 
+      location.pathname.startsWith('/settings') ||
       location.pathname.startsWith('/child') ||
       location.pathname.startsWith('/subscription') ||
       location.pathname.startsWith('/sales') ||
@@ -228,67 +228,67 @@ const SettingsSidebar = ({ user }) => {
   const sidebarVariants = {
     collapsed: {
       width: isSettingsMobileOpen ? "0px" : "85px",
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 30, 
-        duration: 0.4 
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        duration: 0.4
       },
     },
     expanded: {
       width: "280px",
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 30, 
-        duration: 0.4 
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        duration: 0.4
       }
     },
   };
 
   const logoVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       x: -20,
-      transition: { duration: 0.2 } 
+      transition: { duration: 0.2 }
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: "easeOut"
-      } 
+      }
     },
   };
 
   const menuItemVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       x: -10,
-      transition: { duration: 0.15 } 
+      transition: { duration: 0.15 }
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
-      transition: { 
+      transition: {
         duration: 0.25,
         ease: "easeOut"
-      } 
+      }
     },
   };
 
   const subMenuVariants = {
-    hidden: { 
-      height: 0, 
+    hidden: {
+      height: 0,
       opacity: 0,
       transition: {
         height: { duration: 0.2, ease: "easeInOut" },
         opacity: { duration: 0.15 }
       }
     },
-    visible: { 
-      height: "auto", 
+    visible: {
+      height: "auto",
       opacity: 1,
       transition: {
         height: { duration: 0.3, ease: "easeInOut" },
@@ -312,10 +312,10 @@ const SettingsSidebar = ({ user }) => {
         const isItemActive = activeItem?.index === index && activeItem?.type === menuType;
         const hasActiveChild = nav.subItems?.some(sub => location.pathname === sub.path);
         const isDashboard = nav.path === "/settings/dashboard";
-        
+
         // Special handling for dashboard
         const showAsActive = isItemActive || (isDashboard && isActive(nav.path));
-        
+
         return (
           <li key={nav.name} className="relative">
             {nav.subItems?.length ? (
@@ -342,7 +342,7 @@ const SettingsSidebar = ({ user }) => {
                 `}>
                   {nav.icon}
                 </span>
-                
+
                 <AnimatePresence mode="wait">
                   {(isSettingsHovered || isSettingsMobileOpen || isSettingsExpanded) && (
                     <motion.span
@@ -357,7 +357,7 @@ const SettingsSidebar = ({ user }) => {
                     </motion.span>
                   )}
                 </AnimatePresence>
-                
+
                 {(isSettingsHovered || isSettingsMobileOpen || isSettingsExpanded) && nav.subItems && (
                   <motion.div
                     animate={{ rotate: isSubmenuOpen ? 180 : 0 }}
@@ -399,7 +399,7 @@ const SettingsSidebar = ({ user }) => {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
-                
+
                 <span className={`
                   flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0
                   transition-all duration-300 relative z-10
@@ -410,7 +410,7 @@ const SettingsSidebar = ({ user }) => {
                 `}>
                   {nav.icon}
                 </span>
-                
+
                 <AnimatePresence mode="wait">
                   {(isSettingsHovered || isSettingsMobileOpen || isSettingsExpanded) && (
                     <motion.span
@@ -426,7 +426,7 @@ const SettingsSidebar = ({ user }) => {
                 </AnimatePresence>
               </Link>
             )}
-            
+
             {/* Submenu Animation */}
             <AnimatePresence>
               {isSubmenuOpen && (
@@ -569,7 +569,7 @@ const SettingsSidebar = ({ user }) => {
               {renderMenuItems(filteredNavItems, "settings")}
             </div>
           </nav>
-          
+
           {/* System Status */}
           <AnimatePresence mode="wait">
             {(isSettingsHovered || isSettingsMobileOpen || isSettingsExpanded) && (

@@ -35,7 +35,7 @@ const AdminFaqPage = () => {
   const [showSectionModal, setShowSectionModal] = useState(false);
   const [showFaqModal, setShowFaqModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+
   // Form states
   const [sectionForm, setSectionForm] = useState({
     sectionKey: '',
@@ -60,7 +60,7 @@ const AdminFaqPage = () => {
   const fetchSections = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/help`);
+      const response = await axios.get(`/api/admin/help`);
       setSections(response.data.data || []);
     } catch (error) {
       console.error('Error fetching sections:', error);
@@ -256,7 +256,7 @@ const AdminFaqPage = () => {
         if (!section) return;
 
         const updatedFaqs = section.faqs.filter(faq => faq._id !== itemToDelete.id);
-        
+
         await axios.put(`/api/admin/help/${itemToDelete.sectionId}`, {
           faqs: updatedFaqs
         });
@@ -278,20 +278,20 @@ const AdminFaqPage = () => {
 
   // Filtered sections based on search and filter
   const filteredSections = sections.filter(section => {
-    const matchesSearch = 
+    const matchesSearch =
       section.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       section.sectionKey.toLowerCase().includes(searchTerm.toLowerCase()) ||
       section.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      section.faqs?.some(faq => 
+      section.faqs?.some(faq =>
         faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
         faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
       );
-    
-    const matchesFilter = 
+
+    const matchesFilter =
       filterActive === 'all' ||
       (filterActive === 'active' && section.isActive) ||
       (filterActive === 'inactive' && !section.isActive);
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -299,7 +299,7 @@ const AdminFaqPage = () => {
   const totalSections = sections.length;
   const totalFaqs = sections.reduce((total, section) => total + (section.faqs?.length || 0), 0);
   const activeSections = sections.filter(s => s.isActive).length;
-  const activeFaqs = sections.reduce((total, section) => 
+  const activeFaqs = sections.reduce((total, section) =>
     total + (section.faqs?.filter(f => f.isActive).length || 0), 0
   );
 
@@ -455,8 +455,8 @@ const AdminFaqPage = () => {
                       onClick={() => toggleSection(section._id)}
                       className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
                     >
-                      {expandedSections.includes(section._id) ? 
-                        <ChevronUp className="w-5 h-5" /> : 
+                      {expandedSections.includes(section._id) ?
+                        <ChevronUp className="w-5 h-5" /> :
                         <ChevronDown className="w-5 h-5" />
                       }
                     </button>
@@ -771,17 +771,15 @@ const AdminFaqPage = () => {
       {/* Notification Toast */}
       {notification.show && (
         <div className={`fixed top-4 right-4 z-50 animate-in slide-in-from-top-5 duration-300`}>
-          <div className={`px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 ${
-            notification.type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-          }`}>
+          <div className={`px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 ${notification.type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+            }`}>
             {notification.type === 'success' ? (
               <CheckCircle className="w-5 h-5 text-green-600" />
             ) : (
               <AlertCircle className="w-5 h-5 text-red-600" />
             )}
-            <span className={`font-medium ${
-              notification.type === 'success' ? 'text-green-800' : 'text-red-800'
-            }`}>
+            <span className={`font-medium ${notification.type === 'success' ? 'text-green-800' : 'text-red-800'
+              }`}>
               {notification.message}
             </span>
           </div>
