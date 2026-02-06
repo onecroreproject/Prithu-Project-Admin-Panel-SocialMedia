@@ -5,6 +5,8 @@ export default function useFeedFilter() {
     type: "",
     startDate: "",
     endDate: "",
+    categoryId: "",
+    isToday: false,
   });
 
   const handleFilterChange = (key, value) => {
@@ -16,20 +18,32 @@ export default function useFeedFilter() {
       type: "",
       startDate: "",
       endDate: "",
+      categoryId: "",
+      isToday: false,
     });
 
   const applyFilters = (feeds = []) => {
     return feeds.filter((feed) => {
       const matchesType =
-        !filters.type || feed.type.toLowerCase() === filters.type.toLowerCase();
+        !filters.type || feed.type?.toLowerCase() === filters.type?.toLowerCase();
+
+      const feedDate = new Date(feed.createdAt);
 
       const matchesDate =
         (!filters.startDate ||
-          new Date(feed.createdAt) >= new Date(filters.startDate)) &&
+          feedDate >= new Date(filters.startDate)) &&
         (!filters.endDate ||
-          new Date(feed.createdAt) <= new Date(filters.endDate));
+          feedDate <= new Date(new Date(filters.endDate).setHours(23, 59, 59, 999)));
 
-      return matchesType && matchesDate;
+      const matchesCategory =
+        !filters.categoryId ||
+        (feed.categories && feed.categories.some((cat) => cat.id === filters.categoryId));
+
+      const matchesToday =
+        !filters.isToday ||
+        feedDate.toDateString() === new Date().toDateString();
+
+      return matchesType && matchesDate && matchesCategory && matchesToday;
     });
   };
 

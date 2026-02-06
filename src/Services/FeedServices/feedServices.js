@@ -108,5 +108,14 @@ export const updateCategory = async ({ id, name }) => {
   }
 };
 
+export async function removeFeedCategory({ feedId, categoryId }) {
+  try {
+    const res = await Api.delete(`${API_ENDPOINTS.REMOVE_FEED_CATEGORY}/${feedId}/category/${categoryId}`);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to remove category from feed");
+  }
+}
+
 
 

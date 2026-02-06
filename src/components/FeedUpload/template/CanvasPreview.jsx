@@ -228,8 +228,10 @@ const CanvasPreview = ({
     const isVideo = fileType?.startsWith('video');
 
     const safeAudioUrl = React.useMemo(() => {
-        return audioConfig?.file ? URL.createObjectURL(audioConfig.file) : null;
-    }, [audioConfig?.file]);
+        if (audioConfig?.file) return URL.createObjectURL(audioConfig.file);
+        if (audioConfig?.audioUrl) return audioConfig.audioUrl;
+        return null;
+    }, [audioConfig?.file, audioConfig?.audioUrl]);
 
     const activeOverlay = metadata.overlayElements.find(el => el.id === activeOverlayId);
 
