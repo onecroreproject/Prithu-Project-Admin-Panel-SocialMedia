@@ -19,6 +19,7 @@ const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel }) => {
       case '1:1': return { width: 1080, height: 1080 };
       case '4:5': return { width: 1080, height: 1350 };
       case '16:9': return { width: 1920, height: 1080 };
+      case 'original': return { width: 1080, height: 'auto' };
       case '9:16':
       default: return { width: 1080, height: 1920 };
     }
@@ -583,7 +584,8 @@ const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel }) => {
           className="flex-1 relative bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-300"
           style={{
             background: canvasSettings.backgroundColor,
-            aspectRatio: canvasSettings.aspectRatio.replace(':', '/'),
+            aspectRatio: canvasSettings.aspectRatio === 'original' ? 'auto' : canvasSettings.aspectRatio.replace(':', '/'),
+            height: canvasSettings.aspectRatio === 'original' ? 'auto' : undefined,
             cursor: draggingOverlay ? 'grabbing' : 'default'
           }}
         >
@@ -941,7 +943,8 @@ const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel }) => {
             { ratio: '9:16', label: 'Vertical Story', icon: '📱' },
             { ratio: '1:1', label: 'Square Post', icon: '🟦' },
             { ratio: '4:5', label: 'Portrait Post', icon: '🖼️' },
-            { ratio: '16:9', label: 'Landscape Video', icon: '🎞️' }
+            { ratio: '16:9', label: 'Landscape Video', icon: '🎞️' },
+            { ratio: 'original', label: 'Natural / Original', icon: '📐' }
           ].map((item) => (
             <button
               key={item.ratio}
@@ -955,9 +958,14 @@ const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel }) => {
                 className="mt-4 bg-gray-200 border border-gray-300"
                 style={{
                   width: '60px',
-                  aspectRatio: item.ratio.replace(':', '/'),
+                  aspectRatio: item.ratio === 'original' ? '1/1' : item.ratio.replace(':', '/'),
+                  display: item.ratio === 'original' ? 'flex' : 'block',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
-              />
+              >
+                {item.ratio === 'original' && <span className="text-xs font-bold text-gray-400">AUTO</span>}
+              </div>
             </button>
           ))}
         </div>

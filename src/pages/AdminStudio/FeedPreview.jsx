@@ -46,16 +46,16 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
   useEffect(() => {
     if (isPlaying && designMetadata?.isTemplate) {
       setIsAnimating(true);
-      
+
       // Get animation duration based on speed
-      const avatarOverlay = designMetadata.overlayElements?.find(el => 
+      const avatarOverlay = designMetadata.overlayElements?.find(el =>
         el.type === 'avatar' && el.animation?.enabled
       );
-      
+
       if (avatarOverlay) {
         const baseDuration = 1000; // 1 second base
         const duration = baseDuration / avatarOverlay.animation.speed;
-        
+
         setTimeout(() => {
           setIsAnimating(false);
         }, duration);
@@ -98,24 +98,24 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
     const startPos = { x: element.xPercent, y: element.yPercent };
     const elementWidth = element.wPercent;
     const elementHeight = element.hPercent;
-    
-    switch(direction) {
+
+    switch (direction) {
       case 'top':
         return { ...startPos, y: -elementHeight };
       case 'top-right':
-        return { ...startPos, x: 100 + elementWidth/2, y: -elementHeight };
+        return { ...startPos, x: 100 + elementWidth / 2, y: -elementHeight };
       case 'right':
-        return { ...startPos, x: 100 + elementWidth/2 };
+        return { ...startPos, x: 100 + elementWidth / 2 };
       case 'bottom-right':
-        return { ...startPos, x: 100 + elementWidth/2, y: 100 + elementHeight/2 };
+        return { ...startPos, x: 100 + elementWidth / 2, y: 100 + elementHeight / 2 };
       case 'bottom':
-        return { ...startPos, y: 100 + elementHeight/2 };
+        return { ...startPos, y: 100 + elementHeight / 2 };
       case 'bottom-left':
-        return { ...startPos, x: -elementWidth/2, y: 100 + elementHeight/2 };
+        return { ...startPos, x: -elementWidth / 2, y: 100 + elementHeight / 2 };
       case 'left':
-        return { ...startPos, x: -elementWidth/2 };
+        return { ...startPos, x: -elementWidth / 2 };
       case 'top-left':
-        return { ...startPos, x: -elementWidth/2, y: -elementHeight };
+        return { ...startPos, x: -elementWidth / 2, y: -elementHeight };
       default:
         return startPos;
     }
@@ -130,7 +130,7 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
       .map(el => {
         const isAvatar = el.type === 'avatar';
         const isAnimatingNow = isAnimating && isAvatar && el.animation?.enabled;
-        
+
         const startPos = isAnimatingNow
           ? getAnimationStartPosition(el, el.animation.direction)
           : { x: el.xPercent, y: el.yPercent };
@@ -157,11 +157,10 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
           >
             {el.type === 'avatar' && (
               <div className="w-full h-full flex items-center justify-center">
-                <div 
-                  className={`${
-                    el.avatarConfig?.shape === 'circle' ? 'rounded-full' :
-                    el.avatarConfig?.shape === 'rounded' ? 'rounded-lg' : 'rounded-none'
-                  }`}
+                <div
+                  className={`${el.avatarConfig?.shape === 'circle' ? 'rounded-full' :
+                      el.avatarConfig?.shape === 'rounded' ? 'rounded-lg' : 'rounded-none'
+                    }`}
                   style={{
                     width: '80%',
                     height: '80%',
@@ -173,7 +172,7 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
               </div>
             )}
             {el.type === 'text' && el.textConfig && (
-              <div 
+              <div
                 className="w-full h-full flex items-center justify-center p-1"
                 style={{
                   color: el.textConfig.color,
@@ -197,7 +196,7 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
     if (!designMetadata?.footerConfig?.enabled) return null;
 
     return (
-      <div 
+      <div
         className="absolute left-0 right-0 flex items-center justify-center"
         style={{
           backgroundColor: designMetadata.footerConfig.backgroundColor,
@@ -257,10 +256,10 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
               Mobile
             </button>
           </div>
-          
+
           {files.length > 1 && (
             <div className="flex items-center space-x-4">
-              <button 
+              <button
                 onClick={() => {
                   setCurrentFileIndex(prev => Math.max(0, prev - 1));
                   setIsPlaying(false);
@@ -274,7 +273,7 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
               <span className="text-sm font-medium">
                 File {currentFileIndex + 1} of {files.length}
               </span>
-              <button 
+              <button
                 onClick={() => {
                   setCurrentFileIndex(prev => Math.min(files.length - 1, prev + 1));
                   setIsPlaying(false);
@@ -294,22 +293,23 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
         {/* Preview Container */}
         <div className="lg:col-span-2">
           <div className="flex justify-center">
-            <div 
-              className={`relative bg-black rounded-lg overflow-hidden ${
-                previewMode === 'mobile' 
-                  ? 'w-[375px] border-8 border-gray-800 rounded-[40px]' 
+            <div
+              className={`relative bg-black rounded-lg overflow-hidden ${previewMode === 'mobile'
+                  ? 'w-[375px] border-8 border-gray-800 rounded-[40px]'
                   : 'w-full max-w-[800px] border'
-              }`}
+                }`}
               style={{
-                aspectRatio: designMetadata?.canvasSettings?.aspectRatio || '9/16'
+                aspectRatio: (designMetadata?.canvasSettings?.aspectRatio === 'original' || !designMetadata?.canvasSettings?.aspectRatio)
+                  ? 'auto'
+                  : designMetadata.canvasSettings.aspectRatio.replace(':', '/')
               }}
             >
               {/* Media Preview */}
               <div className="absolute inset-0">
                 {currentFile?.type === 'image' ? (
-                  <img 
-                    src={currentFile.preview} 
-                    alt="Preview" 
+                  <img
+                    src={currentFile.preview}
+                    alt="Preview"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -326,7 +326,7 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
                 {designMetadata?.audioConfigs && Object.keys(designMetadata.audioConfigs).map(fileId => {
                   const config = designMetadata.audioConfigs[fileId];
                   if (!config.enabled || !config.audioPreview) return null;
-                  
+
                   return (
                     <audio
                       key={fileId}
@@ -352,7 +352,7 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
 
               {/* Play controls */}
               {(currentFile?.type === 'video' || audioConfig?.enabled) && (
-                <button 
+                <button
                   className="absolute bottom-4 right-4 w-12 h-12 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 transition-all"
                   onClick={togglePlay}
                 >
@@ -456,13 +456,12 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
               {files.map((file, index) => {
                 const hasAudio = designMetadata?.audioConfigs?.[file.id]?.enabled;
                 return (
-                  <div 
-                    key={file.id} 
-                    className={`p-3 rounded cursor-pointer transition-colors ${
-                      index === currentFileIndex 
-                        ? 'bg-blue-50 border-l-4 border-blue-500' 
+                  <div
+                    key={file.id}
+                    className={`p-3 rounded cursor-pointer transition-colors ${index === currentFileIndex
+                        ? 'bg-blue-50 border-l-4 border-blue-500'
                         : 'hover:bg-gray-100'
-                    }`}
+                      }`}
                     onClick={() => {
                       setCurrentFileIndex(index);
                       setIsPlaying(false);
@@ -528,7 +527,7 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
               <h3 className="font-semibold mb-3">Upload Progress</h3>
               <div className="space-y-2">
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-green-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
@@ -541,14 +540,14 @@ const FeedPreview = ({ files, formData, designMetadata, onUpload, onBack, loadin
       </div>
 
       <div className="p-6 border-t flex justify-between">
-        <button 
+        <button
           onClick={onBack}
           disabled={loading}
           className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           ← Back
         </button>
-        <button 
+        <button
           onClick={onUpload}
           disabled={loading}
           className="px-6 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
