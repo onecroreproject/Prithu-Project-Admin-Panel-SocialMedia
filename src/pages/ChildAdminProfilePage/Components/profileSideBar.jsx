@@ -6,8 +6,8 @@ import { useAdminAuth } from "../../../context/adminAuthContext";
 import { useAdminProfile } from "../../../context/adminProfileContext";
 
 export default function ProfileSidebar({ profile, handleAction, setProfile }) {
-  const { role } = useAdminAuth(); 
-  const {updateProfile}=useAdminProfile()
+  const { role } = useAdminAuth();
+  const { updateProfile } = useAdminProfile()
   const isChildAdmin = role === "Child_Admin";
 
   const [isEditing, setIsEditing] = useState(false);
@@ -112,9 +112,8 @@ export default function ProfileSidebar({ profile, handleAction, setProfile }) {
       <div className="flex justify-center space-x-3 mb-4">
         <button
           onClick={() => handleAction(profile.isActive ? "block" : "unblock")}
-          className={`px-3 py-1 rounded ${
-            profile.isActive ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
-          }`}
+          className={`px-3 py-1 rounded ${profile.isActive ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
+            }`}
         >
           <FaBan className="inline-block mr-1" />
           {profile.isActive ? "Block" : "Unblock"}
@@ -131,17 +130,17 @@ export default function ProfileSidebar({ profile, handleAction, setProfile }) {
       <div className="w-full mt-4">
         <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
           Social Media Links
-          {isChildAdmin&&<button
+          {isChildAdmin && <button
             onClick={handleEditToggle}
             className="ml-auto flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
           >
             <FaEdit /> {isEditing ? "Cancel" : "Edit"}
           </button>}
-       
+
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-700 w-full">
-          {["facebook", "instagram", "twitter", "linkedin", "github", "youtube", "website"].map(
-            (key,idx) => (
+          {["facebook", "instagram", "twitter", "youtube"].map(
+            (key, idx) => (
               <div key={idx}>
                 {isEditing ? (
                   <input

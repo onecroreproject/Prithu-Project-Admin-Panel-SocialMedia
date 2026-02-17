@@ -41,13 +41,10 @@ const AdminCompanyPage = () => {
     phone: '',
     address: '',
     socialMedia: {
-      website: '',
-      linkedin: '',
       twitter: '',
       instagram: '',
       facebook: '',
       youtube: '',
-      github: '',
       telegram: '',
       whatsapp: ''
     },
@@ -90,13 +87,10 @@ const AdminCompanyPage = () => {
         phone: data.phone || '',
         address: data.address || '',
         socialMedia: data.socialMedia || {
-          website: '',
-          linkedin: '',
           twitter: '',
           instagram: '',
           facebook: '',
           youtube: '',
-          github: '',
           telegram: '',
           whatsapp: ''
         },
@@ -318,8 +312,8 @@ const AdminCompanyPage = () => {
               <button
                 onClick={toggleCompanyStatus}
                 className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${formData.isActive
-                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
                   }`}
               >
                 {formData.isActive ? (
@@ -346,8 +340,8 @@ const AdminCompanyPage = () => {
 
           {/* Status Indicator */}
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${formData.isActive
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
+            ? 'bg-green-100 text-green-800'
+            : 'bg-red-100 text-red-800'
             }`}>
             {formData.isActive ? (
               <>
@@ -459,8 +453,8 @@ const AdminCompanyPage = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                 >
                   {tab.icon}
@@ -589,13 +583,10 @@ const AdminCompanyPage = () => {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[
-                    { key: 'website', label: 'Website', placeholder: 'https://prithu.com' },
-                    { key: 'linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/company/prithu' },
                     { key: 'twitter', label: 'Twitter/X', placeholder: 'https://twitter.com/prithu' },
                     { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/prithu' },
                     { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/prithu' },
                     { key: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/c/prithu' },
-                    { key: 'github', label: 'GitHub', placeholder: 'https://github.com/prithu' },
                     { key: 'telegram', label: 'Telegram', placeholder: 'https://t.me/prithu' },
                     { key: 'whatsapp', label: 'WhatsApp', placeholder: 'https://wa.me/1234567890' }
                   ].map(social => (

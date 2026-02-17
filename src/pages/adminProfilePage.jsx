@@ -5,7 +5,7 @@ import { useAdminProfile } from "../context/adminProfileContext";
 
 export default function AdminProfileEdit({ isOpen = true, onClose }) {
   const { profile, updateProfile, updating } = useAdminProfile();
- 
+
   // ✅ Initialize formData and socialLinks with fallback
   const getInitialFormData = () => ({
     displayName: profile?.displayName || "N/A",
@@ -26,10 +26,7 @@ export default function AdminProfileEdit({ isOpen = true, onClose }) {
     facebook: profile?.socialLinks?.facebook || "",
     instagram: profile?.socialLinks?.instagram || "",
     twitter: profile?.socialLinks?.twitter || "",
-    linkedin: profile?.socialLinks?.linkedin || "",
-    github: profile?.socialLinks?.github || "",
     youtube: profile?.socialLinks?.youtube || "",
-    website: profile?.socialLinks?.website || "",
   });
 
   const [formData, setFormData] = useState(getInitialFormData());
@@ -94,42 +91,42 @@ export default function AdminProfileEdit({ isOpen = true, onClose }) {
   };
 
   // ✅ Submit Profile Update
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const changedData = {};
-  Object.keys(formData).forEach((key) => {
-    if (formData[key] !== originalData[key] && formData[key] !== "N/A") {
-      changedData[key] = formData[key];
+    const changedData = {};
+    Object.keys(formData).forEach((key) => {
+      if (formData[key] !== originalData[key] && formData[key] !== "N/A") {
+        changedData[key] = formData[key];
+      }
+    });
+
+    const changedSocialLinks = {};
+    Object.keys(socialLinks).forEach((key) => {
+      if (socialLinks[key] !== originalSocialLinks[key]) {
+        changedSocialLinks[key] = socialLinks[key];
+      }
+    });
+
+    if (Object.keys(changedSocialLinks).length > 0) changedData.socialLinks = changedSocialLinks;
+
+    if (Object.keys(changedData).length === 0 && !avatar) {
+      alert("No changes to update.");
+      return;
     }
-  });
 
-  const changedSocialLinks = {};
-  Object.keys(socialLinks).forEach((key) => {
-    if (socialLinks[key] !== originalSocialLinks[key]) {
-      changedSocialLinks[key] = socialLinks[key];
+    const res = await updateProfile(changedData, avatar);
+    if (res?.success) {
+      alert("Profile updated successfully!");
+      setEditMode(false);
+      setSocialEditMode(false);
+      onClose && onClose();
+      setOriginalData(formData);
+      setOriginalSocialLinks(socialLinks);
+    } else {
+      alert(res?.message || "Update failed");
     }
-  });
-
-  if (Object.keys(changedSocialLinks).length > 0) changedData.socialLinks = changedSocialLinks;
-
-  if (Object.keys(changedData).length === 0 && !avatar) {
-    alert("No changes to update.");
-    return;
-  }
-
-  const res = await updateProfile(changedData, avatar);
-  if (res?.success) {
-    alert("Profile updated successfully!");
-    setEditMode(false);
-    setSocialEditMode(false);
-    onClose && onClose();
-    setOriginalData(formData);
-    setOriginalSocialLinks(socialLinks);
-  } else {
-    alert(res?.message || "Update failed");
-  }
-};
+  };
 
 
   const handleCopy = (text) => {

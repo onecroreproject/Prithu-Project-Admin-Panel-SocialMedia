@@ -104,7 +104,8 @@ const mainNavItems = [
     permission: "canFaqManagement",
     subItems: [
       { name: "FAQ Settings", path: "/settings/faq/management", permission: "canFaqManagement" },
-      { name: "User Feedbacks", path: "/settings/reportandfeedback/management", permission: "canManageUserFeedbacks" },
+      { name: "Support Management", path: "/settings/reportandfeedback/management", permission: "canManageUserFeedbacks" },
+      { name: "Footer Settings", path: "/settings/footer/management", permission: "canManageSettings" },
       { name: "Company Info", path: "/settings/company/info", permission: "canViewSystemLogs" },
     ],
   },
@@ -334,7 +335,7 @@ const SocialMediaSidebar = ({ user }) => {
                   group flex items-center gap-3 w-full px-3 py-3 rounded-xl
                   transition-all duration-300 ease-out
                   ${isSubmenuOpen || hasActiveChild
-                    ? "bg-gradient-to-r from-blue-50 to-blue-50/70 dark:from-blue-900/20 dark:to-blue-900/10 text-blue-600 dark:text-blue-400"
+                    ? "bg-linear-to-r from-blue-50 to-blue-50/70 dark:from-blue-900/20 dark:to-blue-900/10 text-blue-600 dark:text-blue-400"
                     : "hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                   }
                   ${showAsActive ? "ring-1 ring-blue-500/20" : ""}
@@ -342,7 +343,7 @@ const SocialMediaSidebar = ({ user }) => {
                 tabIndex={0}
               >
                 <span className={`
-                  flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0
+                  flex items-center justify-center w-8 h-8 rounded-lg shrink-0
                   transition-all duration-300
                   ${isSubmenuOpen || hasActiveChild
                     ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
@@ -395,7 +396,7 @@ const SocialMediaSidebar = ({ user }) => {
                   group flex items-center gap-3 px-3 py-3 rounded-xl
                   transition-all duration-300 ease-out relative
                   ${showAsActive
-                    ? "bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-900/10 text-blue-600 dark:text-blue-400"
+                    ? "bg-linear-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-900/10 text-blue-600 dark:text-blue-400"
                     : "hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                   }
                 `}
@@ -409,7 +410,7 @@ const SocialMediaSidebar = ({ user }) => {
                 )}
 
                 <span className={`
-                  flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0
+                  flex items-center justify-center w-8 h-8 rounded-lg shrink-0
                   transition-all duration-300 relative z-10
                   ${showAsActive
                     ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
@@ -471,7 +472,7 @@ const SocialMediaSidebar = ({ user }) => {
                               className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-blue-500 rounded-r-full"
                             />
                           )}
-                          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 mr-2.5 flex-shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 mr-2.5 shrink-0" />
                           {subItem.name}
                         </Link>
                       </li>
@@ -512,7 +513,7 @@ const SocialMediaSidebar = ({ user }) => {
         {/* Logo section */}
         <div className={`
           py-6 px-4 flex items-center border-b border-gray-100 dark:border-gray-800
-          transition-all duration-500 bg-gradient-to-r from-white to-gray-50/50 
+          transition-all duration-500 bg-linear-to-r from-white to-gray-50/50 
           dark:from-gray-900 dark:to-gray-900/50
           ${isHovered || isMobileOpen ? "justify-start" : "justify-center"}
         `}>
@@ -527,7 +528,7 @@ const SocialMediaSidebar = ({ user }) => {
                 alt="Logo"
                 className="w-10 h-10 rounded-xl shadow-lg"
               />
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/20 to-transparent" />
+              <div className="absolute inset-0 rounded-xl bg-linear-to-br from-blue-500/20 to-transparent" />
             </motion.div>
             <AnimatePresence mode="wait">
               {(isHovered || isMobileOpen) && (
@@ -588,7 +589,7 @@ const SocialMediaSidebar = ({ user }) => {
         {user && !isHovered && !isMobileOpen && (
           <div className="p-4 border-t border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-300 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-blue-300 flex items-center justify-center text-white font-bold text-sm shadow-lg">
                 {user.name?.charAt(0).toUpperCase() || "U"}
               </div>
             </div>

@@ -38,11 +38,7 @@ const AdminFeedbackPage = () => {
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
-    in_review: 0,
-    resolved: 0,
-    rejected: 0,
-    feedback: 0,
-    report: 0
+    resolved: 0
   });
   const [filters, setFilters] = useState({
     search: '',
@@ -105,41 +101,38 @@ const AdminFeedbackPage = () => {
     setLoading(true);
     try {
       const params = {
-        ...filters,
+        status: filters.status,
         page: currentPage,
         limit: 20
       };
 
-      const response = await axios.get('/api/admin/feedback', { params });
+      const response = await axios.get('/api/admin/support-queries', { params });
       setFeedbacks(response.data.data);
       setTotalPages(Math.ceil(response.data.total / 20));
 
-      // Calculate stats from current data
-      calculateStats(response.data.data);
+      calculateStats(response.data.data, response.data.total);
     } catch (error) {
-      console.error('Error fetching feedbacks:', error);
+      console.error('Error fetching support queries:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateStats = (data) => {
+  const calculateStats = (data, total) => {
     const newStats = {
-      total: data.length,
+      total: total || data.length,
       pending: 0,
-      in_review: 0,
-      resolved: 0,
-      rejected: 0,
-      feedback: 0,
-      report: 0
+      resolved: 0
     };
 
+    // Note: In a real scenario, we might want a separate stats endpoint
+    // for now we'll estimate from the current page if total breakdown isn't provided
     data.forEach(item => {
-      newStats[item.status]++;
-      newStats[item.type]++;
+      if (item.status === 'pending') newStats.pending++;
+      if (item.status === 'resolved') newStats.resolved++;
     });
 
-    setStats(newStats);
+    setStats(prev => ({ ...prev, ...newStats }));
   };
 
   const handleStatusUpdate = async (id, status) => {
@@ -150,7 +143,7 @@ const AdminFeedbackPage = () => {
         payload.adminNote = editingNote;
       }
 
-      await axios.put(`/api/admin/feedback/${id}`, payload);
+      await axios.put(`/api/admin/support-queries/${id}`, { status });
 
       // Update local state
       setFeedbacks(prev => prev.map(item =>
@@ -221,18 +214,12 @@ const AdminFeedbackPage = () => {
   const exportData = () => {
     const csvData = feedbacks.map(item => ({
       ID: item._id,
-      Type: item.type,
-      Section: item.section,
-      Category: item.category,
-      Title: item.title || 'N/A',
+      Subject: item.subject || 'N/A',
       Status: item.status,
-      'Submitted By': item.userId?.userName || 'Guest',
-      Email: item.userId?.email || 'N/A',
+      'Submitted By': item.userId?.userName || item.name || 'Guest',
+      Email: item.userId?.email || item.email || 'N/A',
       Message: item.message.replace(/,/g, ';'),
-      'Admin Note': item.adminNote || 'N/A',
       'Created At': new Date(item.createdAt).toLocaleString(),
-      Platform: item.platform || 'N/A',
-      Device: item.device || 'N/A'
     }));
 
     const headers = Object.keys(csvData[0] || {});
@@ -256,8 +243,8 @@ const AdminFeedbackPage = () => {
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Feedback & Reports Management</h1>
-              <p className="text-gray-600 mt-1">Manage user feedback and reports</p>
+              <h1 className="text-2xl font-bold text-gray-900">Support Management</h1>
+              <p className="text-gray-600 mt-1">Manage user support queries and requests</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -274,16 +261,16 @@ const AdminFeedbackPage = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
-          <div className="bg-white rounded-xl border p-4 shadow-sm">
+          <div className="bg-white rounded-xl border p-4 shadow-sm col-span-2">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total</p>
+                <p className="text-sm text-gray-600">Total Queries</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
               </div>
               <BarChart className="w-8 h-8 text-blue-500" />
             </div>
           </div>
-          <div className="bg-white rounded-xl border p-4 shadow-sm">
+          <div className="bg-white rounded-xl border p-4 shadow-sm col-span-2">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Pending</p>
@@ -292,49 +279,13 @@ const AdminFeedbackPage = () => {
               <Clock className="w-8 h-8 text-yellow-500" />
             </div>
           </div>
-          <div className="bg-white rounded-xl border p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">In Review</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.in_review}</p>
-              </div>
-              <Eye className="w-8 h-8 text-blue-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border p-4 shadow-sm">
+          <div className="bg-white rounded-xl border p-4 shadow-sm col-span-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Resolved</p>
                 <p className="text-2xl font-bold text-green-600">{stats.resolved}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Rejected</p>
-                <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
-              </div>
-              <X className="w-8 h-8 text-red-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Feedback</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.feedback}</p>
-              </div>
-              <MessageSquare className="w-8 h-8 text-blue-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Reports</p>
-                <p className="text-2xl font-bold text-red-600">{stats.report}</p>
-              </div>
-              <AlertTriangle className="w-8 h-8 text-red-500" />
             </div>
           </div>
         </div>
@@ -480,7 +431,7 @@ const AdminFeedbackPage = () => {
                     User
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Section & Category
+                    Query Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -524,17 +475,12 @@ const AdminFeedbackPage = () => {
                         {/* Details Column */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${item.type === 'feedback' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'
-                              }`}>
-                              {item.type === 'feedback' ? (
-                                <MessageSquare className="w-5 h-5" />
-                              ) : (
-                                <AlertTriangle className="w-5 h-5" />
-                              )}
+                            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+                              <MessageSquare className="w-5 h-5" />
                             </div>
                             <div>
                               <div className="font-medium text-gray-900 text-sm">
-                                {item.title || 'No Title'}
+                                {item.subject || 'No Subject'}
                               </div>
                               <div className="text-gray-500 text-xs mt-1 truncate max-w-xs">
                                 {item.message}
@@ -553,12 +499,16 @@ const AdminFeedbackPage = () => {
                               <div className="text-gray-500 text-xs">
                                 {item.userId.email}
                               </div>
-                              <div className="text-gray-400 text-xs mt-1">
-                                {item.platform}
-                              </div>
                             </div>
                           ) : (
-                            <span className="text-gray-500 text-sm">Guest</span>
+                            <div>
+                              <div className="font-medium text-gray-900 text-sm">
+                                {item.name || 'Guest'}
+                              </div>
+                              <div className="text-gray-500 text-xs">
+                                {item.email || 'N/A'}
+                              </div>
+                            </div>
                           )}
                         </td>
 
@@ -566,14 +516,11 @@ const AdminFeedbackPage = () => {
                         <td className="px-6 py-4">
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                              {getSectionIcon(item.section)}
-                              <span className="text-sm text-gray-900 capitalize">
-                                {item.section.replace('_', ' ')}
+                              <FileText className="w-4 h-4" />
+                              <span className="text-sm text-gray-900">
+                                Support Request
                               </span>
                             </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(item.category)}`}>
-                              {item.category.replace('_', ' ')}
-                            </span>
                           </div>
                         </td>
 
