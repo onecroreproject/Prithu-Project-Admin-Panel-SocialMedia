@@ -15,8 +15,110 @@ import {
     ChevronRight,
     ArrowLeft,
     X,
-    FileSearch
+    FileSearch,
+    Database as DbIcon,
+    TerminalSquare,
+    Trash2,
+    Play,
+    Square,
+    RotateCcw,
+    Info,
+    ShieldAlert,
+    Zap,
+    History,
+    Eraser,
+    Search,
+    PlayCircle,
+    PauseCircle
 } from 'lucide-react';
+
+const LogViewerModal = ({ isOpen, onClose }) => {
+    const [logs, setLogs] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const fetchLogs = async () => {
+        setLoading(true);
+        try {
+            const response = await api.get('/api/admin/server/logs');
+            if (response.data.success) {
+                setLogs(response.data.logs);
+            }
+        } catch (err) {
+            setError("Failed to load logs");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const flushLogs = async () => {
+        if (!window.confirm("Are you sure you want to clear all PM2 logs? This cannot be undone.")) return;
+        try {
+            const response = await api.post('/api/admin/server/logs/flush');
+            if (response.data.success) {
+                alert("Logs cleared successfully");
+                setLogs('Logs flushed.');
+            }
+        } catch (err) {
+            alert("Failed to flush logs");
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) fetchLogs();
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-gray-900 w-full max-w-4xl rounded-3xl shadow-2xl border border-gray-800 overflow-hidden flex flex-col max-h-[85vh]">
+                <div className="p-6 border-b border-gray-800 flex items-center justify-between bg-black/40">
+                    <div className="flex items-center gap-3">
+                        <TerminalSquare className="text-green-500 w-6 h-6" />
+                        <div>
+                            <h2 className="font-bold text-white text-lg">System Logs</h2>
+                            <p className="text-[10px] text-gray-500 font-mono">Real-time tail -n 100 output</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button onClick={fetchLogs} className="p-2 hover:bg-gray-800 rounded-xl transition-colors text-gray-400" title="Refresh Logs">
+                            <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        </button>
+                        <button onClick={flushLogs} className="p-2 hover:bg-red-500/20 hover:text-red-500 rounded-xl transition-colors text-gray-400" title="Clear All Logs">
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={onClose} className="p-2 hover:bg-gray-800 rounded-full transition-colors text-gray-400">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-auto p-4 bg-black/20 font-mono text-[11px] leading-relaxed no-scrollbar">
+                    {loading ? (
+                        <div className="h-full flex items-center justify-center text-gray-500 animate-pulse">Streaming logs...</div>
+                    ) : error ? (
+                        <div className="h-full flex items-center justify-center text-red-500">{error}</div>
+                    ) : (
+                        <pre className="text-gray-300 whitespace-pre-wrap selection:bg-blue-500/30">
+                            {logs || "No logs available."}
+                        </pre>
+                    )}
+                </div>
+
+                <div className="p-4 bg-black/40 border-t border-gray-800 flex justify-between items-center">
+                    <div className="flex gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-green-500 shadow-sm shadow-green-500/50"></div>
+                            <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Active Stream</span>
+                        </div>
+                    </div>
+                    <p className="text-[10px] text-gray-600 font-bold italic">Restricted Access • Audit Enabled</p>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const FolderExplorerModal = ({ isOpen, onClose }) => {
     const [path, setPath] = useState('');
@@ -151,9 +253,19 @@ const ServerManagement = () => {
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [isExplorerOpen, setIsExplorerOpen] = useState(false);
+    const [isLogOpen, setIsLogOpen] = useState(false);
+    const [dbStats, setDbStats] = useState(null);
+    const [dbLoading, setDbLoading] = useState(true);
+    const [redisStats, setRedisStats] = useState(null);
+    const [redisLoading, setRedisLoading] = useState(true);
+    const [cronStatus, setCronStatus] = useState([]);
+    const [cronLoading, setCronLoading] = useState(true);
 
     const fetchStats = async (isManual = false) => {
         if (isManual) setRefreshing(true);
+        fetchDbStats();
+        fetchRedisStats();
+        fetchCronStatus();
         try {
             // const token = localStorage.getItem('adminToken'); // Token handling should be in apiClient
             const response = await api.get('/api/admin/server/status'); // Changed to apiClient.get
@@ -168,6 +280,99 @@ const ServerManagement = () => {
         } finally {
             setLoading(false);
             setRefreshing(false);
+        }
+    };
+
+    const fetchDbStats = async () => {
+        setDbLoading(true);
+        try {
+            const response = await api.get('/api/admin/db/stats');
+            if (response.data.success) {
+                setDbStats(response.data.data);
+            }
+        } catch (err) {
+            console.error("DB Stats Error");
+        } finally {
+            setDbLoading(false);
+        }
+    };
+
+    const triggerBackup = async () => {
+        if (!window.confirm("This will create a full database backup. It may take a moment depending on data size. Proceed?")) return;
+        try {
+            const response = await api.post('/api/admin/db/backup');
+            if (response.data.success) {
+                alert(`Backup success: ${response.data.data.fileName}`);
+            }
+        } catch (err) {
+            alert("Backup failed. Check server logs.");
+        }
+    };
+
+    const fetchRedisStats = async () => {
+        setRedisLoading(true);
+        try {
+            const response = await api.get('/api/admin/redis/stats');
+            if (response.data.success) setRedisStats(response.data.data);
+        } catch (err) {
+            console.error("Redis Stats Error");
+        } finally {
+            setRedisLoading(false);
+        }
+    };
+
+    const fetchCronStatus = async () => {
+        setCronLoading(true);
+        try {
+            const response = await api.get('/api/admin/cron/status');
+            if (response.data.success) setCronStatus(response.data.data);
+        } catch (err) {
+            console.error("Cron Status Error");
+        } finally {
+            setCronLoading(false);
+        }
+    };
+
+    const handleRedisFlush = async () => {
+        if (!window.confirm("CRITICAL: This will clear the entire Redis cache. This may temporarily increase database load. Proceed?")) return;
+        try {
+            const response = await api.post('/api/admin/redis/flush');
+            if (response.data.success) {
+                alert("Redis cache flushed successfully");
+                fetchRedisStats();
+            }
+        } catch (err) {
+            alert("Flush failed");
+        }
+    };
+
+    const handleTriggerCron = async (taskId, taskName) => {
+        if (!window.confirm(`Manually trigger '${taskName}' now?`)) return;
+        try {
+            const response = await api.post('/api/admin/cron/trigger', { taskId });
+            if (response.data.success) {
+                alert(`Task '${taskName}' started successfully`);
+            }
+        } catch (err) {
+            alert(`Trigger failed: ${err.response?.data?.message || err.message}`);
+        }
+    };
+
+    const handleProcessAction = async (action, processName = 'all') => {
+        const confirmMsg = action === 'stop'
+            ? `WARNING: This will STOP the ${processName} process, taking the application offline. Continue?`
+            : `Are you sure you want to ${action} ${processName}?`;
+
+        if (!window.confirm(confirmMsg)) return;
+
+        try {
+            const response = await api.post('/api/admin/server/process/manage', { action, processName });
+            if (response.data.success) {
+                alert(`Process ${action} initiated successfully.`);
+                fetchStats();
+            }
+        } catch (err) {
+            alert(`Action failed: ${err.response?.data?.message || err.message}`);
         }
     };
 
@@ -305,6 +510,62 @@ const ServerManagement = () => {
                 </div>
             </div>
 
+            {/* Action Center - NEW */}
+            <div className="bg-linear-to-br from-gray-900 to-gray-800 p-8 rounded-[2rem] text-white shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-12 opacity-5 scale-150 rotate-12 group-hover:rotate-0 transition-transform duration-1000">
+                    <ShieldAlert className="w-32 h-32" />
+                </div>
+
+                <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+                    <div className="max-w-md">
+                        <h2 className="text-2xl font-black mb-2 flex items-center gap-2">
+                            <TerminalSquare className="text-blue-400" />
+                            Process Action Center
+                        </h2>
+                        <p className="text-gray-400 text-sm leading-relaxed">
+                            Manage your application lifecycle with whitelisted PM2 commands. All actions are
+                            <span className="text-blue-400 font-bold"> Audit Logged </span>
+                            for security compliance.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full lg:w-auto">
+                        <button
+                            onClick={() => handleProcessAction('restart')}
+                            className="bg-blue-600 hover:bg-blue-500 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20"
+                        >
+                            <RotateCcw className="w-6 h-6" />
+                            <div className="text-center">
+                                <p className="font-bold text-sm">Restart All</p>
+                                <p className="text-[10px] opacity-70">Graceful reboot</p>
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={() => handleProcessAction('reload')}
+                            className="bg-green-600 hover:bg-green-500 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20"
+                        >
+                            <RefreshCcw className="w-6 h-6" />
+                            <div className="text-center">
+                                <p className="font-bold text-sm">Reload Zero</p>
+                                <p className="text-[10px] opacity-70">Zero-downtime</p>
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={() => handleProcessAction('stop')}
+                            className="bg-red-600 hover:bg-red-500 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-500/20"
+                        >
+                            <Square className="w-6 h-6" />
+                            <div className="text-center">
+                                <p className="font-bold text-sm">Critical Stop</p>
+                                <p className="text-[10px] opacity-70">Shutdown backend</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* Detailed Info Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* PM2 Processes Table */}
@@ -355,23 +616,166 @@ const ServerManagement = () => {
 
                 {/* Hardware/Network Details */}
                 <div className="space-y-6">
+                    {/* Redis Dashboard - NEW */}
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-8 transform translate-x-4 -translate-y-4 opacity-5 group-hover:rotate-12 transition-transform duration-1000">
+                            <Zap className="w-24 h-24 text-red-500" />
+                        </div>
+
+                        <div className="flex items-center justify-between mb-6 relative z-10">
+                            <h2 className="font-bold flex items-center gap-2">
+                                <Zap className="text-red-500 w-5 h-5" />
+                                Redis Cache Hub
+                            </h2>
+                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${redisStats?.status === 'ready' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {redisStats?.status || 'Offline'}
+                            </span>
+                        </div>
+
+                        {redisLoading ? (
+                            <div className="py-4 animate-pulse space-y-3">
+                                <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded w-full"></div>
+                                <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded w-5/6"></div>
+                            </div>
+                        ) : redisStats ? (
+                            <div className="space-y-4 relative z-10">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-3 bg-gray-50 dark:bg-gray-900/30 rounded-2xl">
+                                        <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Used Memory</p>
+                                        <p className="font-black text-gray-800 dark:text-gray-100">{redisStats.memory.used}</p>
+                                    </div>
+                                    <div className="p-3 bg-gray-50 dark:bg-gray-900/30 rounded-2xl">
+                                        <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Cache Hits</p>
+                                        <p className="font-black text-blue-600">{redisStats.performance.hitRatio}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-[11px] font-bold">
+                                        <span className="text-gray-500 uppercase tracking-tighter">Total Keys</span>
+                                        <span className="text-gray-900 dark:text-gray-100 tabular-nums">{redisStats.keys.total}</span>
+                                    </div>
+                                    <div className="flex justify-between text-[11px] font-bold">
+                                        <span className="text-gray-500 uppercase tracking-tighter">Connected Clients</span>
+                                        <span className="text-gray-900 dark:text-gray-100 tabular-nums">{redisStats.clients}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-gray-50 dark:border-gray-700 flex gap-2">
+                                    <button
+                                        onClick={handleRedisFlush}
+                                        className="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-500/20"
+                                    >
+                                        <Eraser className="w-3 h-3" /> Flush DB
+                                    </button>
+                                </div>
+                            </div>
+                        ) : null}
+                    </div>
+
+                    {/* Cron Manager - NEW */}
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col">
+                        <div className="p-6 border-b border-gray-50 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/10">
+                            <h2 className="font-bold flex items-center gap-2">
+                                <History className="text-purple-500 w-5 h-5" />
+                                Automated Task Registry
+                            </h2>
+                            <p className="text-[10px] text-gray-400 font-mono mt-1 uppercase tracking-tighter">Manage internal node-cron schedules</p>
+                        </div>
+
+                        <div className="divide-y divide-gray-50 dark:divide-gray-700 max-h-[300px] overflow-y-auto no-scrollbar">
+                            {cronLoading ? (
+                                <div className="p-8 text-center text-gray-400 animate-pulse text-xs">Fetching schedules...</div>
+                            ) : cronStatus.map((cron, i) => (
+                                <div key={i} className="p-4 hover:bg-gray-50/50 dark:hover:bg-gray-900/20 transition-all flex items-center justify-between group">
+                                    <div className="flex-1 pr-4">
+                                        <h4 className="font-bold text-sm text-gray-800 dark:text-gray-100 leading-none">{cron.name}</h4>
+                                        <p className="text-[10px] text-purple-600 font-mono mt-1">{cron.schedule}</p>
+                                        <p className="text-[9px] text-gray-400 mt-1 line-clamp-1">{cron.description}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleTriggerCron(cron.id, cron.name)}
+                                        className="p-2.5 bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-purple-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                        title="Trigger Manually"
+                                    >
+                                        <PlayCircle className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-3 bg-purple-50 dark:bg-purple-900/10 text-center border-t border-purple-100 dark:border-purple-800/30">
+                            <p className="text-[9px] text-purple-600 font-bold italic uppercase">Audit Logging Enabled for Manual Triggers</p>
+                        </div>
+                    </div>
+
+                    {/* Database Hub */}
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <h2 className="font-bold flex items-center gap-2 mb-6">
-                            <Network className="text-blue-500 w-5 h-5" />
-                            System Environment
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="font-bold flex items-center gap-2">
+                                <DbIcon className="text-green-500 w-5 h-5" />
+                                Database Hub
+                            </h2>
+                            <button
+                                onClick={triggerBackup}
+                                className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-green-100 text-green-700 rounded-full hover:bg-green-500 hover:text-white transition-all"
+                            >
+                                Trigger Backup
+                            </button>
+                        </div>
+
+                        {dbLoading ? (
+                            <div className="py-4 animate-pulse space-y-2">
+                                <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded w-1/2"></div>
+                                <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded w-full"></div>
+                            </div>
+                        ) : dbStats ? (
+                            <div className="space-y-4">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Database Engine</span>
+                                    <span className="font-bold underline cursor-help decoration-blue-500/30" title="MongoDB 6.0 Enterprise">MongoDB Cluster</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Total Data Size</span>
+                                    <span className="font-bold text-green-600">{dbStats.dataSize}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Storage Used</span>
+                                    <span className="font-bold">{dbStats.storageSize}</span>
+                                </div>
+
+                                <div className="pt-4 border-t border-gray-50 dark:border-gray-700">
+                                    <p className="text-[10px] text-gray-400 uppercase font-black mb-2 tracking-widest">Top Collections</p>
+                                    <div className="space-y-2">
+                                        {dbStats.collectionDetails.slice(0, 3).map((col, i) => (
+                                            <div key={i} className="flex justify-between text-[11px] font-bold">
+                                                <span className="text-gray-400">{col.name}</span>
+                                                <span className="text-blue-500">{col.size}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="py-6 text-center text-gray-400 italic text-sm">Database stats unavailable</div>
+                        )}
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative group cursor-pointer" onClick={() => setIsLogOpen(true)}>
+                        <h2 className="font-bold flex items-center gap-2 mb-4">
+                            <Terminal className="text-blue-500 w-5 h-5" />
+                            Live Logs Console
                         </h2>
-                        <div className="grid grid-cols-2 gap-y-4 text-sm">
-                            <div className="text-gray-500">Operating System</div>
-                            <div className="font-bold text-right">{stats.os.type} {stats.os.release}</div>
-
-                            <div className="text-gray-500">Platform</div>
-                            <div className="font-bold text-right capitalize">{stats.os.platform} ({stats.os.arch})</div>
-
-                            <div className="text-gray-500">Hostname</div>
-                            <div className="font-bold text-right truncate pl-4">{stats.os.hostname}</div>
-
-                            <div className="text-gray-500">Process Node Uptime</div>
-                            <div className="font-bold text-right text-blue-600">{formatUptime(stats.uptime.process)}</div>
+                        <p className="text-xs text-gray-500 leading-relaxed mb-4">
+                            Access the latest application runtime logs. Vital for tracking errors and runtime behavior in production.
+                        </p>
+                        <div className="bg-gray-900 rounded-xl p-3 font-mono text-[9px] text-green-500 overflow-hidden h-12 relative">
+                            <div className="animate-pulse">
+                                [INFO] Server stabilized on port 5000... <br />
+                                [AUTH] Admin heartbeat detected...
+                            </div>
+                            <div className="absolute inset-0 bg-linear-to-t from-gray-900 via-transparent flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">Open Terminal</span>
+                            </div>
                         </div>
                     </div>
 
@@ -392,6 +796,11 @@ const ServerManagement = () => {
             <FolderExplorerModal
                 isOpen={isExplorerOpen}
                 onClose={() => setIsExplorerOpen(false)}
+            />
+
+            <LogViewerModal
+                isOpen={isLogOpen}
+                onClose={() => setIsLogOpen(false)}
             />
         </div>
     );
