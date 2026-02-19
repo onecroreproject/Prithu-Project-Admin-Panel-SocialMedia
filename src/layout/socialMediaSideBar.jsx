@@ -109,6 +109,12 @@ const mainNavItems = [
       { name: "Company Info", path: "/settings/company/info", permission: "canViewSystemLogs" },
     ],
   },
+  {
+    icon: <HardDrive className="w-5 h-5" />,
+    name: "Server Management",
+    path: "/settings/server/management",
+    permission: "canViewSystemLogs"
+  },
 ];
 
 const SocialMediaSidebar = ({ user }) => {

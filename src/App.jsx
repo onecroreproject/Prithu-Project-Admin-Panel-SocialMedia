@@ -74,6 +74,7 @@ import AdminFeedbackPage from "./pages/feedbackandReportpage";
 import AdminStudioLayout from "./pages/AdminStudio/studioLayout";
 import AdminFaqPage from "./pages/faqPage";
 import FooterManagementPage from "./pages/footerManagementPage";
+import ServerManagement from "./pages/AdminPages/ServerManagement";
 
 // Create separate dashboard components or use existing ones
 // For now, we'll use SocialMediaDashboard as a placeholder for analytics
@@ -143,6 +144,7 @@ function AnimatedRoutes() {
           <Route path="/settings/faq/management" element={<AdminFaqPage />} />
           <Route path="/settings/reportandfeedback/management" element={<AdminFeedbackPage />} />
           <Route path="/settings/footer/management" element={<FooterManagementPage />} />
+          <Route path="/settings/server/management" element={<ServerManagement />} />
           <Route path="/settings/admin/studio" element={<AdminStudioLayout />} />
 
           {/* ====== DRIVE MODULE ROUTES ====== */}
