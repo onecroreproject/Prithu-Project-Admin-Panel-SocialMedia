@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import SEOService from "../../Services/seoService";
 import SEOPreview from "../../components/SEO/SEOPreview";
-import { calculateSeoScore } from "../../utils/seoScorer";
+import { calculateSeoScore } from "../../Utils/seoScorer";
 
 const FeedSEOMatagement = () => {
     const [feeds, setFeeds] = useState([]);
