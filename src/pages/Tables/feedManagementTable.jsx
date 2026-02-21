@@ -1,17 +1,19 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, Trash, Calendar, Play, X } from "lucide-react";
+import { Eye, Trash, Calendar, Play, X, Edit } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { fetchFeeds, deleteFeed, removeFeedCategory, fetchCategories } from "../../Services/FeedServices/feedServices";
 import useFeedFilter from "../../hooks/filter";
 import usePagination from "../../hooks/pagePagination";
 import FeedPreviewModal from "../../components/common/FeedPreviewModal";
+import FeedOverlayEditModal from "../../components/common/FeedOverlayEditModal";
 
 export default function FeedManagement() {
   const queryClient = useQueryClient();
   const { filters, handleFilterChange, resetFilters, applyFilters } = useFeedFilter();
   const [selectedFeed, setSelectedFeed] = useState(null);
+  const [editingFeed, setEditingFeed] = useState(null);
 
   // Fetch feeds
   const { data: feeds = [], isLoading: feedsLoading, isError: feedsError, error: feedsErr } = useQuery({
@@ -274,13 +276,21 @@ export default function FeedManagement() {
 
                 {/* ACTION BUTTONS */}
                 <td className="p-2 flex gap-2">
-                  {/* View */}
                   <button
                     className="btn-action"
                     title="View"
                     onClick={() => setSelectedFeed(feed)}
                   >
                     <Eye className="h-4 w-4" />
+                  </button>
+
+                  {/* Edit Overlays */}
+                  <button
+                    className="btn-action text-blue-500 hover:text-blue-700"
+                    title="Edit Overlays"
+                    onClick={() => setEditingFeed(feed)}
+                  >
+                    <Edit className="h-4 w-4" />
                   </button>
 
                   {/* Delete */}
@@ -296,7 +306,8 @@ export default function FeedManagement() {
             ))}
           </tbody>
         </table>
-      )}
+      )
+      }
 
       {/* ============================================
           PAGINATION SECTION
@@ -332,12 +343,26 @@ export default function FeedManagement() {
       {/* ============================================
           FEED PREVIEW MODAL
       ============================================ */}
-      {selectedFeed && (
-        <FeedPreviewModal
-          feed={selectedFeed}
-          onClose={() => setSelectedFeed(null)}
-        />
-      )}
-    </div>
+      {
+        selectedFeed && (
+          <FeedPreviewModal
+            feed={selectedFeed}
+            onClose={() => setSelectedFeed(null)}
+          />
+        )
+      }
+
+      {/* ============================================
+          FEED OVERLAY EDIT MODAL
+      ============================================ */}
+      {
+        editingFeed && (
+          <FeedOverlayEditModal
+            feed={editingFeed}
+            onClose={() => setEditingFeed(null)}
+          />
+        )
+      }
+    </div >
   );
 }

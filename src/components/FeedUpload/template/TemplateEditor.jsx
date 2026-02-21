@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Save, Plus, Layers, Play, Settings, Music, Palette, CheckCircle, X } from 'lucide-react';
 import CanvasPreview from './CanvasPreview';
 import OverlayControls from './OverlayControls';
@@ -43,22 +43,22 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
     const [activeOverlayId, setActiveOverlayId] = useState('avatar');
     const [activeTab, setActiveTab] = useState('layers');
 
-    const handleUpdateOverlay = (id, updates) => {
+    const handleUpdateOverlay = useCallback((id, updates) => {
         setMetadata(prev => ({
             ...prev,
             overlayElements: prev.overlayElements.map(el =>
                 el.id === id ? { ...el, ...updates } : el
             )
         }));
-    };
+    }, []);
 
-    const handleSave = () => {
+    const handleSave = useCallback(() => {
         onSave(fileData.id, metadata);
         if (onUpdateEditMetadata) {
             onUpdateEditMetadata(fileData.id, editMetadata);
         }
         onClose();
-    };
+    }, [fileData.id, metadata, editMetadata, onSave, onUpdateEditMetadata, onClose]);
 
     const activeOverlay = metadata.overlayElements.find(el => el.id === activeOverlayId);
 

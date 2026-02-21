@@ -19,7 +19,8 @@ import {
   Home,
   BarChart3,
   Database,
-  HardDrive
+  HardDrive,
+  Search
 } from "lucide-react";
 
 const mainNavItems = [
@@ -41,7 +42,6 @@ const mainNavItems = [
     permission: "canManageUsers",
     subItems: [
       { name: "User Detail", path: "/social/profile", permission: "canManageUsersDetail" },
-      { name: "User Activity", path: "/social/profile", permission: "canManageUsersDetail" },
     ],
   },
   {
@@ -53,20 +53,12 @@ const mainNavItems = [
     ]
   },
   {
-    icon: <Table className="w-5 h-5" />,
-    name: "Feeds Info",
-    permission: "canManageFeedInfo",
-    subItems: [
-      { name: "Treanding Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
-      { name: "User Feed Request", path: "/social/post/request/approval", permission: "canManageUserFeedRequest" },
-
-    ]
-  },
-  {
     icon: <Users className="w-5 h-5" />,
     name: "Feed Management",
     permission: "canManageFeeds",
     subItems: [
+      { name: "Treanding Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
+      { name: "User Feed Request", path: "/social/post/request/approval", permission: "canManageUserFeedRequest" },
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
     ],
@@ -94,8 +86,6 @@ const mainNavItems = [
     permission: "canManageSettings",
     subItems: [
       { name: "Manage Subscriptions", path: "/settings/subscription/page", permission: "canManageSettingsSubscriptions" },
-      { name: "Billing", path: "/settings/billing", permission: "canViewBilling" },
-      { name: "Plans", path: "/settings/plans", permission: "canManagePlans" },
     ],
   },
   {
@@ -107,6 +97,18 @@ const mainNavItems = [
       { name: "Support Management", path: "/settings/reportandfeedback/management", permission: "canManageUserFeedbacks" },
       { name: "Footer Settings", path: "/settings/footer/management", permission: "canManageSettings" },
       { name: "Company Info", path: "/settings/company/info", permission: "canViewSystemLogs" },
+    ],
+  },
+  {
+    icon: <Search className="w-5 h-5" />,
+    name: "SEO Management",
+    permission: "canManageSettings",
+    subItems: [
+      { name: "SEO Dashboard", path: "/seo/dashboard", permission: "canManageSettings" },
+      { name: "Global Settings", path: "/seo/settings", permission: "canManageSettings" },
+      { name: "Feed SEO", path: "/seo/feeds", permission: "canManageSettings" },
+      { name: "Media SEO", path: "/seo/media", permission: "canManageSettings" },
+      { name: "Redirect Manager", path: "/seo/redirects", permission: "canManageSettings" },
     ],
   },
   {

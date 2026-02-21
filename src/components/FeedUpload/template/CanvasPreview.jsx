@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { clsx } from 'clsx';
 import { Play, Pause, RotateCcw, X } from 'lucide-react';
+import { throttle } from 'lodash';
 import sampleAvatar from '../../../Assets/sampleimage.png';
 
 const FILTER_STYLES = {
@@ -269,8 +270,8 @@ const CanvasPreview = ({
         }
     }, [previewUrl, isVideo, extractDominantColor]);
 
-    // --- BRUSH PAINTING HANDLER ---
-    const handlePaint = (e, overlay, xPercent, yPercent) => {
+    // Throttled Paint Handler
+    const handlePaint = useCallback(throttle((overlay, xPercent, yPercent) => {
         if (!overlay.avatarConfig?.softEdgeConfig?.enabled) return;
 
         const config = overlay.avatarConfig.softEdgeConfig;
@@ -278,7 +279,7 @@ const CanvasPreview = ({
             x: xPercent,
             y: yPercent,
             r: config.brushSize || 20,
-            blur: config.brushSize / 2, // Simple blur based on brush size
+            blur: config.brushSize / 2,
             opacity: config.opacity || 1
         };
 
@@ -292,7 +293,7 @@ const CanvasPreview = ({
                 }
             }
         });
-    };
+    }, 16), [onUpdateOverlay]); // ~60fps
 
     const handleMouseDown = useCallback((e, overlay, mode = 'move') => {
         if (isPlaying) return;
@@ -305,7 +306,7 @@ const CanvasPreview = ({
             const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
             const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
             setBrushPos({ x: xPercent, y: yPercent });
-            handlePaint(e, overlay, xPercent, yPercent);
+            handlePaint(overlay, xPercent, yPercent);
             return;
         }
 
@@ -317,7 +318,12 @@ const CanvasPreview = ({
             initialWPercent: overlay.wPercent, initialHPercent: overlay.hPercent,
             containerWidth: rect.width, containerHeight: rect.height,
         });
-    }, [isPlaying, onSelectOverlay]);
+    }, [isPlaying, onSelectOverlay, handlePaint]);
+
+    // Throttled Move Handler
+    const handleThrottledUpdate = useCallback(throttle((id, updates) => {
+        onUpdateOverlay(id, updates);
+    }, 16), [onUpdateOverlay]);
 
     useEffect(() => {
         const handleMouseMove = (e) => {
@@ -328,7 +334,7 @@ const CanvasPreview = ({
                     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
                     const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
                     setBrushPos({ x: xPercent, y: yPercent });
-                    handlePaint(e, activeOverlay, xPercent, yPercent);
+                    handlePaint(activeOverlay, xPercent, yPercent);
                     return;
                 }
             }
@@ -340,12 +346,12 @@ const CanvasPreview = ({
             const deltaYPercent = (deltaY / dragging.containerHeight) * 100;
 
             if (dragging.mode === 'move') {
-                onUpdateOverlay(dragging.id, {
+                handleThrottledUpdate(dragging.id, {
                     xPercent: dragging.initialXPercent + deltaXPercent,
                     yPercent: dragging.initialYPercent + deltaYPercent
                 });
             } else if (dragging.mode === 'resize') {
-                onUpdateOverlay(dragging.id, {
+                handleThrottledUpdate(dragging.id, {
                     wPercent: Math.max(5, dragging.initialWPercent + deltaXPercent),
                     hPercent: Math.max(5, dragging.initialHPercent + deltaYPercent)
                 });
@@ -364,7 +370,7 @@ const CanvasPreview = ({
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [dragging, isPainting, activeOverlay, onUpdateOverlay]);
+    }, [dragging, isPainting, activeOverlay, onUpdateOverlay, handlePaint, handleThrottledUpdate]);
 
     const handlePlay = () => {
         setIsPlaying(true);

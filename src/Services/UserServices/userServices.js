@@ -42,6 +42,12 @@ export const fetchUserById = async (userId) => {
   return res.data.user;
 };
 
+// ✅ Fetch user activities
+export const fetchUserActivities = async (userId) => {
+  const res = await Api.get(`/api/admin/user/activities/${userId}`);
+  return res.data.activities;
+};
+
 // ✅ Fetch user metrics
 export const fetchUserMetricks = async (userId) => {
   const res = await Api.get(`${API_ENDPOINTS.USER_PROFILE_METRICKS}`);
@@ -99,7 +105,7 @@ export const fetchUserHidden = async (userId, params) => {
 
 export const fetchUserLiked = async (userId, params) => {
   const res = await Api.get(`${API_ENDPOINTS.USER_ANALYTICS_LIKED}/${userId}${buildQueryParams(params)}`);
-   
+
   return res.data.likedFeeds;
 };
 

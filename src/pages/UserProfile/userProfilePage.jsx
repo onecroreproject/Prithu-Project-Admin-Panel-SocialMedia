@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import UserProfileMetricks from "./userProfileMetricks";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -65,7 +66,15 @@ export default function UserProfilePage() {
     console.log("Applied filters:", filters);
   };
 
+  const [searchParams] = useSearchParams();
   const [metricFilter, setMetricFilter] = useState(null);
+
+  useEffect(() => {
+    const filter = searchParams.get("filter");
+    if (filter) {
+      setMetricFilter(filter);
+    }
+  }, [searchParams]);
 
   return (
     <AnimatePresence mode="wait">
@@ -81,7 +90,7 @@ export default function UserProfilePage() {
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
           <div className="max-w-7xl mx-auto">
             <PageBreadcrumb pageTitle="User Management" />
-            
+
           </div>
         </div>
 

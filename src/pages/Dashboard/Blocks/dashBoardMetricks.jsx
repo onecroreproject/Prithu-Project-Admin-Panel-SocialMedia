@@ -1,6 +1,9 @@
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { FaUsers, FaUserCheck, FaUserPlus, FaUserSlash, FaFlag, FaUserShield } from "react-icons/fa";
 import { fetchMetrics } from "../../../Services/DashboardServices/metricksServices";
+import ChildAdminListModal from "./ChildAdminListModal";
 
 // Responsive Skeleton Loader
 const MetricCardSkeleton = () => (
@@ -14,6 +17,9 @@ const MetricCardSkeleton = () => (
 );
 
 export default function TodayMetrics() {
+  const navigate = useNavigate();
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ["todayMetrics"],
     queryFn: fetchMetrics,
@@ -141,6 +147,22 @@ export default function TodayMetrics() {
     return num.toString();
   };
 
+  const handleMetricClick = (key) => {
+    if (key === "totalReports") {
+      navigate("/social/user-reportinfo");
+      return;
+    }
+    if (key === "totalChildAdmins") {
+      setIsAdminModalOpen(true);
+      return;
+    }
+
+    const navigableMetrics = ["totalUsers", "activeUsersToday", "newRegistrationsToday", "suspendedUsers"];
+    if (navigableMetrics.includes(key)) {
+      navigate(`/social/profile?filter=${key}`);
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Container with responsive padding */}
@@ -148,12 +170,13 @@ export default function TodayMetrics() {
         {metrics.map((metric) => (
           <div
             key={metric.key}
-            className="group relative rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-300 
+            onClick={() => handleMetricClick(metric.key)}
+            className={`group relative rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-300 
               p-3 sm:p-4 md:p-5 
               hover:scale-[1.01] sm:hover:scale-[1.02]
               min-h-[110px] xs:min-h-[120px] sm:min-h-[130px] md:min-h-[140px]
               flex flex-col justify-between
-              w-full"
+              w-full cursor-pointer`}
           >
             {/* Glow effect - hidden on mobile for performance */}
             <div className="hidden sm:block absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"></div>
@@ -183,8 +206,8 @@ export default function TodayMetrics() {
                 {metric.trend && (
                   <span
                     className={`hidden xs:inline-flex text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ml-1 flex-shrink-0 ${metric.trend.startsWith("+")
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-rose-50 text-rose-700"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-rose-50 text-rose-700"
                       }`}
                   >
                     {metric.trend}
@@ -201,19 +224,33 @@ export default function TodayMetrics() {
                   <div className="hidden sm:block h-1.5 w-1.5 rounded-full bg-gray-300 flex-shrink-0"></div>
                 </div>
 
+                {/* Specific details for Online Admins */}
+                {metric.key === "onlineChildAdmins" && data.onlineAdminNames?.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {data.onlineAdminNames.slice(0, 3).map((name, idx) => (
+                      <span key={idx} className="text-[10px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-md font-medium">
+                        {name}
+                      </span>
+                    ))}
+                    {data.onlineAdminNames.length > 3 && (
+                      <span className="text-[10px] text-gray-400">+{data.onlineAdminNames.length - 3} more</span>
+                    )}
+                  </div>
+                )}
+
                 {/* Progress Bar - hidden on mobile to save space */}
                 <div className="hidden sm:block mt-2">
                   <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${metric.key === "totalUsers"
-                          ? "bg-blue-500"
-                          : metric.key === "activeUsersToday"
-                            ? "bg-emerald-500"
-                            : metric.key === "newRegistrationsToday"
-                              ? "bg-violet-500"
-                              : metric.key === "suspendedUsers"
-                                ? "bg-rose-500"
-                                : "bg-amber-500"
+                        ? "bg-blue-500"
+                        : metric.key === "activeUsersToday"
+                          ? "bg-emerald-500"
+                          : metric.key === "newRegistrationsToday"
+                            ? "bg-violet-500"
+                            : metric.key === "suspendedUsers"
+                              ? "bg-rose-500"
+                              : "bg-amber-500"
                         }`}
                       style={{
                         width: `${Math.min((metric.value / (data.totalUsers || 1)) * 100, 100)}%`,
@@ -241,6 +278,8 @@ export default function TodayMetrics() {
           Hover over cards for details • Click to view detailed analytics
         </p>
       </div>
+
+      <ChildAdminListModal isOpen={isAdminModalOpen} onClose={() => setIsAdminModalOpen(false)} />
     </div>
   );
 }

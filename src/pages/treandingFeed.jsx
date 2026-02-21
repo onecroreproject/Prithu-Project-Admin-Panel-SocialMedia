@@ -382,6 +382,17 @@ export default function TrendingFeedsTable() {
                 </th>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort('downloads')}
+                >
+                  <div className="flex items-center gap-1">
+                    <FaDownload className="w-3 h-3" /> Downloads
+                    {filters.sortBy === 'downloads' && (
+                      filters.sortOrder === 'desc' ? <FaSortDown className="ml-1" /> : <FaSortUp className="ml-1" />
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort('createdAt')}
                 >
                   <div className="flex items-center gap-1">
@@ -422,16 +433,16 @@ export default function TrendingFeedsTable() {
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-center">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white' :
-                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                              index === 2 ? 'bg-gradient-to-r from-amber-600 to-amber-800 text-white' :
-                                'bg-gray-100 text-gray-700'
+                          index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
+                            index === 2 ? 'bg-gradient-to-r from-amber-600 to-amber-800 text-white' :
+                              'bg-gray-100 text-gray-700'
                           }`}>
                           {index + 1}
                         </div>
                         {index < 3 && (
                           <FaCrown className={`mt-1 ${index === 0 ? 'text-yellow-500' :
-                              index === 1 ? 'text-gray-400' :
-                                'text-amber-700'
+                            index === 1 ? 'text-gray-400' :
+                              'text-amber-700'
                             }`} />
                         )}
                       </div>
@@ -570,6 +581,18 @@ export default function TrendingFeedsTable() {
                       </div>
                     </td>
 
+                    {/* Downloads */}
+                    <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <FaDownload className="text-purple-500 w-4 h-4" />
+                          <span className="text-lg font-semibold text-gray-900">
+                            {formatNumber(feed.downloads || 0)}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
                     {/* Posted */}
                     <td className="px-6 py-4">
                       <div className="space-y-1">
@@ -596,32 +619,6 @@ export default function TrendingFeedsTable() {
                           title="View Details"
                         >
                           <FaEye className="w-4 h-4" />
-                        </button>
-
-                        {feed.contentUrl && (
-                          <button
-                            onClick={() => window.open(feed.contentUrl, '_blank')}
-                            className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Open Original"
-                          >
-                            <FaExternalLinkAlt className="w-4 h-4" />
-                          </button>
-                        )}
-
-                        <button
-                          onClick={() => alert(`Would send notification to ${feed.createdBy?.userName} about trending performance`)}
-                          className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                          title="Notify Creator"
-                        >
-                          <FaChartLine className="w-4 h-4" />
-                        </button>
-
-                        <button
-                          onClick={() => alert(`Would boost or hide feed ${feed.feedId}`)}
-                          className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                          title="Manage Feed"
-                        >
-                          <FaStar className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

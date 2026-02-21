@@ -40,6 +40,9 @@ import ChildAdminProfile from "./pages/ChildAdminProfilePage/childAdminProfilePa
 import AdminProfilePage from "./pages/adminProfilePage";
 import SubscriptionPage from "./pages/subscriptionPage";
 import SalesDashboard from "./pages/SalesDashboard/salesdashBoardPage";
+import SubscriptionUsersTablePage from "./pages/SalesDashboard/Tables/SubscriptionUsersTablePage";
+import WithdrawalUsersTablePage from "./pages/SalesDashboard/Tables/WithdrawalUsersTablePage";
+import TopReferralUsersTablePage from "./pages/SalesDashboard/Tables/TopReferralUsersTablePage";
 import ReportManagementPage from "./pages/ReportManagement/reportmanagement";
 
 // UI Elements & Components
@@ -75,6 +78,12 @@ import AdminStudioLayout from "./pages/AdminStudio/studioLayout";
 import AdminFaqPage from "./pages/faqPage";
 import FooterManagementPage from "./pages/footerManagementPage";
 import ServerManagement from "./pages/AdminPages/ServerManagement";
+import SEODashboard from "./pages/AdminPages/SEODashboard";
+import GlobalSEOSettings from "./pages/AdminPages/GlobalSEOSettings";
+import RedirectManager from "./pages/AdminPages/RedirectManager";
+import PageSEOMatagement from "./pages/AdminPages/PageSEOMatagement";
+import FeedSEOMatagement from "./pages/AdminPages/FeedSEOMatagement";
+import MediaSEOMatagement from "./pages/AdminPages/MediaSEOMatagement";
 
 // Create separate dashboard components or use existing ones
 // For now, we'll use SocialMediaDashboard as a placeholder for analytics
@@ -140,12 +149,23 @@ function AnimatedRoutes() {
           <Route path="/settings/admin/profile/page" element={<AdminProfilePage />} />
           <Route path="/settings/subscription/page" element={<SubscriptionPage />} />
           <Route path="/settings/sales/dashboard" element={<SalesDashboard />} />
+          <Route path="/settings/sales/subscriptions" element={<SubscriptionUsersTablePage />} />
+          <Route path="/settings/sales/withdrawals" element={<WithdrawalUsersTablePage />} />
+          <Route path="/settings/sales/referrals" element={<TopReferralUsersTablePage />} />
           <Route path="/settings/report/management" element={<ReportManagementPage />} />
           <Route path="/settings/faq/management" element={<AdminFaqPage />} />
           <Route path="/settings/reportandfeedback/management" element={<AdminFeedbackPage />} />
           <Route path="/settings/footer/management" element={<FooterManagementPage />} />
           <Route path="/settings/server/management" element={<ServerManagement />} />
           <Route path="/settings/admin/studio" element={<AdminStudioLayout />} />
+
+          {/* ====== SEO MODULE ROUTES ====== */}
+          <Route path="/seo/dashboard" element={<SEODashboard />} />
+          <Route path="/seo/settings" element={<GlobalSEOSettings />} />
+          <Route path="/seo/redirects" element={<RedirectManager />} />
+          <Route path="/seo/pages" element={<PageSEOMatagement />} />
+          <Route path="/seo/feeds" element={<FeedSEOMatagement />} />
+          <Route path="/seo/media" element={<MediaSEOMatagement />} />
 
           {/* ====== DRIVE MODULE ROUTES ====== */}
           <Route path="/drive/dashboard" element={<GoogleDriveDashboard />} />

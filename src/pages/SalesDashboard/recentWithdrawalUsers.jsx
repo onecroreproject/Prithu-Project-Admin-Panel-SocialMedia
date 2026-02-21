@@ -2,18 +2,17 @@ import { useState } from "react";
 import { FiMoreVertical } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getRecentWithdrawalUsers } from "../../Services/SalesDashboardSecrvices/metricServices";
 
 export default function RecentWithdrawalUsers() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
-  const users = [
-    { id: 1, name: "Vikram Singh", email: "vikram@example.com", withdrawn: "11 Oct 2025", amount: "$250", profilePic: "https://randomuser.me/api/portraits/men/45.jpg" },
-    { id: 2, name: "Neha Gupta", email: "neha@example.com", withdrawn: "12 Oct 2025", amount: "$150", profilePic: "https://randomuser.me/api/portraits/women/30.jpg" },
-    { id: 3, name: "Rohit Kumar", email: "rohit@example.com", withdrawn: "13 Oct 2025", amount: "$50", profilePic: "https://randomuser.me/api/portraits/men/28.jpg" },
-    { id: 4, name: "Priya Sharma", email: "priya@example.com", withdrawn: "14 Oct 2025", amount: "$300", profilePic: "https://randomuser.me/api/portraits/women/24.jpg" },
-    { id: 5, name: "Karthik R", email: "karthik@example.com", withdrawn: "15 Oct 2025", amount: "$100", profilePic: "https://randomuser.me/api/portraits/men/22.jpg" },
-  ];
+  const { data: users = [], isLoading, isError } = useQuery({
+    queryKey: ["recentWithdrawals"],
+    queryFn: () => getRecentWithdrawalUsers(5), // Limit to 5 for the card
+  });
 
   return (
     <motion.div
@@ -29,36 +28,53 @@ export default function RecentWithdrawalUsers() {
           <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">Latest users who withdrew recently</p>
         </div>
 
-        {/* Dropdown */}
-        <div
-          className="relative"
-          onMouseEnter={() => setDropdownOpen(true)}
-          onMouseLeave={() => setDropdownOpen(false)}
-        >
-          <button className="p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition">
-            <FiMoreVertical className="text-gray-600 dark:text-gray-300" />
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/settings/sales/withdrawals")}
+            className="hidden sm:block px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100"
+          >
+            View Detail
           </button>
 
-          {dropdownOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: -5 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg z-10"
-            >
-              <ul className="text-sm">
-                <li>
-                  <button
-                    onClick={() => navigate("/withdrawals")}
-                    className="w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                  >
-                    View All Withdrawals
-                  </button>
-                </li>
-              </ul>
-            </motion.div>
-          )}
+          <div
+            className="relative"
+            onMouseEnter={() => setDropdownOpen(true)}
+            onMouseLeave={() => setDropdownOpen(false)}
+          >
+            <button className="p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition">
+              <FiMoreVertical className="text-gray-600 dark:text-gray-300" />
+            </button>
+
+            {dropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: -5 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg z-10"
+              >
+                <ul className="text-sm">
+                  <li>
+                    <button
+                      onClick={() => navigate("/settings/sales/withdrawals")}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    >
+                      View Detail Table
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => navigate("/social/profile")}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    >
+                      View All Users
+                    </button>
+                  </li>
+                </ul>
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -67,30 +83,55 @@ export default function RecentWithdrawalUsers() {
         <table className="w-full text-sm text-left text-gray-700 dark:text-gray-200 table-fixed">
           <thead className="text-gray-600 uppercase text-xs border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="py-2 px-2 w-1/4 truncate">User</th>
+              <th className="py-2 px-2 w-1/2 truncate">User</th>
               <th className="py-2 px-2 w-1/4 truncate">Withdrawn</th>
-              <th className="py-2 px-2 w-1/4 truncate">Amount</th>
+              <th className="py-2 px-2 w-1/4 truncate text-right">Amount</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {isLoading && (
+              <tr>
+                <td colSpan={3} className="py-10 text-center text-gray-400 italic">
+                  Loading withdrawals...
+                </td>
+              </tr>
+            )}
+            {isError && (
+              <tr>
+                <td colSpan={3} className="py-10 text-center text-rose-500 italic">
+                  Failed to load data
+                </td>
+              </tr>
+            )}
+            {!isLoading && !isError && users.length === 0 && (
+              <tr>
+                <td colSpan={3} className="py-10 text-center text-gray-400 italic">
+                  No data available
+                </td>
+              </tr>
+            )}
+            {!isLoading && !isError && users.map((user, idx) => (
               <tr
-                key={user.id}
-                className="border-b border-gray-100 dark:border-gray-700 hover:bg-indigo-50/20 dark:hover:bg-white/5 transition-all"
+                key={user.id || idx}
+                className="border-b border-gray-100 dark:border-gray-700 hover:bg-indigo-50/20 dark:hover:bg-white/5 transition-all text-xs"
               >
                 <td className="py-2 px-2 flex items-center gap-2 truncate">
                   <img
-                    src={user.profilePic}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover ring-1 ring-indigo-300"
+                    src={user.avatar || "https://randomuser.me/api/portraits/lego/1.jpg"}
+                    alt={user.userName}
+                    className="w-7 h-7 rounded-full object-cover ring-1 ring-indigo-300 flex-shrink-0"
                   />
-                  <div className="truncate">
-                    <p className="font-medium text-gray-800 dark:text-white truncate">{user.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  <div className="truncate min-w-0">
+                    <p className="font-semibold text-gray-800 dark:text-white truncate">{user.userName}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{user.email || "No email"}</p>
                   </div>
                 </td>
-                <td className="py-2 px-2 text-gray-600 dark:text-gray-400 truncate">{user.withdrawn}</td>
-                <td className="py-2 px-2 text-gray-600 dark:text-gray-400 font-medium truncate">{user.amount}</td>
+                <td className="py-2 px-2 text-gray-500 dark:text-gray-400 truncate">
+                  {user.processedAt ? new Date(user.processedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "-"}
+                </td>
+                <td className="py-2 px-2 text-rose-600 dark:text-rose-400 font-bold truncate text-right">
+                  ₹{user.amount?.toLocaleString() || "0"}
+                </td>
               </tr>
             ))}
           </tbody>

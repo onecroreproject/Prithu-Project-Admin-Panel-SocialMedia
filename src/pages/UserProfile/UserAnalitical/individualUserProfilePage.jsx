@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { fetchUserById } from "../../../Services/UserServices/userServices";
+import { fetchUserById, fetchUserActivities } from "../../../Services/UserServices/userServices";
 import ProfileHeader from "./ComponentsForIndividualUserProfile/ProfileHeader";
 import PersonalInfoCard from "./ComponentsForIndividualUserProfile/PersonalInfoCard";
 import UserStats from "./ComponentsForIndividualUserProfile/userStatus";
@@ -27,6 +27,12 @@ export default function IndividualUserProfilePage() {
   const { data: userData, isLoading, isError } = useQuery({
     queryKey: ["user", id],
     queryFn: () => fetchUserById(id),
+    enabled: !!id,
+  });
+
+  const { data: activitiesData } = useQuery({
+    queryKey: ["user-activities", id],
+    queryFn: () => fetchUserActivities(id),
     enabled: !!id,
   });
 
@@ -179,73 +185,150 @@ export default function IndividualUserProfilePage() {
             )}
           </div>
 
+
           {/* Fourth Row: Account Timeline */}
           <div className="grid grid-cols-1 gap-8">
-            {/* Account Timeline */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg flex items-center gap-2">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h3 className="font-semibold text-gray-900 mb-6 text-lg flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Account Timeline
+                Account Timeline Detail
               </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="text-xs text-gray-500 font-medium">Registered</div>
-                    <div className="text-sm text-gray-900 font-semibold">
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      }) : 'N/A'}
-                    </div>
-                  </div>
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="text-xs text-gray-500 font-medium">Last Login</div>
-                    <div className="text-sm text-gray-900 font-semibold">
-                      {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      }) : 'Never'}
-                    </div>
-                  </div>
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="text-xs text-gray-500 font-medium">Last Active</div>
-                    <div className="text-sm text-gray-900 font-semibold">
-                      {user.lastActiveAt ? new Date(user.lastActiveAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      }) : 'N/A'}
-                    </div>
-                  </div>
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 01118 0z" />
-                    </svg>
-                  </div>
+
+              <div className="relative">
+                {/* Vertical Line */}
+                <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gray-100"></div>
+
+                <div className="space-y-8 relative">
+                  {(() => {
+                    const events = [];
+
+                    // 1. Registration
+                    if (user.createdAt) {
+                      events.push({
+                        date: new Date(user.createdAt),
+                        title: "Account Created",
+                        description: "User successfully registered on the platform",
+                        type: "registration",
+                        icon: (
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )
+                      });
+                    }
+
+                    // 2. Last Login
+                    if (user.lastLoginAt) {
+                      events.push({
+                        date: new Date(user.lastLoginAt),
+                        title: "Last Login Recorded",
+                        description: `User last logged in from a ${user.device?.deviceName || 'device'}`,
+                        type: "login",
+                        icon: (
+                          <div className="p-2 bg-green-100 rounded-lg">
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                          </div>
+                        )
+                      });
+                    }
+
+                    // 3. Last Active
+                    if (user.lastActiveAt) {
+                      events.push({
+                        date: new Date(user.lastActiveAt),
+                        title: "Last Seen Active",
+                        description: user.isOnline ? "User is currently online" : "User was last active on the platform",
+                        type: "activity",
+                        icon: (
+                          <div className="p-2 bg-purple-100 rounded-lg">
+                            <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 01-18 0" />
+                            </svg>
+                          </div>
+                        )
+                      });
+                    }
+
+                    // 4. Action Activities
+                    if (activitiesData) {
+                      activitiesData.forEach(act => {
+                        events.push({
+                          date: new Date(act.createdAt),
+                          title: act.actionType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                          description: act.targetId?.title || act.targetId?.userName || "Activity recorded",
+                          type: "action",
+                          icon: (
+                            <div className="p-2 bg-orange-100 rounded-lg">
+                              <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                              </svg>
+                            </div>
+                          )
+                        });
+                      });
+                    }
+
+                    // 5. Financials
+                    if (user.financials?.transactionHistory) {
+                      user.financials.transactionHistory.forEach(tx => {
+                        events.push({
+                          date: new Date(tx.date),
+                          title: `${tx.type} - $${tx.amount}`,
+                          description: tx.description,
+                          type: tx.type.toLowerCase(),
+                          icon: (
+                            <div className={`p-2 rounded-lg ${tx.type === 'Earning' ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                              <svg className={`w-4 h-4 ${tx.type === 'Earning' ? 'text-emerald-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" />
+                              </svg>
+                            </div>
+                          )
+                        });
+                      });
+                    }
+
+                    // Sort chronologically (descending)
+                    return events
+                      .sort((a, b) => b.date - a.date)
+                      .map((event, idx) => (
+                        <div key={idx} className="flex gap-4 group relative">
+                          <div className="z-10">{event.icon}</div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                {event.title}
+                              </h4>
+                              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                {event.date.toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                              {event.description}
+                            </p>
+                          </div>
+                        </div>
+                      ));
+                  })()}
                 </div>
               </div>
+
+              {(!activitiesData || activitiesData.length === 0) && (
+                <div className="mt-8 text-center p-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  <p className="text-gray-500 text-sm italic">No recent platform activities recorded for this user.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

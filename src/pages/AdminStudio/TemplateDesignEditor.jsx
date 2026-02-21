@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel }) => {
-  const [step, setStep] = useState('setup'); // 'setup' or 'design'
+const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel, initialDesignData }) => {
+  const [step, setStep] = useState(initialDesignData ? 'design' : 'setup'); // 'setup' or 'design'
   const [activeTab, setActiveTab] = useState('overlays');
-  const [overlayElements, setOverlayElements] = useState([]);
+  const [overlayElements, setOverlayElements] = useState(initialDesignData?.overlayElements || []);
   const [selectedOverlay, setSelectedOverlay] = useState(null);
-  const [canvasSettings, setCanvasSettings] = useState({
+  const [canvasSettings, setCanvasSettings] = useState(initialDesignData?.canvasSettings || {
     referenceWidth: 1080,
     referenceHeight: 1920,
     aspectRatio: '9:16',
@@ -97,7 +97,7 @@ const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel }) => {
     }
   });
 
-  const [theme, setTheme] = useState({
+  const [theme, setTheme] = useState(initialDesignData?.theme || {
     primaryColor: '#1e5a78',
     secondaryColor: '#0f3a4d',
     accentColor: '#ff6b6b',

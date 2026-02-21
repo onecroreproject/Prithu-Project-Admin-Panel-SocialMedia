@@ -45,6 +45,7 @@ export const API_ENDPOINTS = {
 
   GET_SALES_METRICKS: "/api/sales/dashboard/analytics",
   GET_RECENT_SUBSCRIBER_USERS: '/api/get/recent/subscribers',
+  GET_RECENT_WITHDRAWALS: '/api/get/recent/withdrawals',
   GET_REFERALL_TOPERS: "/api/top/referral/users",
   GET_SALES_CHART_COUNT: "/api/dashboard/user-subscription-counts",
 
@@ -60,6 +61,8 @@ export const API_ENDPOINTS = {
   REMOVE_FEED_CATEGORY: "/api/admin/feed",
   ADMIN_DELETE_CATEGORY: "/api/delete/category",
   ADMIN_UPDATE_CATEGORY: "/api/admin/update/category",
+  ADMIN_GET_FEED_DESIGN: "/api/admin/feed", // Base for /:feedId/design
+  ADMIN_UPDATE_FEED_DESIGN: "/api/admin/feed", // Base for /:feedId/design
 
 
   ADMIN_LOGIN: "/api/auth/admin/login",
@@ -81,8 +84,14 @@ export const API_ENDPOINTS = {
 
   ADMIN_GET_POSTED_JOBS: "/web/job/admin/get/all",
 
-
-
-
-  // Add more endpoints here as needed
+  // SEO Endpoints
+  SEO_STATS: "/api/admin/seo/stats",
+  SEO_CONFIG: "/api/admin/seo/config",
+  SEO_PAGES: "/api/admin/seo/pages",
+  SEO_FEEDS: "/api/admin/seo/feeds",
+  SEO_MEDIA: "/api/admin/seo/media",
+  SEO_REDIRECTS: "/api/admin/seo/redirects",
+  SEO_SITEMAP: "/api/admin/seo/sitemap",
+  SEO_ROBOTS: "/api/admin/seo/robots",
+  UPDATE_PAGE_SEO: "/api/admin/static-page",
 };

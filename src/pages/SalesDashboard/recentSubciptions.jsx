@@ -34,35 +34,52 @@ export default function RecentSubscriptionUsers() {
           </p>
         </div>
 
-        {/* Dropdown */}
-        <div
-          className="relative"
-          onMouseEnter={() => setDropdownOpen(true)}
-          onMouseLeave={() => setDropdownOpen(false)}
-        >
-          <button className="p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition">
-            <FiMoreVertical className="text-gray-600 dark:text-gray-300" />
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/settings/sales/subscriptions")}
+            className="hidden sm:block px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors border border-indigo-100"
+          >
+            View Detail
           </button>
 
-          {dropdownOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: -5 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg z-10"
-            >
-              <ul className="text-sm">
-                <li>
-                  <button
-                    onClick={() => navigate("/users")}
-                    className="w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                  >
-                    View All Users
-                  </button>
-                </li>
-              </ul>
-            </motion.div>
-          )}
+          <div
+            className="relative"
+            onMouseEnter={() => setDropdownOpen(true)}
+            onMouseLeave={() => setDropdownOpen(false)}
+          >
+            <button className="p-2 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-700 transition">
+              <FiMoreVertical className="text-gray-600 dark:text-gray-300" />
+            </button>
+
+            {dropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: -5 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg z-10"
+              >
+                <ul className="text-sm">
+                  <li>
+                    <button
+                      onClick={() => navigate("/settings/sales/subscriptions")}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    >
+                      View Detail Table
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => navigate("/social/profile")}
+                      className="w-full text-left px-4 py-2 hover:bg-indigo-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    >
+                      View All Users
+                    </button>
+                  </li>
+                </ul>
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -86,6 +103,13 @@ export default function RecentSubscriptionUsers() {
               </tr>
             </thead>
             <tbody>
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="py-10 text-center text-gray-400 italic">
+                    No data available
+                  </td>
+                </tr>
+              )}
               {users.map((user) => (
                 <tr
                   key={user.userId}

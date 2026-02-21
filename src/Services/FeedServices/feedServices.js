@@ -117,5 +117,25 @@ export async function removeFeedCategory({ feedId, categoryId }) {
   }
 }
 
+// ✅ Get Feed Design
+export async function fetchFeedDesign(feedId) {
+  try {
+    const res = await Api.get(`${API_ENDPOINTS.ADMIN_GET_FEED_DESIGN}/${feedId}/design`);
+    return res.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch feed design");
+  }
+}
+
+// ✅ Update Feed Design
+export async function updateFeedDesignMetadata(feedId, { designMetadata, editMetadata }) {
+  try {
+    const res = await Api.put(`${API_ENDPOINTS.ADMIN_UPDATE_FEED_DESIGN}/${feedId}/design`, { designMetadata, editMetadata });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update feed design");
+  }
+}
+
 
 

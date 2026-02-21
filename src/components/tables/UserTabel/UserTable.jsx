@@ -172,6 +172,9 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
         let daysAgo;
 
         switch (filters.registered) {
+          case "today":
+            daysAgo = 0;
+            break;
           case "7days":
             daysAgo = 7;
             break;
@@ -364,12 +367,15 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
 
     switch (externalFilter) {
       case "total":
+      case "totalUsers":
         // Reset everything (handled above)
         break;
       case "online":
+      case "activeUsersToday":
         setFilters(prev => ({
           ...prev,
-          status: { active: true, inactive: false, blocked: false, suspended: false }
+          status: { active: true, inactive: false, blocked: false, suspended: false },
+          lastActive: "today"
         }));
         break;
       case "subscribed":
@@ -377,6 +383,15 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
         break;
       case "trial":
         setTrialStatusFilter("Used");
+        break;
+      case "newRegistrationsToday":
+        setFilters(prev => ({ ...prev, registered: "today" }));
+        break;
+      case "suspendedUsers":
+        setFilters(prev => ({
+          ...prev,
+          status: { active: false, inactive: false, blocked: true, suspended: true }
+        }));
         break;
     }
   }, [externalFilter]);

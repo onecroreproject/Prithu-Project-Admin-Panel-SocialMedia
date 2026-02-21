@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { debounce } from 'lodash';
 import { clsx } from 'clsx';
 import { X, Plus, Move, Maximize2, Type, Image as ImageIcon, Layers, CheckCircle, Play } from 'lucide-react';
 
@@ -7,7 +8,29 @@ const directions = [
     'bottom', 'bottom-left', 'left', 'top-left', 'none'
 ];
 
-const OverlayControls = ({ overlay, onUpdate }) => {
+const OverlayControls = React.memo(({ overlay, onUpdate }) => {
+    // Local state for debounced numeric inputs
+    const [localX, setLocalX] = useState(overlay?.xPercent || 0);
+    const [localY, setLocalY] = useState(overlay?.yPercent || 0);
+    const [localW, setLocalW] = useState(overlay?.wPercent || 0);
+    const [localH, setLocalH] = useState(overlay?.hPercent || 0);
+
+    // Sync local state with incoming props (when dragging on canvas)
+    useEffect(() => {
+        setLocalX(overlay?.xPercent || 0);
+        setLocalY(overlay?.yPercent || 0);
+        setLocalW(overlay?.wPercent || 0);
+        setLocalH(overlay?.hPercent || 0);
+    }, [overlay?.xPercent, overlay?.yPercent, overlay?.wPercent, overlay?.hPercent]);
+
+    // Debounced update function
+    const debouncedUpdate = useCallback(
+        debounce((id, updates) => {
+            onUpdate(id, updates);
+        }, 300),
+        [onUpdate]
+    );
+
     if (!overlay) return (
         <div className="flex flex-col items-center justify-center p-12 text-center bg-black/20 rounded-3xl border border-dashed border-white/10">
             <Layers className="text-gray-700 mb-4" size={32} />
@@ -78,32 +101,48 @@ const OverlayControls = ({ overlay, onUpdate }) => {
                         <label className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em]">Horizontal %</label>
                         <input
                             type="number" className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-3 text-white text-xs font-bold outline-none focus:border-blue-500/50 transition-all"
-                            value={overlay.xPercent.toFixed(1)}
-                            onChange={(e) => handleChange('xPercent', parseFloat(e.target.value))}
+                            value={localX}
+                            onChange={(e) => {
+                                const val = parseFloat(e.target.value) || 0;
+                                setLocalX(val);
+                                debouncedUpdate(overlay.id, { xPercent: val });
+                            }}
                         />
                     </div>
                     <div className="space-y-2">
                         <label className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em]">Vertical %</label>
                         <input
                             type="number" className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-3 text-white text-xs font-bold outline-none focus:border-blue-500/50 transition-all"
-                            value={overlay.yPercent.toFixed(1)}
-                            onChange={(e) => handleChange('yPercent', parseFloat(e.target.value))}
+                            value={localY}
+                            onChange={(e) => {
+                                const val = parseFloat(e.target.value) || 0;
+                                setLocalY(val);
+                                debouncedUpdate(overlay.id, { yPercent: val });
+                            }}
                         />
                     </div>
                     <div className="space-y-2">
                         <label className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em]">Width %</label>
                         <input
                             type="number" className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-3 text-white text-xs font-bold outline-none focus:border-blue-500/50 transition-all"
-                            value={overlay.wPercent || 0}
-                            onChange={(e) => handleChange('wPercent', parseFloat(e.target.value))}
+                            value={localW}
+                            onChange={(e) => {
+                                const val = parseFloat(e.target.value) || 0;
+                                setLocalW(val);
+                                debouncedUpdate(overlay.id, { wPercent: val });
+                            }}
                         />
                     </div>
                     <div className="space-y-2">
                         <label className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em]">Height %</label>
                         <input
                             type="number" className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-3 text-white text-xs font-bold outline-none focus:border-blue-500/50 transition-all"
-                            value={overlay.hPercent || 0}
-                            onChange={(e) => handleChange('hPercent', parseFloat(e.target.value))}
+                            value={localH}
+                            onChange={(e) => {
+                                const val = parseFloat(e.target.value) || 0;
+                                setLocalH(val);
+                                debouncedUpdate(overlay.id, { hPercent: val });
+                            }}
                         />
                     </div>
                 </div>
@@ -279,6 +318,6 @@ const OverlayControls = ({ overlay, onUpdate }) => {
 
         </div>
     );
-};
+});
 
 export default OverlayControls;
