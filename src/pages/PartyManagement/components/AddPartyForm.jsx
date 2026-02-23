@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Save, Plus, X, Upload, User, Image as ImageIcon, Crop as CropIcon, Activity } from "lucide-react";
+import { Save, Plus, X, Upload, User, Image as ImageIcon, Crop as CropIcon, Building2, Globe, Shield } from "lucide-react";
 import Api from "../../../Utils/axiosApi";
 import toast from "react-hot-toast";
 import PostEditor from "../../../components/FeedUpload/PostEditor";
 import getMediaUrl from "../../../Utils/mediaUrl";
-import { clsx } from "clsx";
 
 export default function AddPartyForm({ initialData, onSuccess }) {
     const [formData, setFormData] = useState({
@@ -33,7 +32,6 @@ export default function AddPartyForm({ initialData, onSuccess }) {
                 partyShortName: initialData.partyShortName || "",
                 isActive: initialData.isActive,
             });
-            // Use getMediaUrl to resolve relative paths to full URLs for previews
             setLogoPreview(getMediaUrl(initialData.partyLogo));
             setLeaders(initialData.leaders.map(l => ({
                 ...l,
@@ -71,7 +69,6 @@ export default function AddPartyForm({ initialData, onSuccess }) {
     const handleFileSelect = (e, target) => {
         const file = e.target.files[0];
         if (!file) return;
-        // Reset the input so the same file can be selected again
         e.target.value = "";
 
         if (!file.type.startsWith('image/')) {
@@ -81,8 +78,6 @@ export default function AddPartyForm({ initialData, onSuccess }) {
 
         const previewUrl = URL.createObjectURL(file);
 
-        // Directly stage the file without requiring the cropper to complete.
-        // The cropper is shown as a visual aid but saved file is always the raw file.
         if (target.type === 'logo') {
             setPartyLogo(file);
             setLogoPreview(previewUrl);
@@ -96,7 +91,6 @@ export default function AddPartyForm({ initialData, onSuccess }) {
             setLeaders(newLeaders);
         }
 
-        // Also open the PostEditor for optional visual crop/filter preview
         setCropFile({
             id: 'crop-temp',
             file: file,
@@ -107,9 +101,6 @@ export default function AddPartyForm({ initialData, onSuccess }) {
     };
 
     const onCropSave = (id, metadata) => {
-        // PostEditor only returns metadata (crop/filter settings), not a new Blob.
-        // The file was already staged in handleFileSelect.
-        // Just close the editor.
         setCropFile(null);
         setCropTarget(null);
     };
@@ -133,19 +124,13 @@ export default function AddPartyForm({ initialData, onSuccess }) {
             data.append("partyLogo", partyLogo);
         }
 
-        // Send leaders metadata WITHOUT blob URLs — photos are sent separately as files
         const cleanedLeaders = leaders.map((l, i) => ({
             name: l.name,
             order: l.order || i + 1,
-            // If photo is a File, backend will handle it via leaderPhotos[i]
-            // If it's a full URL (existing), send as-is so backend can keep it
             photo: l.photo instanceof File ? null : (l.photoPreview || null),
         }));
         data.append("leaders", JSON.stringify(cleanedLeaders));
 
-        // Append each leader photo file using plain 'leaderPhotos' field name
-        // (Multer is configured with { name: 'leaderPhotos', maxCount: 10 })
-        // Send parallel 'leaderPhotoIndices' so backend knows which leader each photo belongs to
         leaders.forEach((leader, index) => {
             if (leader.photo instanceof File) {
                 data.append('leaderPhotos', leader.photo, leader.photo.name);
@@ -178,74 +163,74 @@ export default function AddPartyForm({ initialData, onSuccess }) {
     ];
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-16">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                {/* Basic Details */}
-                <div className="space-y-10">
+        <form onSubmit={handleSubmit} className="space-y-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                {/* Basic Details Section */}
+                <div className="space-y-8 bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
                     <div className="flex items-center gap-4 mb-2">
-                        <div className="w-10 h-10 bg-blue-600/10 rounded-2xl flex items-center justify-center border border-blue-600/20">
-                            <Activity size={20} className="text-blue-600" />
+                        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center border border-blue-100">
+                            <Building2 size={24} className="text-blue-500" />
                         </div>
                         <div>
-                            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Core Identity</h3>
-                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Define entity architecture</p>
+                            <h3 className="text-lg font-bold text-gray-900 tracking-tight">Party Details</h3>
+                            <p className="text-sm text-gray-500 font-medium">Basic information regarding the political entity</p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Geopolitical State</label>
-                            <div className="relative group">
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Select State</label>
+                            <div className="relative">
                                 <select
                                     name="state"
                                     value={formData.state}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-50 dark:bg-white/3 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 rounded-2xl px-5 py-4 text-[11px] font-black focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600/50 outline-none transition-all appearance-none cursor-pointer uppercase tracking-widest"
+                                    className="w-full bg-gray-50/50 border border-gray-200 rounded-xl px-5 py-3.5 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all appearance-none cursor-pointer"
                                 >
-                                    <option value="">SELECT STATE</option>
-                                    {states.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
+                                    <option value="">CHOOSE STATE</option>
+                                    {states.map(s => <option key={s} value={s}>{s}</option>)}
                                 </select>
-                                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-blue-600 transition-colors">
-                                    <Plus size={14} />
+                                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                    <Globe size={16} />
                                 </div>
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Native Nomenclature</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Regional Name</label>
                             <input
                                 type="text"
                                 name="stateRegionalName"
-                                placeholder="E.G. தமிழ் நாடு"
+                                placeholder="e.g. தமிழ் நாடு"
                                 value={formData.stateRegionalName}
                                 onChange={handleChange}
-                                className="w-full bg-gray-50 dark:bg-white/3 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 rounded-2xl px-5 py-4 text-[11px] font-black focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600/50 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-700 uppercase"
+                                className="w-full bg-gray-50/50 border border-gray-200 rounded-xl px-5 py-3.5 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all placeholder:text-gray-300"
                             />
                         </div>
                         <div className="space-y-2 sm:col-span-2">
-                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Official Organization Name</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Official Party Name</label>
                             <input
                                 type="text"
                                 name="partyName"
-                                placeholder="FULL ENTITY NAME"
+                                placeholder="Enter full name of the organization"
                                 value={formData.partyName}
                                 onChange={handleChange}
-                                className="w-full bg-gray-50 dark:bg-white/3 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 rounded-2xl px-5 py-4 text-[11px] font-black focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600/50 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-700 uppercase tracking-wider"
+                                className="w-full bg-gray-50/50 border border-gray-200 rounded-xl px-5 py-3.5 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all placeholder:text-gray-300"
                             />
                         </div>
                         <div className="space-y-2 sm:col-span-2">
-                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Strategic Acronym</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Short Name/Abbreviation</label>
                             <input
                                 type="text"
                                 name="partyShortName"
-                                placeholder="SHORT NAME (E.G. DMK)"
+                                placeholder="e.g. DMK, AIADMK, BJP"
                                 value={formData.partyShortName}
                                 onChange={handleChange}
-                                className="w-full bg-gray-50 dark:bg-white/[0.03] text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 rounded-2xl px-5 py-4 text-[11px] font-black focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600/50 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-700 uppercase tracking-[0.2em]"
+                                className="w-full bg-gray-50/50 border border-gray-200 rounded-xl px-5 py-3.5 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all placeholder:text-gray-300 tracking-wider"
                             />
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6 p-6 bg-gray-50/50 dark:bg-white/[0.02] rounded-3xl border border-gray-100 dark:border-gray-800 transition-all hover:bg-gray-50 dark:hover:bg-white/[0.04]">
+                    <div className="flex items-center gap-6 p-6 bg-blue-50/30 rounded-2xl border border-blue-50 transition-all hover:bg-blue-50/50">
                         <label className="relative inline-flex items-center cursor-pointer group">
                             <input
                                 type="checkbox"
@@ -254,50 +239,50 @@ export default function AddPartyForm({ initialData, onSuccess }) {
                                 onChange={handleChange}
                                 className="sr-only peer"
                             />
-                            <div className="w-14 h-7 bg-gray-200 dark:bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-7 peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 transition-all shadow-sm"></div>
+                            <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-7 peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500 transition-all shadow-sm"></div>
                             <div className="ml-4">
-                                <span className="block text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-widest">Global Status</span>
-                                <span className="block text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{formData.isActive ? 'ACTIVE IN PRODUCTION' : 'STANDBY MODE'}</span>
+                                <span className="block text-sm font-bold text-gray-900">Active Status</span>
+                                <span className="block text-xs font-medium text-gray-400 mt-0.5">{formData.isActive ? 'Currently visibile in portals' : 'Hidden from public view'}</span>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                {/* Logo Upload */}
-                <div className="space-y-10">
+                {/* Logo Section */}
+                <div className="space-y-8 bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
                     <div className="flex items-center gap-4 mb-2">
-                        <div className="w-10 h-10 bg-purple-600/10 rounded-2xl flex items-center justify-center border border-purple-600/20">
-                            <ImageIcon size={20} className="text-purple-600" />
+                        <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center border border-purple-100">
+                            <ImageIcon size={24} className="text-purple-500" />
                         </div>
                         <div>
-                            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Branding & Visuals</h3>
-                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">High-fidelity logo upload</p>
+                            <h3 className="text-lg font-bold text-gray-900 tracking-tight">Party Branding</h3>
+                            <p className="text-sm text-gray-500 font-medium">Official logo and visual identity</p>
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center p-16 bg-gray-50/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-[3rem] group hover:border-blue-600/30 transition-all gap-8 relative overflow-hidden min-h-[360px]">
-                        <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="flex flex-col items-center justify-center p-12 bg-gray-50/30 border-2 border-dashed border-gray-100 rounded-[2.5rem] group hover:border-blue-500/30 transition-all gap-6 relative overflow-hidden min-h-[320px]">
+                        <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                         {logoPreview ? (
-                            <div className="relative group/logo z-10 scale-in duration-500">
-                                <div className="absolute -inset-4 bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl blur-2xl opacity-50" />
-                                <img src={logoPreview} alt="Logo" className="w-56 h-56 object-contain rounded-3xl bg-white dark:bg-gray-900 shadow-xl p-6 relative z-10 border border-gray-100 dark:border-gray-800" />
+                            <div className="relative group/logo z-10">
+                                <div className="absolute -inset-4 bg-white rounded-3xl shadow-xl blur-xl opacity-50" />
+                                <img src={logoPreview} alt="Logo" className="w-48 h-48 object-contain rounded-2xl bg-white shadow-md p-4 relative z-10 border border-gray-100" />
                                 <button
                                     type="button"
                                     onClick={() => { setPartyLogo(null); setLogoPreview(null); }}
-                                    className="absolute -top-4 -right-4 p-3 bg-red-500 text-white rounded-2xl shadow-xl opacity-0 group-hover/logo:opacity-100 transition-all hover:scale-110 active:scale-95 z-20"
+                                    className="absolute -top-3 -right-3 p-2.5 bg-red-500 text-white rounded-xl shadow-lg opacity-0 group-hover/logo:opacity-100 transition-all hover:scale-110 active:scale-95 z-20"
                                 >
-                                    <X size={18} />
+                                    <X size={16} />
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center gap-6 relative z-10 transition-transform group-hover:scale-105 duration-500">
-                                <div className="w-24 h-24 bg-white dark:bg-gray-900 rounded-[2rem] flex items-center justify-center border border-gray-100 dark:border-gray-800 shadow-xl group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
-                                    <Upload size={36} />
+                            <div className="flex flex-col items-center gap-4 relative z-10 group-hover:scale-105 transition-transform duration-500">
+                                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border border-gray-100 shadow-sm group-hover:bg-blue-500 group-hover:text-white transition-all duration-500">
+                                    <Upload size={32} />
                                 </div>
-                                <div className="text-center space-y-2">
-                                    <p className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">Select Entity Symbol</p>
-                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em]">Recommended: 512x512px WEBP/PNG</p>
+                                <div className="text-center">
+                                    <p className="text-sm font-bold text-gray-900">Upload Party Logo</p>
+                                    <p className="text-xs text-gray-400 font-medium mt-1">Recommended: 512x512px WEBP/PNG</p>
                                 </div>
                             </div>
                         )}
@@ -311,48 +296,48 @@ export default function AddPartyForm({ initialData, onSuccess }) {
             </div>
 
             {/* Leaders Section */}
-            <div className="space-y-12 pt-12 border-t border-gray-100 dark:border-gray-800">
+            <div className="space-y-8 pt-10 border-t border-gray-50">
                 <div className="flex items-center justify-between gap-6 flex-wrap">
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-green-600/10 rounded-2xl flex items-center justify-center border border-green-600/20">
-                            <User size={20} className="text-green-600" />
+                        <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center border border-emerald-100">
+                            <Shield size={24} className="text-emerald-500" />
                         </div>
                         <div>
-                            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Governance & Leadership</h3>
-                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Top-tier echelon mapping (Limit: 10)</p>
+                            <h3 className="text-lg font-bold text-gray-900 tracking-tight">Leadership Profiles</h3>
+                            <p className="text-sm text-gray-500 font-medium">Prominent figures of the organization (Max. 10)</p>
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={addLeader}
-                        className="flex items-center gap-3 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.25em] shadow-xl hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white transition-all transform active:scale-95"
+                        className="flex items-center gap-2.5 px-8 py-4 bg-gray-900 text-white rounded-2xl text-sm font-bold shadow-lg hover:bg-blue-600 transition-all active:scale-95"
                     >
-                        <Plus size={16} />
-                        Append Leader
+                        <Plus size={20} />
+                        Add New Leader
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {leaders.map((leader, index) => (
-                        <div key={index} className="bg-gray-50/30 dark:bg-white/[0.01] border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-10 space-y-8 relative group transition-all hover:bg-white dark:hover:bg-white/[0.03] hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-2xl duration-500">
+                        <div key={index} className="bg-white border border-gray-100 rounded-3xl p-8 space-y-6 relative group transition-all hover:border-gray-200 hover:shadow-xl duration-500">
                             <button
                                 type="button"
                                 onClick={() => removeLeader(index)}
-                                className="absolute top-8 right-8 p-2.5 text-gray-300 hover:text-red-500 transition-colors bg-white/50 dark:bg-black/20 rounded-xl"
-                                title="Remove Personnel"
+                                className="absolute top-6 right-6 p-2 text-gray-300 hover:text-red-500 transition-colors bg-gray-50 rounded-lg shadow-sm"
+                                title="Remove Leader"
                             >
-                                <X size={20} />
+                                <X size={18} />
                             </button>
 
-                            <div className="flex flex-col sm:flex-row items-center gap-8">
+                            <div className="flex flex-col items-center gap-6">
                                 <div className="relative group/leader-photo h-32 w-32 shrink-0">
-                                    <div className="h-full w-full rounded-[2.2rem] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 overflow-hidden flex items-center justify-center relative group-hover/leader-photo:border-blue-600/50 transition-all shadow-lg group-hover:scale-105 duration-500">
+                                    <div className="h-full w-full rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center relative group-hover/leader-photo:border-blue-500/50 transition-all shadow-sm group-hover:scale-105 duration-500">
                                         {leader.photoPreview ? (
-                                            <img src={leader.photoPreview} alt="Leader" className="h-full w-full object-cover transition-transform group-hover/leader-photo:scale-125 duration-700" />
+                                            <img src={leader.photoPreview} alt="Leader" className="h-full w-full object-cover" />
                                         ) : (
-                                            <div className="text-gray-300 dark:text-gray-700 flex flex-col items-center gap-2">
-                                                <User size={32} />
-                                                <span className="text-[8px] font-black uppercase tracking-[0.2em]">Upload</span>
+                                            <div className="text-gray-300 flex flex-col items-center gap-1">
+                                                <User size={36} />
+                                                <span className="text-[10px] font-bold uppercase tracking-widest">Select</span>
                                             </div>
                                         )}
                                         <input
@@ -361,25 +346,25 @@ export default function AddPartyForm({ initialData, onSuccess }) {
                                             className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                         />
                                     </div>
-                                    <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-900 z-20">
+                                    <div className="absolute -bottom-1.5 -right-1.5 w-9 h-9 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg border-2 border-white z-20">
                                         <CropIcon size={16} />
                                     </div>
                                 </div>
 
-                                <div className="space-y-6 flex-1 w-full text-center sm:text-left">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Legal Name</label>
+                                <div className="w-full space-y-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Leader Name</label>
                                         <input
                                             type="text"
-                                            placeholder="PERSONNEL NAME"
+                                            placeholder="Enter full name"
                                             value={leader.name}
                                             onChange={(e) => handleLeaderChange(index, "name", e.target.value)}
-                                            className="w-full bg-white dark:bg-black/20 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-800 rounded-2xl px-5 py-3.5 text-[11px] font-black tracking-widest focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600/50 outline-none transition-all placeholder:text-gray-200 dark:placeholder:text-gray-800 uppercase"
+                                            className="w-full bg-gray-50/50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all placeholder:text-gray-300"
                                             required
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Rank & Priority</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Display Order</label>
                                         <div className="relative group">
                                             <input
                                                 type="number"
@@ -387,11 +372,11 @@ export default function AddPartyForm({ initialData, onSuccess }) {
                                                 max="10"
                                                 value={leader.order}
                                                 onChange={(e) => handleLeaderChange(index, "order", parseInt(e.target.value))}
-                                                className="w-full bg-white dark:bg-black/20 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-800 rounded-2xl px-5 py-3.5 text-[11px] font-black tracking-widest focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600/50 outline-none transition-all"
+                                                className="w-full bg-gray-50/50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all"
                                                 required
                                             />
-                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-blue-600 font-black text-[9px] tracking-widest">
-                                                RANK #{leader.order}
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-blue-500 font-bold text-xs">
+                                                Rank {leader.order}
                                             </div>
                                         </div>
                                     </div>
@@ -401,35 +386,36 @@ export default function AddPartyForm({ initialData, onSuccess }) {
                     ))}
 
                     {leaders.length === 0 && (
-                        <div className="col-span-full py-20 bg-gray-50/50 dark:bg-white/[0.01] border border-dashed border-gray-200 dark:border-gray-800 rounded-[3rem] flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors" onClick={addLeader}>
-                            <div className="w-16 h-16 bg-white dark:bg-gray-900 rounded-3xl flex items-center justify-center text-gray-400 border border-gray-100 dark:border-gray-800">
+                        <div className="col-span-full py-16 bg-gray-50 border border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-white transition-all shadow-inner" onClick={addLeader}>
+                            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-gray-400 border border-gray-100 shadow-sm">
                                 <Plus size={24} />
                             </div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Initialize Leadership Protocol</p>
+                            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Configure Leadership</p>
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="flex items-center justify-end gap-6 pt-16 border-t border-gray-100 dark:border-gray-800">
+            {/* Submission Section */}
+            <div className="flex items-center justify-end gap-6 pt-12 border-t border-gray-50">
                 <button
                     type="button"
                     onClick={onSuccess}
-                    className="px-10 py-5 rounded-2xl text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all outline-none"
+                    className="px-8 py-4 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
                 >
-                    Abandon Protocol
+                    Cancel Action
                 </button>
                 <button
                     disabled={isSubmitting}
                     type="submit"
-                    className="group px-20 py-6 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-blue-600/30 flex items-center gap-4 transition-all transform hover:scale-105 active:scale-95 outline-none"
+                    className="px-16 py-4 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-sm tracking-tight shadow-xl shadow-blue-500/20 flex items-center gap-3 transition-all transform hover:scale-[1.02] active:scale-95"
                 >
                     {isSubmitting ? (
-                        <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                     ) : (
-                        <Save size={20} className="group-hover:rotate-12 transition-transform" />
+                        <Save size={18} />
                     )}
-                    {initialData ? "Synchronize Updates" : "Finalize Entity Initialization"}
+                    {initialData ? "Save Global Changes" : "Deploy New Entity"}
                 </button>
             </div>
 
