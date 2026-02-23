@@ -61,6 +61,7 @@ const mainNavItems = [
       { name: "User Feed Request", path: "/social/post/request/approval", permission: "canManageUserFeedRequest" },
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
+      { name: "Party Management", path: "/social/party/management", permission: "canManageFeeds" },
     ],
   },
   {

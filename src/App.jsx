@@ -31,6 +31,7 @@ import TrendingCreatorsPage from "./pages/trendingCreator";
 
 import UserFeedReportTable from "./components/tables/UserTabel/userReportTable";
 import CategoryManagementPage from "./pages/CategoryManagementPage";
+import PartyManagement from "./pages/PartyManagement/PartyManagement";
 
 // Settings Module Pages
 import SettingsDashboard from "./pages/Dashboard/settingsDashboard";
@@ -139,6 +140,7 @@ function AnimatedRoutes() {
 
           <Route path="/social/admin/upload/page" element={<UploadPage />} />
           <Route path="/social/category/management" element={<CategoryManagementPage />} />
+          <Route path="/social/party/management" element={<PartyManagement />} />
 
 
           {/* ====== SETTINGS MODULE ROUTES ====== */}
