@@ -28,6 +28,8 @@ import UserAnalytics from "./pages/UserProfile/UserAnalitical/userAnaliticalPage
 import ReferralTreePage from "./pages/userTree";
 import CreatorTable from "./components/tables/UserTabel/creatorTable";
 import TrendingCreatorsPage from "./pages/trendingCreator";
+import BlogListPage from "./pages/BlogManagement/BlogListPage";
+import AddBlogPage from "./pages/BlogManagement/AddBlogPage";
 
 import UserFeedReportTable from "./components/tables/UserTabel/userReportTable";
 import CategoryManagementPage from "./pages/CategoryManagementPage";
@@ -141,6 +143,11 @@ function AnimatedRoutes() {
           <Route path="/social/admin/upload/page" element={<UploadPage />} />
           <Route path="/social/category/management" element={<CategoryManagementPage />} />
           <Route path="/social/party/management" element={<PartyManagement />} />
+
+          {/* Blog Management */}
+          <Route path="/social/blog/list" element={<BlogListPage />} />
+          <Route path="/social/blog/add" element={<AddBlogPage />} />
+          <Route path="/social/blog/edit/:id" element={<AddBlogPage />} />
 
 
           {/* ====== SETTINGS MODULE ROUTES ====== */}

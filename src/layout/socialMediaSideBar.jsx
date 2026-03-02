@@ -113,6 +113,15 @@ const mainNavItems = [
     ],
   },
   {
+    icon: <FileText className="w-5 h-5" />,
+    name: "Blog Management",
+    permission: "canManageFeeds",
+    subItems: [
+      { name: "List Blog", path: "/social/blog/list", permission: "canManageFeeds" },
+      { name: "Add Blog", path: "/social/blog/add", permission: "canManageFeeds" },
+    ],
+  },
+  {
     icon: <HardDrive className="w-5 h-5" />,
     name: "Server Management",
     path: "/settings/server/management",

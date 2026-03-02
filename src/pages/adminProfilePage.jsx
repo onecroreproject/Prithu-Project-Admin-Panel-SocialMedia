@@ -285,7 +285,7 @@ export default function AdminProfileEdit({ isOpen = true, onClose }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {Object.entries(socialLinks).map(([key, value]) => (
               <div key={key}>
-                <label className="block mb-1 text-sm text-gray-600 capitalize flex items-center gap-2">
+                <label className=" mb-1 text-sm text-gray-600 capitalize flex items-center gap-2">
                   <FaLink className="text-gray-400" /> {key}
                 </label>
                 {socialEditMode ? (
