@@ -1,4 +1,4 @@
-import api from "../../Utils/axiosApi"; 
+import api from "../../Utils/axiosApi";
 import { API_ENDPOINTS } from "../../API-Constanse/apiConstance";
 
 // ✅ Helper: get token safely from localStorage
@@ -24,7 +24,7 @@ export const getChildAdmins = async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    
+
     return data?.admins || [];
   } catch (err) {
     console.error("Failed to fetch child admins:", err);
@@ -33,7 +33,7 @@ export const getChildAdmins = async () => {
     if (err.response?.status === 401) {
       alert("Your session expired. Please login again.");
       localStorage.removeItem("admin");
-      window.location.href = "/admin-login"; // redirect to admin login
+      window.location.href = "/signin"; // redirect to admin login
     }
 
     throw err;
@@ -58,7 +58,7 @@ export const getAdminPermissions = async (childAdminId) => {
     if (err.response?.status === 401) {
       alert("Your session expired. Please login again.");
       localStorage.removeItem("admin");
-      window.location.href = "/admin-login";
+      window.location.href = "/signin";
     }
 
     throw err;
@@ -84,7 +84,7 @@ export const updateChildAdminPermissions = async (childAdminId, body) => {
     if (err.response?.status === 401) {
       alert("Your session expired. Please login again.");
       localStorage.removeItem("admin");
-      window.location.href = "/admin-login";
+      window.location.href = "/signin";
     }
 
     throw err;
@@ -123,16 +123,28 @@ export const updateChildAdminProfile = async (id, updateData) => {
   if (!id) throw new Error("Admin ID is required");
   if (!updateData) throw new Error("Update data is required");
 
+  // If updateData is not FormData, we should check if it's meant to be
+  // but usually for profile updates involving images, it should be FormData.
+  // We'll wrap it if it's a plain object.
+
+  let body = updateData;
+  let headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (updateData instanceof FormData) {
+    body = updateData;
+    headers = { "Content-Type": "multipart/form-data" };
+  }
+
   const { data } = await api.put(
     `${API_ENDPOINTS.UPDATE_CHILD_ADMIN_PROFILE}/${id}`,
-    updateData,
+    body,
     {
       withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: headers,
     }
   );
 
-  return data.data; // return updated profile
+  return data;
 };

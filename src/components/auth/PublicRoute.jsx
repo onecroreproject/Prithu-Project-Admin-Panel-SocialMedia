@@ -8,7 +8,8 @@ const PublicRoute = ({ children }) => {
 
     // If already logged in, redirect to the dashboard or the page they were trying to access
     if (admin) {
-        return <Navigate to="/" state={{ from: location }} replace />;
+        const origin = location.state?.from?.pathname || "/";
+        return <Navigate to={origin} replace />;
     }
 
     return children;

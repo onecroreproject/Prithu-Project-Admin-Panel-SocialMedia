@@ -159,20 +159,9 @@ const LayoutContent = () => {
         style={{
           left: contentDimensions.left,
           width: contentDimensions.width,
-          paddingTop: "4rem",
+          paddingTop: "0px", // Removed 4rem padding-top
         }}
       >
-        {/* Header */}
-        <div
-          className="fixed top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 transition-all duration-300"
-          style={{
-            left: contentDimensions.left,
-            width: contentDimensions.width,
-          }}
-        >
-          <AppHeader />
-        </div>
-
         {/* Main Content */}
         <main className={`py-4 sm:py-6 lg:py-8 ${contentDimensions.padding}`}>
           <div className={`${contentDimensions.maxWidth} mx-auto transition-all duration-300`}>

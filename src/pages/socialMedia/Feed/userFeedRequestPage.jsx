@@ -455,129 +455,63 @@ const UsersWillingToPost = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
+      <div className="max-w-[1600px] mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
+        <div className="mb-12">
+          <div className="flex justify-between items-end">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="text-4xl font-black text-gray-900 mb-3 tracking-tight">
                 Users Willing to Post
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">
                 {totalUsers} {totalUsers === 1 ? 'user' : 'users'} interested in posting content
               </p>
             </div>
-
+            <button
+              onClick={fetchUsers}
+              className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-gray-400 hover:text-blue-600 hover:border-blue-100 transition-all hover:scale-110 active:scale-95"
+            >
+              <FaSync className={loading ? "animate-spin" : ""} />
+            </button>
           </div>
         </div>
 
         {/* Count Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaUser className="h-8 w-8 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaUserCheck className="h-8 w-8 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Allowed to Post</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {users.filter(user => user.allowToPost === 'allow').length}
-                </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          {[
+            { label: 'Total Users', value: totalUsers, icon: FaUser, color: 'blue', opacity: 'bg-blue-50' },
+            { label: 'Allowed to Post', value: users.filter(user => user.allowToPost === 'allow').length, icon: FaUserCheck, color: 'emerald', opacity: 'bg-emerald-50' },
+            { label: 'Interested', value: users.filter(user => user.allowToPost === 'interest').length, icon: FaUserClock, color: 'amber', opacity: 'bg-amber-50' },
+            { label: 'Not Allowed', value: users.filter(user => user.allowToPost === 'notallow').length, icon: FaUserTimes, color: 'rose', opacity: 'bg-rose-50' }
+          ].map((card, idx) => (
+            <div key={idx} className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+              <div className="flex items-center gap-6">
+                <div className={`w-16 h-16 rounded-3xl ${card.opacity} flex items-center justify-center transition-transform group-hover:scale-110 duration-500`}>
+                  <card.icon className={`h-7 w-7 text-${card.color}-600`} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">{card.label}</p>
+                  <p className="text-3xl font-black text-gray-900">{card.value}</p>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaUserClock className="h-8 w-8 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Interested</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {users.filter(user => user.allowToPost === 'interest').length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaUserTimes className="h-8 w-8 text-red-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Not Allowed</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {users.filter(user => user.allowToPost === 'notallow').length}
-                </p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Success Message */}
-        {successMessage && (
-          <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <FaCheckCircle className="h-5 w-5 text-green-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-green-700">{successMessage}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <FaExclamationTriangle className="h-5 w-5 text-red-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-              <div className="ml-auto pl-3">
-                <button
-                  onClick={() => setError('')}
-                  className="text-red-700 hover:text-red-900"
-                >
-                  <FaTimes className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Search and Filter Section */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="bg-white rounded-[2.5rem] p-8 mb-10 border border-gray-100 shadow-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Search Input */}
-            <div className="lg:col-span-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaSearch className="text-gray-400" />
+            <div className="lg:col-span-12">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                  <FaSearch className="text-gray-300 group-focus-within:text-blue-500 transition-colors" />
                 </div>
                 <input
                   type="text"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Search users by name, email or username..."
+                  className="block w-full pl-14 pr-6 py-5 bg-gray-50 border border-transparent rounded-3xl text-sm font-medium text-gray-900 focus:bg-white focus:border-blue-500/20 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:tracking-widest"
+                  placeholder="Search by name, email or username..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                   disabled={loading}
@@ -586,163 +520,124 @@ const UsersWillingToPost = () => {
             </div>
 
             {/* Quick Filters */}
-            <div className="lg:col-span-8">
-              <div className="flex flex-wrap gap-3">
-                <select
-                  value={filters.accountType}
-                  onChange={(e) => handleFilterChange('accountType', e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={loading}
-                >
-                  <option value="">All Account Types</option>
-                  {availableFilters.accountTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.allowToPost}
-                  onChange={(e) => handleFilterChange('allowToPost', e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={loading}
-                >
-                  <option value="">All Post Status</option>
-                  {availableFilters.postStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.country}
-                  onChange={(e) => handleFilterChange('country', e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={loading}
-                >
-                  <option value="">All Countries</option>
-                  {availableFilters.countries.map((country) => (
-                    <option key={country} value={country}>
-                      {country}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.isPublished}
-                  onChange={(e) => handleFilterChange('isPublished', e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={loading}
-                >
-                  <option value="">Profile Status</option>
-                  <option value="true">Published</option>
-                  <option value="false">Not Published</option>
-                </select>
+            <div className="lg:col-span-12">
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { value: filters.accountType, onChange: (val) => handleFilterChange('accountType', val), options: availableFilters.accountTypes, placeholder: 'All Account Types' },
+                  { value: filters.allowToPost, onChange: (val) => handleFilterChange('allowToPost', val), options: availableFilters.postStatuses, placeholder: 'All Post Status' },
+                  { value: filters.country, onChange: (val) => handleFilterChange('country', val), options: availableFilters.countries, placeholder: 'All Countries' },
+                  { value: filters.isPublished, onChange: (val) => handleFilterChange('isPublished', val), options: [{ value: 'true', label: 'Published' }, { value: 'false', label: 'Not Published' }], placeholder: 'Profile Status' }
+                ].map((filter, idx) => (
+                  <select
+                    key={idx}
+                    value={filter.value}
+                    onChange={(e) => filter.onChange(e.target.value)}
+                    className="pl-4 pr-10 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-600 focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/20 transition-all outline-none appearance-none cursor-pointer hover:border-gray-200"
+                    disabled={loading}
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23D1D5DB'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                  >
+                    <option value="">{filter.placeholder}</option>
+                    {filter.options.map((opt) => (
+                      <option key={typeof opt === 'string' ? opt : opt.value} value={typeof opt === 'string' ? opt : opt.value}>
+                        {typeof opt === 'string' ? opt.charAt(0).toUpperCase() + opt.slice(1) : opt.label}
+                      </option>
+                    ))}
+                  </select>
+                ))}
 
                 <button
                   onClick={resetFilters}
                   disabled={loading}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors flex items-center disabled:opacity-50"
+                  className="px-6 py-3 bg-gray-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all flex items-center gap-2"
                 >
-                  <FaTimes className="mr-2" />
-                  Clear Filters
+                  <FaTimes className="text-[12px]" />
+                  Reset Filters
                 </button>
               </div>
             </div>
           </div>
 
           {/* Sort Options */}
-          <div className="mt-4 flex items-center space-x-4">
-            <span className="text-sm font-medium text-gray-700">Sort by:</span>
-            <button
-              onClick={() => handleSortChange('createdAt')}
-              disabled={loading}
-              className={`px-3 py-1 text-sm rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''} ${sortBy === 'createdAt'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-                }`}
-            >
-              <FaCalendarAlt className="inline mr-1" />
-              Newest {sortBy === 'createdAt' && (sortOrder === 'desc' ? '↓' : '↑')}
-            </button>
-            <button
-              onClick={() => handleSortChange('lastActiveAt')}
-              disabled={loading}
-              className={`px-3 py-1 text-sm rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''} ${sortBy === 'lastActiveAt'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-                }`}
-            >
-              Last Active {sortBy === 'lastActiveAt' && (sortOrder === 'desc' ? '↓' : '↑')}
-            </button>
+          <div className="mt-8 pt-8 border-t border-gray-50 flex items-center gap-6">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sort by:</span>
+            <div className="flex gap-2">
+              {[
+                { field: 'createdAt', label: 'Newest', icon: FaCalendarAlt },
+                { field: 'lastActiveAt', label: 'Last Active', icon: FaClock }
+              ].map((sort) => (
+                <button
+                  key={sort.field}
+                  onClick={() => handleSortChange(sort.field)}
+                  disabled={loading}
+                  className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 ${sortBy === sort.field
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                    : 'bg-white text-gray-400 border border-gray-100 hover:border-gray-200'
+                    }`}
+                >
+                  <sort.icon className="text-[12px]" />
+                  {sort.label} {sortBy === sort.field && (sortOrder === 'desc' ? '↓' : '↑')}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Users Table */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden mb-10">
           {loading && currentPage > 1 ? (
-            <div className="p-8 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-              <p className="mt-2 text-gray-600">Loading more users...</p>
+            <div className="p-20 text-center">
+              <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+              <p className="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Loading more users...</p>
             </div>
           ) : filteredUsers.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <FaUser className="text-gray-400 text-2xl" />
+            <div className="p-20 text-center">
+              <div className="w-20 h-20 mx-auto bg-gray-50 rounded-3xl flex items-center justify-center mb-6">
+                <FaUser className="text-gray-300 text-3xl" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-xl font-black text-gray-900 mb-2">No users found</h3>
+              <p className="text-sm font-medium text-gray-400 mb-8 max-w-xs mx-auto">
                 {searchTerm || Object.values(filters).some(f => f)
-                  ? "Try adjusting your search or filters"
-                  : "No users are currently willing to post"}
+                  ? "We couldn't find any users matching your current filters."
+                  : "There are no users currently expressing interest in posting."}
               </p>
               {(searchTerm || Object.values(filters).some(f => f)) && (
                 <button
                   onClick={resetFilters}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-8 py-4 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
                 >
                   Clear all filters
                 </button>
               )}
             </div>
           ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        User Profile
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-50">
+                <thead>
+                  <tr className="bg-gray-50/50">
+                    {[
+                      'User Profile',
+                      'Contact & Location',
+                      'Post Status',
+                      'Activity',
+                      'Actions'
+                    ].map((head) => (
+                      <th key={head} className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        {head}
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Contact & Location
-                      </th>
-                      {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Account Details
-                      </th> */}
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Post Status
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Activity
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredUsers.map((user) => (
-                      <tr key={user._id} className="hover:bg-gray-50">
-                        {/* User Profile */}
-                        <td className="px-6 py-4">
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0">
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {filteredUsers.map((user) => (
+                    <tr key={user._id} className="hover:bg-gray-50/50 transition-colors group">
+                      {/* User Profile */}
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 border-2 border-white ring-1 ring-gray-100 shadow-sm">
                               {user.profile?.profileAvatar ? (
                                 <img
-                                  className="h-12 w-12 rounded-full object-cover"
+                                  className="w-full h-full object-cover"
                                   src={user.profile.profileAvatar}
                                   alt={user.userName}
                                   onError={(e) => {
@@ -751,178 +646,146 @@ const UsersWillingToPost = () => {
                                   }}
                                 />
                               ) : (
-                                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                  <FaUser className="text-blue-600 text-lg" />
+                                <div className="w-full h-full flex items-center justify-center bg-blue-50">
+                                  <FaUser className="text-blue-400 text-xl" />
                                 </div>
                               )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="text-sm font-medium text-gray-900">
-                                {user.profile?.name || 'N/A'} {user.profile?.lastName || ''}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                @{user.userName}
-                              </div>
+                            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${user.isActive ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-sm font-black text-gray-900 mb-0.5">
+                              {user.profile?.name || 'N/A'} {user.profile?.lastName || ''}
+                            </div>
+                            <div className="text-[10px] font-bold text-gray-400 truncate tracking-wide">
+                              @{user.userName}
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
                               {user.profile?.gender && (
-                                <div className="flex items-center text-xs text-gray-500 mt-1">
-                                  <FaVenusMars className="mr-1" />
-                                  {user.profile.gender.charAt(0).toUpperCase() + user.profile.gender.slice(1)}
-                                </div>
-                              )}
-                              {user.profile?.isPublished !== undefined && (
-                                <div className="text-xs mt-1">
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded ${user.profile.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                    {user.profile.isPublished ? 'Published' : 'Not Published'}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Contact & Location */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="space-y-2">
-                            <div className="text-sm text-gray-900">
-                              <div className="flex items-center">
-                                <FaEnvelope className="mr-2 text-gray-400" />
-                                {user.email}
-                              </div>
-                            </div>
-                            {user.profile?.phoneNumber && (
-                              <div className="text-sm text-gray-500">
-                                <div className="flex items-center">
-                                  <FaPhone className="mr-2 text-gray-400" />
-                                  {user.profile.phoneNumber}
-                                </div>
-                              </div>
-                            )}
-                            {(user.profile?.city || user.profile?.country) && (
-                              <div className="text-sm text-gray-500">
-                                <div className="flex items-center">
-                                  <FaGlobe className="mr-2 text-gray-400" />
-                                  {user.profile.city && <span>{user.profile.city}</span>}
-                                  {user.profile.city && user.profile.country && <span>, </span>}
-                                  {user.profile.country && <span>{user.profile.country}</span>}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Account Details */}
-                        {/* <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="space-y-2">
-                            <div>{getAccountTypeBadge(user.accountType)}</div>
-                            <div>{getSubscriptionBadge(user.subscription)}</div>
-                            {user.roles && user.roles.length > 0 && (
-                              <div className="text-xs text-gray-500">
-                                {user.roles.join(', ')}
-                              </div>
-                            )}
-                          </div>
-                        </td> */}
-
-                        {/* Post Status */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>{getPostStatusBadge(user.allowToPost)}</div>
-                        </td>
-
-                        {/* Activity */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="space-y-2">
-                            <div className="text-sm text-gray-900">
-                              <div className="flex items-center">
-                                <FaCalendarAlt className="mr-2 text-gray-400" />
-                                Joined: {formatDate(user.createdAt)}
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              <div className="flex items-center">
-                                <FaClock className="mr-2 text-gray-400" />
-                                Last active: {getTimeSince(user.lastActiveAt)}
-                              </div>
-                            </div>
-                            <div className="text-xs">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                {user.isActive ? 'Active' : 'Inactive'}
-                              </span>
-                              {user.isBlocked && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-red-100 text-red-800 ml-1">
-                                  Blocked
+                                <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-[8px] font-black text-gray-500 uppercase tracking-widest rounded-md">
+                                  {user.profile.gender}
                                 </span>
                               )}
+                              <span className={`inline-flex items-center px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md ${user.profile?.isPublished ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                {user.profile?.isPublished ? 'Published' : 'Hidden'}
+                              </span>
                             </div>
                           </div>
-                        </td>
+                        </div>
+                      </td>
 
-                        {/* Actions */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center space-x-2">
+                      {/* Contact & Location */}
+                      <td className="px-8 py-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-[11px] font-medium text-gray-600">
+                            <FaEnvelope className="text-gray-300" />
+                            {user.email}
+                          </div>
+                          {user.profile?.phoneNumber && (
+                            <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500">
+                              <FaPhone className="text-gray-300" />
+                              {user.profile.phoneNumber}
+                            </div>
+                          )}
+                          {(user.profile?.city || user.profile?.country) && (
+                            <div className="flex items-center gap-2 text-[11px] font-medium text-gray-400">
+                              <FaGlobe className="text-gray-300" />
+                              <span className="truncate">
+                                {user.profile.city && <span>{user.profile.city}</span>}
+                                {user.profile.city && user.profile.country && <span>, </span>}
+                                {user.profile.country && <span>{user.profile.country}</span>}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Post Status */}
+                      <td className="px-8 py-6">
+                        {getPostStatusBadge(user.allowToPost)}
+                      </td>
+
+                      {/* Activity */}
+                      <td className="px-8 py-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-[11px] font-medium text-gray-600">
+                            <FaCalendarAlt className="text-gray-300" />
+                            {formatDate(user.createdAt)}
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-blue-500 uppercase tracking-widest">
+                            <FaClock className="text-blue-200" />
+                            {getTimeSince(user.lastActiveAt)}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleViewProfile(user)}
+                            className="p-3 bg-white border border-gray-100 text-gray-400 rounded-xl hover:text-blue-600 hover:border-blue-100 hover:bg-blue-50 transition-all shadow-sm active:scale-95"
+                            title="View Profile"
+                            disabled={loading}
+                          >
+                            <FaEye className="text-sm" />
+                          </button>
+
+                          {user.allowToPost !== 'allow' && (
                             <button
-                              onClick={() => handleViewProfile(user)}
-                              className="p-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
-                              title="View Profile"
+                              onClick={() => handleUpdateStatus(user, 'allow')}
+                              className="p-3 bg-white border border-gray-100 text-gray-400 rounded-xl hover:text-emerald-600 hover:border-emerald-100 hover:bg-emerald-50 transition-all shadow-sm active:scale-95"
+                              title="Allow to Post"
                               disabled={loading}
                             >
-                              <FaEye className="text-sm" />
+                              <FaCheck className="text-sm" />
                             </button>
+                          )}
 
-                            {user.allowToPost !== 'allow' && (
-                              <button
-                                onClick={() => handleUpdateStatus(user, 'allow')}
-                                className="p-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
-                                title="Allow to Post"
-                                disabled={loading}
-                              >
-                                <FaCheck className="text-sm" />
-                              </button>
-                            )}
-
-                            {user.allowToPost !== 'notallow' && (
-                              <button
-                                onClick={() => handleUpdateStatus(user, 'notallow')}
-                                className="p-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
-                                title="Disallow Posting"
-                                disabled={loading}
-                              >
-                                <FaTimes className="text-sm" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
+                          {user.allowToPost !== 'notallow' && (
+                            <button
+                              onClick={() => handleUpdateStatus(user, 'notallow')}
+                              className="p-3 bg-white border border-gray-100 text-gray-400 rounded-xl hover:text-rose-600 hover:border-rose-100 hover:bg-rose-50 transition-all shadow-sm active:scale-95"
+                              title="Disallow Posting"
+                              disabled={loading}
+                            >
+                              <FaTimes className="text-sm" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
         {/* Pagination */}
         {filteredUsers.length > 0 && totalUsers > itemsPerPage && (
-          <div className="mt-6 flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
-              <span className="font-medium">{Math.min(currentPage * itemsPerPage, totalUsers)}</span> of{' '}
-              <span className="font-medium">{totalUsers}</span> users
+          <div className="flex items-center justify-between px-8 py-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm">
+            <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+              Showing <span className="text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
+              <span className="text-gray-900">{Math.min(currentPage * itemsPerPage, totalUsers)}</span> of{' '}
+              <span className="text-gray-900">{totalUsers}</span> users
             </div>
-            <div className="flex space-x-2">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1 || loading}
-                className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-3 px-6 bg-white rounded-2xl border border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
               >
                 Previous
               </button>
-              <span className="px-3 py-2 text-sm text-gray-700">
-                Page {currentPage} of {Math.ceil(totalUsers / itemsPerPage)}
-              </span>
+              <div className="w-24 h-10 flex items-center justify-center bg-gray-50 rounded-2xl text-[10px] font-black text-blue-600 tracking-widest">
+                PAGE {currentPage}
+              </div>
               <button
                 onClick={() => setCurrentPage(prev => prev + 1)}
                 disabled={currentPage * itemsPerPage >= totalUsers || loading}
-                className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-3 px-6 bg-white rounded-2xl border border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
               >
                 Next
               </button>
@@ -932,192 +795,147 @@ const UsersWillingToPost = () => {
 
         {/* Profile Preview Modal */}
         {showPreview && previewUser && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-medium text-gray-900">User Profile</h3>
-                  <button
-                    onClick={() => setShowPreview(false)}
-                    className="text-gray-400 hover:text-gray-500"
-                    disabled={loading}
-                  >
-                    <FaTimes className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Profile Header */}
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0">
-                      {previewUser.profile?.profileAvatar ? (
-                        <img
-                          className="h-20 w-20 rounded-full object-cover"
-                          src={previewUser.profile.profileAvatar}
-                          alt={previewUser.userName}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = 'https://via.placeholder.com/80';
-                          }}
-                        />
-                      ) : (
-                        <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center">
-                          <FaUser className="text-blue-600 text-2xl" />
-                        </div>
-                      )}
+          <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-md flex items-center justify-center p-6 z-[100] animate-in fade-in duration-300">
+            <div className="bg-white rounded-[3rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-300">
+              <div className="p-10 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="flex justify-between items-start mb-10">
+                  <div className="flex items-center gap-8">
+                    <div className="relative group">
+                      <div className="w-28 h-28 rounded-[2.5rem] overflow-hidden bg-gray-50 border-4 border-white shadow-xl shadow-gray-200/50">
+                        {previewUser.profile?.profileAvatar ? (
+                          <img
+                            className="w-full h-full object-cover"
+                            src={previewUser.profile.profileAvatar}
+                            alt={previewUser.userName}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-blue-50">
+                            <FaUser className="text-blue-400 text-4xl" />
+                          </div>
+                        )}
+                      </div>
+                      <div className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-2xl border-4 border-white shadow-md flex items-center justify-center ${previewUser.isActive ? 'bg-emerald-500 text-white' : 'bg-gray-300 text-white'}`}>
+                        {previewUser.isActive ? <FaCheck size={10} /> : <FaBan size={10} />}
+                      </div>
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">
+                      <h2 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
                         {previewUser.profile?.name || 'N/A'} {previewUser.profile?.lastName || ''}
                       </h2>
-                      <p className="text-gray-600">@{previewUser.userName}</p>
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <p className="text-[11px] font-black text-blue-500 uppercase tracking-[0.3em]">@{previewUser.userName}</p>
+                      <div className="flex flex-wrap items-center gap-3 mt-6">
                         {getPostStatusBadge(previewUser.allowToPost)}
                         {getAccountTypeBadge(previewUser.accountType)}
                         {getSubscriptionBadge(previewUser.subscription)}
                       </div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => setShowPreview(false)}
+                    className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-all active:scale-95"
+                  >
+                    <FaTimes size={20} />
+                  </button>
+                </div>
 
-                  {/* Bio & Summary */}
-                  {(previewUser.profile?.bio || previewUser.profile?.profileSummary) && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  {/* Left Column */}
+                  <div className="space-y-10">
                     <div>
-                      <h4 className="text-lg font-medium text-gray-900 mb-2">About</h4>
-                      {previewUser.profile?.bio && (
-                        <p className="text-gray-700 mb-2">{previewUser.profile.bio}</p>
-                      )}
-                      {previewUser.profile?.profileSummary && (
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <p className="text-gray-700 whitespace-pre-wrap">
-                            {previewUser.profile.profileSummary}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Contact Information */}
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center mb-2">
-                          <FaEnvelope className="mr-2 text-gray-400" />
-                          <span className="text-gray-700">{previewUser.email}</span>
-                        </div>
-                        {previewUser.profile?.phoneNumber && (
-                          <div className="flex items-center mb-2">
-                            <FaPhone className="mr-2 text-gray-400" />
-                            <span className="text-gray-700">{previewUser.profile.phoneNumber}</span>
-                          </div>
-                        )}
-                        {previewUser.profile?.whatsAppNumber && (
-                          <div className="flex items-center">
-                            <FaPhone className="mr-2 text-green-400" />
-                            <span className="text-gray-700">WhatsApp: {previewUser.profile.whatsAppNumber}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        {(previewUser.profile?.city || previewUser.profile?.country) && (
-                          <div className="flex items-center mb-2">
-                            <FaGlobe className="mr-2 text-gray-400" />
-                            <span className="text-gray-700">
-                              {previewUser.profile.city && <span>{previewUser.profile.city}, </span>}
-                              {previewUser.profile.country && <span>{previewUser.profile.country}</span>}
-                            </span>
-                          </div>
-                        )}
-                        {previewUser.profile?.gender && (
-                          <div className="flex items-center">
-                            <FaVenusMars className="mr-2 text-gray-400" />
-                            <span className="text-gray-700">{previewUser.profile.gender}</span>
-                          </div>
-                        )}
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">About User</p>
+                      <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100 shadow-inner">
+                        <p className="text-sm font-medium text-gray-700 leading-loose">
+                          {previewUser.profile?.bio || previewUser.profile?.profileSummary || "No bio information provided by the user."}
+                        </p>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Social Links */}
-                  {previewUser.profile?.socialLinks && Object.keys(previewUser.profile.socialLinks).length > 0 && (
                     <div>
-                      <h4 className="text-lg font-medium text-gray-900 mb-2">Social Links</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(previewUser.profile.socialLinks).map(([platform, url]) => (
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Social Context</p>
+                      <div className="flex flex-wrap gap-3">
+                        {previewUser.profile?.socialLinks && Object.entries(previewUser.profile.socialLinks).map(([platform, url]) => (
                           url && (
                             <a
                               key={platform}
                               href={url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                              className="px-6 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm"
                             >
-                              {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                              {platform}
                             </a>
                           )
                         ))}
                       </div>
                     </div>
-                  )}
+                  </div>
 
-                  {/* Account Information */}
-                  <div className="border-t border-gray-200 pt-6">
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">Account Information</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-600">Joined</p>
-                        <p className="text-gray-700">{formatDateTime(previewUser.createdAt)}</p>
+                  {/* Right Column */}
+                  <div className="space-y-10">
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Contact & Location</p>
+                      <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6">
+                        {[
+                          { icon: FaEnvelope, label: 'Email Address', value: previewUser.email, color: 'text-blue-500' },
+                          { icon: FaPhone, label: 'Phone Number', value: previewUser.profile?.phoneNumber || 'N/A', color: 'text-emerald-500' },
+                          { icon: FaGlobe, label: 'Location', value: `${previewUser.profile?.city || ''}${previewUser.profile?.country ? `, ${previewUser.profile.country}` : ''}` || 'N/A', color: 'text-amber-500' },
+                          { icon: FaVenusMars, label: 'Gender', value: previewUser.profile?.gender || 'N/A', color: 'text-rose-500' }
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-5">
+                            <div className={`w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center ${item.color}`}>
+                              <item.icon size={16} />
+                            </div>
+                            <div>
+                              <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-0.5">{item.label}</p>
+                              <p className="text-xs font-bold text-gray-900">{item.value}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Last Active</p>
-                        <p className="text-gray-700">{getTimeSince(previewUser.lastActiveAt)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Profile Status</p>
-                        <p className={`inline-flex items-center px-2 py-0.5 rounded ${previewUser.profile?.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                          {previewUser.profile?.isPublished ? 'Published' : 'Not Published'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Account Status</p>
-                        <p className={`inline-flex items-center px-2 py-0.5 rounded ${previewUser.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {previewUser.isActive ? 'Active' : 'Inactive'}
-                        </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Account Metadata</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { label: 'Joined', value: formatDate(previewUser.createdAt) },
+                          { label: 'Last Activity', value: getTimeSince(previewUser.lastActiveAt) }
+                        ].map((meta, idx) => (
+                          <div key={idx} className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                            <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{meta.label}</p>
+                            <p className="text-xs font-black text-gray-900">{meta.value}</p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
-                  <button
-                    onClick={() => {
-                      setShowPreview(false);
-                      handleUpdateStatus(previewUser, previewUser.allowToPost === 'allow' ? 'notallow' : 'allow');
-                    }}
-                    className={`px-4 py-2 rounded-lg text-white transition-colors flex items-center ${previewUser.allowToPost === 'allow' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
-                    disabled={loading}
-                  >
-                    {previewUser.allowToPost === 'allow' ? (
-                      <>
-                        <FaBan className="mr-2" />
-                        Disallow Posting
-                      </>
-                    ) : (
-                      <>
-                        <FaCheck className="mr-2" />
-                        Allow Posting
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setShowPreview(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                    disabled={loading}
-                  >
-                    Close
-                  </button>
-                </div>
+              {/* Action Buttons */}
+              <div className="p-8 bg-gray-50/50 border-t border-gray-100 flex justify-end gap-4">
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="px-8 py-4 bg-white border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-gray-900 hover:bg-white transition-all shadow-sm"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPreview(false);
+                    handleUpdateStatus(previewUser, previewUser.allowToPost === 'allow' ? 'notallow' : 'allow');
+                  }}
+                  className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg active:scale-95 flex items-center gap-3 ${previewUser.allowToPost === 'allow'
+                      ? 'bg-rose-600 shadow-rose-500/20 hover:bg-rose-700'
+                      : 'bg-emerald-600 shadow-emerald-500/20 hover:bg-emerald-700'
+                    }`}
+                >
+                  {previewUser.allowToPost === 'allow' ? (
+                    <><FaBan /> Disallow Posting</>
+                  ) : (
+                    <><FaCheck /> Allow Posting</>
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -1125,49 +943,37 @@ const UsersWillingToPost = () => {
 
         {/* Status Update Confirmation Modal */}
         {showStatusModal && selectedUser && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-              <div className="p-6">
-                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-blue-100">
-                  <FaUserCheck className="h-6 w-6 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
-                  Update Post Permission
-                </h3>
-                <p className="text-sm text-gray-500 text-center mb-6">
-                  Are you sure you want to update <strong>{selectedUser.userName}</strong>'s post permission to{' '}
-                  <strong>{newStatus}</strong>?
-                </p>
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={() => {
-                      setShowStatusModal(false);
-                      setSelectedUser(null);
-                      setNewStatus('');
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmUpdateStatus}
-                    disabled={loading}
-                    className={`px-4 py-2 text-white rounded-lg hover:opacity-90 transition-colors flex items-center ${newStatus === 'allow' ? 'bg-green-600' :
-                        newStatus === 'interest' ? 'bg-yellow-600' :
-                          'bg-red-600'
-                      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {loading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                        Updating...
-                      </>
-                    ) : (
-                      `Update to ${newStatus}`
-                    )}
-                  </button>
-                </div>
+          <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-md flex items-center justify-center p-6 z-[100] animate-in fade-in duration-300">
+            <div className="bg-white rounded-[3rem] shadow-2xl max-w-md w-full border border-gray-100 p-10 text-center animate-in zoom-in-95 duration-300">
+              <div className={`w-20 h-20 mx-auto mb-8 rounded-3xl flex items-center justify-center ${newStatus === 'allow' ? 'bg-emerald-50 text-emerald-600' :
+                  newStatus === 'interest' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                }`}>
+                <FaUserCheck size={32} />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">
+                Update Permission?
+              </h3>
+              <p className="text-sm font-medium text-gray-500 leading-relaxed mb-10">
+                Are you sure you want to update <span className="text-gray-900 font-bold">@{selectedUser.userName}</span>'s permission to <span className="text-gray-900 font-bold uppercase">{newStatus}</span>?
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    setShowStatusModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="flex-1 py-4 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-500 rounded-2xl hover:bg-gray-100 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmUpdateStatus}
+                  className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-white rounded-2xl transition-all shadow-lg active:scale-95 ${newStatus === 'allow' ? 'bg-emerald-600 shadow-emerald-500/20' :
+                      newStatus === 'interest' ? 'bg-amber-600 shadow-amber-500/20' : 'bg-rose-600 shadow-rose-500/20'
+                    }`}
+                >
+                  {loading ? 'Processing...' : 'Confirm Update'}
+                </button>
               </div>
             </div>
           </div>
@@ -1175,45 +981,30 @@ const UsersWillingToPost = () => {
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && selectedUser && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-              <div className="p-6">
-                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-100">
-                  <FaExclamationTriangle className="h-6 w-6 text-red-600" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
-                  Delete User
-                </h3>
-                <p className="text-sm text-gray-500 text-center mb-6">
-                  Are you sure you want to delete user <strong>"{selectedUser.userName}"</strong>?
-                  This action cannot be undone and will permanently remove the user account.
-                </p>
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={() => {
-                      setShowDeleteModal(false);
-                      setSelectedUser(null);
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmDelete}
-                    disabled={loading}
-                    className={`px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {loading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                        Deleting...
-                      </>
-                    ) : (
-                      'Delete User'
-                    )}
-                  </button>
-                </div>
+          <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-md flex items-center justify-center p-6 z-[100] animate-in fade-in duration-300">
+            <div className="bg-white rounded-[3rem] shadow-2xl max-w-md w-full border border-gray-100 p-10 text-center animate-in zoom-in-95 duration-300">
+              <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-8 text-rose-600">
+                <FaExclamationTriangle size={32} />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight font-serif">
+                Delete Account?
+              </h3>
+              <p className="text-sm font-medium text-gray-500 leading-relaxed mb-10">
+                Deleting <span className="text-gray-900 font-bold">@{selectedUser.userName}</span> is permanent and cannot be undone. All associated data will be removed.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 py-4 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-500 rounded-2xl hover:bg-gray-100 transition-all font-serif"
+                >
+                  Keep Account
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 py-4 bg-rose-600 text-[10px] font-black uppercase tracking-widest text-white rounded-2xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-500/20 active:scale-95"
+                >
+                  {loading ? 'Deleting...' : 'Permanently Delete'}
+                </button>
               </div>
             </div>
           </div>

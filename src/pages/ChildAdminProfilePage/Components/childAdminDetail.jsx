@@ -10,18 +10,12 @@ const fadeLeft = {
   visible: { opacity: 1, x: 0, transition: { type: "spring", duration: 0.55, bounce: 0.17 } },
 };
 
-export default function ChildAdminDetails({ profile }) {
+export default function ChildAdminDetails({ profile, isEditing, formData, setFormData }) {
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(profile || {});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleEdit = () => {
-    navigate(`/settings/childadmin/permission/${profile._id}`);
   };
 
   return (
@@ -38,7 +32,10 @@ export default function ChildAdminDetails({ profile }) {
         <FaTimes />
       </motion.button>
 
-      <h2 className="text-xl font-semibold mb-4">Child Admin Details</h2>
+      <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+        <h2 className="text-xl font-semibold text-gray-800">General Information</h2>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
         <Info
           label="Name"
@@ -47,9 +44,10 @@ export default function ChildAdminDetails({ profile }) {
               <input
                 type="text"
                 name="userName"
-                value={formData.userName || ""}
+                value={formData.userName}
                 onChange={handleInputChange}
-                className="bg-gray-50 px-3 py-2 rounded w-full"
+                placeholder="User Name"
+                className="bg-gray-50 border border-gray-300 px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
               />
             ) : (
               profile.userName
@@ -63,46 +61,40 @@ export default function ChildAdminDetails({ profile }) {
               <input
                 type="text"
                 name="phoneNumber"
-                value={formData.phoneNumber || ""}
+                value={formData.phoneNumber}
                 onChange={handleInputChange}
-                className="bg-gray-50 px-3 py-2 rounded w-full"
+                className="bg-gray-50 border border-gray-300 px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
+                placeholder="Phone Number"
               />
             ) : (
-              profile.phoneNumber || "-"
+              profile.profile?.phoneNumber || "-"
             )
           }
         />
-        <Info
-          label="Bio"
-          value={
-            isEditing ? (
-              <textarea
-                name="bio"
-                value={formData.bio || ""}
-                onChange={handleInputChange}
-                className="bg-gray-50 px-3 py-2 rounded w-full"
-              />
-            ) : (
-              profile.bio || "-"
-            )
-          }
-        />
+        <div className="md:col-span-2">
+          <Info
+            label="Bio"
+            value={
+              isEditing ? (
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  className="bg-gray-50 border border-gray-300 px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] transition-all shadow-xs"
+                  placeholder="Tell us about yourself..."
+                />
+              ) : (
+                profile.profile?.bio || "-"
+              )
+            }
+          />
+        </div>
         <Info label="Email" value={profile.email} />
         <Info label="Active Status" value={profile.isActive ? "Active" : "Inactive"} />
         <Info label="Approval Status" value={profile.isApprovedByParent ? "Approved" : "Pending"} />
         <Info label="Created At" value={new Date(profile.createdAt).toLocaleString()} />
         <Info label="Updated At" value={new Date(profile.updatedAt).toLocaleString()} />
       </div>
-
-      {/* Only show Edit button if role is Child_Admin */}
-      {profile.role === "Child_Admin" && (
-        <button
-          onClick={handleEdit}
-          className="absolute top-4 right-4 flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
-        >
-          <FaEdit /> Edit
-        </button>
-      )}
     </motion.div>
   );
 }

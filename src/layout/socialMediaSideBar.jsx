@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PrithuLogo from "../Assets/Logo/prithulogo.png";
 import { useSidebar } from "../context/SidebarContext";
+import { useAdminAuth } from "../context/adminAuthContext";
 import SidebarWidget from "./SidebarWidget";
 import {
   Grid,
@@ -172,7 +173,34 @@ const SocialMediaSidebar = ({ user }) => {
       .filter((item) => !item.subItems || item.subItems.length > 0);
   };
 
-  const filteredNavItems = useMemo(() => filterMenu(mainNavItems), [user]);
+  // Filter menu based on permissions and add dynamic items
+  const filteredNavItems = useMemo(() => {
+    let items = filterMenu(mainNavItems);
+
+    // Add Profile link for Child Admins at the top
+    if (user && user.role === "Child_Admin") {
+      const profileId = user._id || user.id || user.userId;
+      if (profileId) {
+        items = [
+          {
+            icon: <User className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />,
+            name: "My Profile",
+            path: `/settings/child/admin/profile/${profileId}`,
+            permission: null
+          },
+          ...items
+        ];
+      }
+    }
+    return items;
+  }, [user]);
+
+  const { logout } = useAdminAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/signin");
+  };
 
   // Handle submenu toggle
   const handleSubmenuToggle = (index, menuType) => {
@@ -572,6 +600,34 @@ const SocialMediaSidebar = ({ user }) => {
             </div>
           </nav>
 
+          {/* Logout Button */}
+          <div className="pb-4">
+            <button
+              onClick={handleLogout}
+              className={`
+                group flex items-center gap-3 w-full px-3 py-3 rounded-xl
+                transition-all duration-300 ease-out
+                bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/10 dark:hover:bg-red-900/20 dark:text-red-400
+                ${!(isHovered || isMobileOpen) ? "justify-center" : "justify-start"}
+              `}
+            >
+              <LogOut className="w-5 h-5" />
+              <AnimatePresence>
+                {(isHovered || isMobileOpen) && (
+                  <motion.span
+                    variants={menuItemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    className="text-sm font-medium"
+                  >
+                    Logout
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
+
           {/* Social Media Info & Actions */}
           <AnimatePresence mode="wait">
             {(isHovered || isMobileOpen) && (
@@ -596,6 +652,7 @@ const SocialMediaSidebar = ({ user }) => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ delay: 0.1 }}
+                className="mb-6"
               >
                 <SidebarWidget />
               </motion.div>

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlusCircle, Eye } from "lucide-react";
+import { PlusCircle, Eye, Calendar } from "lucide-react";
 
 import FeedUploadPage from "../components/FeedUpload/FeedUploadPage";
 import FeedManagement from "../pages/Tables/feedManagementTable";
+import ScheduledFeedTable from "../pages/Tables/ScheduledFeedTable";
 
 export default function UploadPage() {
   const [activeTab, setActiveTab] = useState("feedUpload");
@@ -17,6 +18,7 @@ export default function UploadPage() {
   const tabs = [
     { id: "feedUpload", label: "Feed Upload", icon: <PlusCircle className="h-4 w-4 mr-2" /> },
     { id: "feedManagement", label: "Feed Management", icon: <Eye className="h-4 w-4 mr-2" /> },
+    { id: "scheduledFeed", label: "Scheduled Feed", icon: <Calendar className="h-4 w-4 mr-2" /> },
   ];
 
   return (
@@ -65,6 +67,19 @@ export default function UploadPage() {
               className="max-w-6xl mx-auto bg-white dark:bg-white/[0.03] rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm"
             >
               <FeedManagement />
+            </motion.div>
+          )}
+          {activeTab === "scheduledFeed" && (
+            <motion.div
+              key="scheduledFeed"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={tabVariants}
+              transition={{ duration: 0.3 }}
+              className="max-w-6xl mx-auto bg-white dark:bg-white/[0.03] rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm"
+            >
+              <ScheduledFeedTable />
             </motion.div>
           )}
         </AnimatePresence>

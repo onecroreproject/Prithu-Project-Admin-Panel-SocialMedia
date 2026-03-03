@@ -24,63 +24,125 @@ const fadeLeft = {
   visible: { opacity: 1, x: 0, transition: { type: "spring", duration: 0.55, bounce: 0.17 } },
 };
 
-export default function ChildAdminProfile() {
+const ChildAdminProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [actionType, setActionType] = useState(null);
-  const [isActionProcessing, setIsActionProcessing] = useState(false);
-  const {role}=useAdminAuth()
-console.log(id)
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { role: currentUserRole } = useAdminAuth();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    userName: "",
+    phoneNumber: "",
+    bio: "",
+    socialLinks: {
+      facebook: "",
+      instagram: "",
+      twitter: "",
+      youtube: "",
+    }
+  });
+  const [newAvatar, setNewAvatar] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const {
+    data: profileData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["childAdminProfile", id],
     queryFn: () => fetchChildAdminProfile(id),
-    staleTime: 1000 * 60 * 5,
     enabled: !!id,
   });
 
-  useEffect(() => {
-    if (data) {
-      const normalizedProfile = {
-        ...data,
-        userName: data.profile?.userName || data.userName,
-        profileAvatar: data.profile?.profileAvatar || "/default-avatar.png",
-        grantedPermissions: data.grantedPermissions || [],
-        ungrantedPermissions: data.ungrantedPermissions || [],
-        socialLinks: data.profile?.socialLinks || {},
-      };
-      setProfile(normalizedProfile);
-    }
-  }, [data]);
+  const profile = profileData ? {
+    ...profileData,
+    userName: profileData.profile?.userName || profileData.userName,
+    profileAvatar: profileData.profile?.profileAvatar || "/default-avatar.png",
+    socialLinks: profileData.profile?.socialLinks || {},
+  } : null;
 
-  const handleAction = (type) => {
-    setActionType(type);
-    setShowModal(true);
+  useEffect(() => {
+    if (profileData) {
+      setFormData({
+        userName: profileData.profile?.userName || profileData.userName || "",
+        phoneNumber: profileData.profile?.phoneNumber || "",
+        bio: profileData.profile?.bio || "",
+        socialLinks: profileData.profile?.socialLinks || {
+          facebook: "",
+          instagram: "",
+          twitter: "",
+          youtube: "",
+        }
+      });
+    }
+  }, [profileData]);
+
+  const handleAction = async (type) => {
+    try {
+      if (type === "block" || type === "unblock") {
+        await blockChildAdmin(id);
+        toast.success(`Child admin ${type === "block" ? "blocked" : "unblocked"} successfully!`);
+      } else if (type === "delete") {
+        if (window.confirm("Are you sure you want to delete this child admin?")) {
+          await deleteChildAdmin(id);
+          toast.success("Child admin deleted successfully!");
+          navigate("/child/admin/page");
+        }
+      }
+      refetch();
+    } catch (error) {
+      toast.error(error.response?.data?.message || `Failed to ${type} child admin`);
+    }
   };
 
-  const handleConfirmAction = async () => {
-    if (isActionProcessing) return;
-    setIsActionProcessing(true);
+  const handleSaveAll = async () => {
+    setIsSaving(true);
     try {
-      if (actionType === "block" || actionType === "unblock") {
-        await blockChildAdmin(profile._id);
-        toast.success(
-          `Child Admin ${profile.isActive ? "blocked" : "unblocked"} successfully!`
-        );
-        refetch();
-      } else if (actionType === "delete") {
-        await deleteChildAdmin(profile._id);
-        toast.success("Child Admin deleted successfully!");
-        navigate("/child/admin/page");
+      const fd = new FormData();
+      fd.append("userName", formData.userName);
+      fd.append("phoneNumber", formData.phoneNumber);
+      fd.append("bio", formData.bio);
+      fd.append("socialLinks", JSON.stringify(formData.socialLinks));
+      if (newAvatar) {
+        fd.append("file", newAvatar);
       }
-      setShowModal(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Action failed. Please try again.");
+
+      const response = await updateChildAdminProfile(id, fd);
+
+      if (response.success) {
+        toast.success("Profile updated successfully!");
+        setIsEditing(false);
+        setNewAvatar(null);
+        refetch();
+      } else {
+        toast.error(response.message || "Update failed");
+      }
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
     } finally {
-      setIsActionProcessing(false);
+      setIsSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    if (profileData) {
+      setFormData({
+        userName: profileData.profile?.userName || profileData.userName || "",
+        phoneNumber: profileData.profile?.phoneNumber || "",
+        bio: profileData.profile?.bio || "",
+        socialLinks: profileData.profile?.socialLinks || {
+          facebook: "",
+          instagram: "",
+          twitter: "",
+          youtube: "",
+        }
+      });
+    }
+    setNewAvatar(null);
+    setIsEditing(false);
   };
 
   if (isLoading) return <div className="p-6 flex justify-center items-center">Loading...</div>;
@@ -90,29 +152,32 @@ console.log(id)
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="flex flex-col lg:flex-row gap-6 p-6 w-full bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
+      <div className="flex flex-col lg:flex-row gap-6 p-6 w-full min-h-screen bg-gray-50 dark:bg-gray-900">
         <ProfileSidebar
           profile={profile}
           handleAction={handleAction}
-          setProfile={setProfile}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          formData={formData}
+          setFormData={setFormData}
+          newAvatar={newAvatar}
+          setNewAvatar={setNewAvatar}
+          handleSaveAll={handleSaveAll}
+          handleCancel={handleCancel}
+          isSaving={isSaving}
         />
         <div className="flex-1 flex flex-col gap-6">
-          <ChildAdminDetails profile={profile} />
+          <ChildAdminDetails
+            profile={profile}
+            isEditing={isEditing}
+            formData={formData}
+            setFormData={setFormData}
+          />
           <ParentAdminCard profile={profile} />
-          <PermissionsCard profile={profile}  role={role}/>
         </div>
-
-        <AnimatePresence>
-          {showModal && (
-            <ConfirmModal
-              actionType={actionType}
-              handleClose={() => setShowModal(false)}
-              handleConfirm={handleConfirmAction}
-              isProcessing={isActionProcessing}
-            />
-          )}
-        </AnimatePresence>
       </div>
     </>
   );
-}
+};
+
+export default ChildAdminProfile;

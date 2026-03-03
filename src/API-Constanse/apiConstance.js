@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
   GET_CHILD_ADMIN_DETAIL: "/api/child/admin",
   DETETE_CHILD_ADMIN: "/api/delete/child/admin",
   BLOCK_CHILD_ADMIN: "/api/block/child/admin",
+  UPDATE_CHILD_ADMIN_PROFILE: "/api/child/admin/profile/update",
 
 
   GET_SALES_METRICKS: "/api/sales/dashboard/analytics",
@@ -63,6 +64,7 @@ export const API_ENDPOINTS = {
   ADMIN_UPDATE_CATEGORY: "/api/admin/update/category",
   ADMIN_GET_FEED_DESIGN: "/api/admin/feed", // Base for /:feedId/design
   ADMIN_UPDATE_FEED_DESIGN: "/api/admin/feed", // Base for /:feedId/design
+  ADMIN_UPDATE_FEED_SCHEDULE: "/api/admin/feed", // Base for /:feedId/schedule
 
 
   ADMIN_LOGIN: "/api/auth/admin/login",

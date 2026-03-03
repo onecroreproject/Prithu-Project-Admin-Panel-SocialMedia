@@ -139,3 +139,12 @@ export async function updateFeedDesignMetadata(feedId, { designMetadata, editMet
 
 
 
+// ✅ Update Feed Schedule
+export async function updateFeedSchedule(feedId, { scheduleTime }) {
+  try {
+    const res = await Api.patch(`${API_ENDPOINTS.ADMIN_UPDATE_FEED_SCHEDULE}/${feedId}/schedule`, { scheduleTime });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update feed schedule");
+  }
+}

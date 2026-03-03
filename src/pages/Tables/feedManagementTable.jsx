@@ -3,11 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Eye, Trash, Calendar, Play, X, Edit } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { fetchFeeds, deleteFeed, removeFeedCategory, fetchCategories } from "../../Services/FeedServices/feedServices";
+import { fetchFeeds, deleteFeed, removeFeedCategory, fetchCategories, updateFeedSchedule } from "../../Services/FeedServices/feedServices";
 import useFeedFilter from "../../hooks/filter";
 import usePagination from "../../hooks/pagePagination";
 import FeedPreviewModal from "../../components/common/FeedPreviewModal";
 import FeedOverlayEditModal from "../../components/common/FeedOverlayEditModal";
+import ScheduleEditModal from "../../components/common/ScheduleEditModal";
 
 export default function FeedManagement() {
   const queryClient = useQueryClient();
@@ -48,7 +49,7 @@ export default function FeedManagement() {
   });
 
   // Filter feeds
-  const filteredFeeds = applyFilters(feeds);
+  const filteredFeeds = applyFilters(feeds.filter(f => f.status !== 'scheduled'));
 
   // Pagination
   const { page, totalPages, currentItems, nextPage, prevPage, resetPage } =
@@ -206,6 +207,7 @@ export default function FeedManagement() {
               <th className="p-2">#</th>
               <th className="p-2">Content</th>
               <th className="p-2">Type</th>
+              <th className="p-2">Status</th>
               <th className="p-2">Creator</th>
               <th className="p-3">Categories</th>
               <th className="p-2">Actions</th>
@@ -214,39 +216,51 @@ export default function FeedManagement() {
 
           <tbody>
             {currentItems.map((feed, idx) => (
-              <tr key={feed._id} className="border-b border-gray-200 dark:border-gray-700">
-                <td className="p-2">{(page - 1) * 10 + idx + 1}</td>
+              <tr key={feed._id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                <td className="p-2 text-gray-500">{(page - 1) * 10 + idx + 1}</td>
 
                 {/* FEED MEDIA */}
                 <td className="p-2">
-                  {feed.type === "video" ? (
-                    <div className="relative w-20 h-20 cursor-pointer">
-                      <video
+                  <div className="flex items-center gap-3">
+                    {feed.type === "video" ? (
+                      <div className="relative w-16 h-16 cursor-pointer group">
+                        <video
+                          src={feed.contentUrl}
+                          className="w-full h-full object-cover rounded-md"
+                          muted
+                          onClick={() => setSelectedFeed(feed)}
+                        />
+                        <div
+                          className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setSelectedFeed(feed)}
+                        >
+                          <Play className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                    ) : feed.contentUrl ? (
+                      <img
+                        className="w-16 h-16 object-cover rounded-md cursor-pointer hover:scale-105 transition-transform"
                         src={feed.contentUrl}
-                        className="w-full h-full object-cover rounded-md"
-                        muted
+                        alt="feed"
                         onClick={() => setSelectedFeed(feed)}
                       />
-                      <div
-                        className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-md"
-                        onClick={() => setSelectedFeed(feed)}
-                      >
-                        <Play className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                  ) : feed.contentUrl ? (
-                    <img
-                      className="w-20 h-20 object-cover rounded-md cursor-pointer"
-                      src={feed.contentUrl}
-                      alt="feed"
-                      onClick={() => setSelectedFeed(feed)}
-                    />
-                  ) : (
-                    <span>No media</span>
-                  )}
+                    ) : (
+                      <span>No media</span>
+                    )}
+                    
+                  </div>
                 </td>
 
-                <td className="p-2 capitalize">{feed.type}</td>
+                <td className="p-2">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${feed.type === 'video' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                    {feed.type}
+                  </span>
+                </td>
+                <td className="p-2">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${feed.status === 'scheduled' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                    {feed.status}
+                  </span>
+                </td>
                 <td className="p-2">{feed.creator?.userName || "Unknown"}</td>
 
                 {/* CATEGORIES COLUMN */}
@@ -292,6 +306,8 @@ export default function FeedManagement() {
                   >
                     <Edit className="h-4 w-4" />
                   </button>
+
+                  
 
                   {/* Delete */}
                   <button
@@ -363,6 +379,7 @@ export default function FeedManagement() {
           />
         )
       }
+
     </div >
   );
 }

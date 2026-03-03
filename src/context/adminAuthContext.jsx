@@ -14,8 +14,11 @@ export const useAdminAuth = () => {
 };
 
 export const AdminAuthProvider = ({ children }) => {
-  const [admin, setAdmin] = useState(null);
-  const [role, setRole] = useState(null);
+  const [admin, setAdmin] = useState(() => {
+    const stored = localStorage.getItem("admin");
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [role, setRole] = useState(() => localStorage.getItem("role"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
@@ -25,14 +28,6 @@ export const AdminAuthProvider = ({ children }) => {
     return stored ? parseInt(stored, 10) : Date.now();
   });
 
-  // ✅ Load from localStorage when app starts
-  useEffect(() => {
-    const storedAdmin = localStorage.getItem("admin");
-    const storedRole = localStorage.getItem("role");
-
-    if (storedAdmin) setAdmin(JSON.parse(storedAdmin));
-    if (storedRole) setRole(storedRole);
-  }, []);
 
   // ✅ Update Activity Function
   const updateActivity = useCallback(() => {

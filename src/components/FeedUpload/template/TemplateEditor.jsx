@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Save, Plus, Layers, Play, Settings, Music, Palette, CheckCircle, X } from 'lucide-react';
+import { Save, Plus, Layers, Play, Settings, Music, Palette, CheckCircle, X, ChevronDown } from 'lucide-react';
 import CanvasPreview from './CanvasPreview';
 import OverlayControls from './OverlayControls';
 import AudioConfig from './AudioConfig';
@@ -60,28 +60,46 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
         onClose();
     }, [fileData.id, metadata, editMetadata, onSave, onUpdateEditMetadata, onClose]);
 
+    // Intercept browser back button: push a history entry on mount,
+    // then catch popstate to close the overlay instead of navigating away.
+    useEffect(() => {
+        // Push a dummy entry so the back button has somewhere to "go"
+        window.history.pushState({ editorOpen: true }, '');
+
+        const handlePopState = (e) => {
+            // If the state does NOT have editorOpen, it means we went back past our entry
+            // Call onClose to dismiss the overlay and stay on the upload page
+            onClose();
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [onClose]);
+
     const activeOverlay = metadata.overlayElements.find(el => el.id === activeOverlayId);
 
     return (
-        <div className="fixed inset-0 z-[120] bg-black/95 flex flex-col backdrop-blur-3xl">
+        <div className="fixed inset-0 bg-gray-50 z-[120] flex flex-col animate-in fade-in duration-500">
             {/* Header */}
-            <div className="h-20 bg-gray-900/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-10">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-600 rounded-2xl shadow-xl shadow-blue-900/40">
+            <div className="h-24 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-10 shrink-0 shadow-sm">
+                <div className="flex items-center gap-5">
+                    <div className="p-4 bg-blue-600 rounded-2xl shadow-xl shadow-blue-500/20">
                         <Layers className="text-white" size={24} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black text-white uppercase tracking-widest">Advanced Editor</h2>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Designing: {fileData.file.name}</p>
+                        <h2 className="text-xl font-black text-gray-900 uppercase tracking-widest">Advanced Editor</h2>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Designing: {fileData.file.name}</p>
                     </div>
                 </div>
-                <div className="flex gap-6">
-                    <button onClick={onClose} className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-all">
+                <div className="flex items-center gap-8">
+                    <button onClick={onClose} className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all">
                         Discard Changes
                     </button>
                     <button
                         onClick={handleSave}
-                        className="px-10 py-3 bg-white text-black hover:bg-gray-200 rounded-[1.25rem] flex items-center gap-3 font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl transition-all transform hover:scale-105 active:scale-95"
+                        className="px-12 py-4 bg-gray-900 text-white hover:bg-black rounded-2xl flex items-center gap-3 font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl transition-all transform hover:scale-105 active:scale-95"
                     >
                         <Save size={18} />
                         Apply & Close
@@ -92,27 +110,29 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
             {/* Body */}
             <div className="flex-1 flex overflow-hidden">
                 {/* Left: Canvas */}
-                <div className="flex-1 bg-black/50 p-4 flex items-center justify-center relative inner-shadow-black">
-                    <CanvasPreview
-                        previewUrl={fileData.preview}
-                        fileType={fileData.file.type}
-                        metadata={metadata}
-                        audioConfig={metadata.audioConfig}
-                        editMetadata={editMetadata}
-                        onUpdateOverlay={handleUpdateOverlay}
-                        activeOverlayId={activeOverlayId}
-                        onSelectOverlay={setActiveOverlayId}
-                        onUpdateFooterConfig={(updates) => setMetadata(prev => ({
-                            ...prev,
-                            footerConfig: { ...prev.footerConfig, ...updates }
-                        }))}
-                    />
+                <div className="flex-1 bg-gray-50/50 p-8 flex items-center justify-center relative inner-shadow-white overflow-hidden">
+                    <div className="relative h-full shadow-[0_0_100px_rgba(0,0,0,0.2)] rounded-2xl border-4 border-white overflow-hidden">
+                        <CanvasPreview
+                            previewUrl={fileData.preview}
+                            fileType={fileData.file.type}
+                            metadata={metadata}
+                            audioConfig={metadata.audioConfig}
+                            editMetadata={editMetadata}
+                            onUpdateOverlay={handleUpdateOverlay}
+                            activeOverlayId={activeOverlayId}
+                            onSelectOverlay={setActiveOverlayId}
+                            onUpdateFooterConfig={(updates) => setMetadata(prev => ({
+                                ...prev,
+                                footerConfig: { ...prev.footerConfig, ...updates }
+                            }))}
+                        />
+                    </div>
                 </div>
 
                 {/* Right: Controls Sidebar */}
-                <div className="w-[380px] bg-gray-900 border-l border-white/5 flex flex-col overflow-hidden shadow-[-40px_0_100px_rgba(0,0,0,0.5)] z-20">
+                <div className="w-[400px] bg-white border-l border-gray-100 flex flex-col overflow-hidden shadow-[-20px_0_60px_rgba(0,0,0,0.02)] z-20">
                     {/* Secondary Tabs */}
-                    <div className="flex p-2 bg-black/40 border-b border-white/5 gap-1 shrink-0">
+                    <div className="flex p-3 bg-gray-50/30 border-b border-gray-100 gap-2 shrink-0">
                         {[
                             { id: 'layers', icon: <Layers size={14} />, label: 'Layers' },
                             { id: 'audio', icon: <Music size={14} />, label: 'Audio' },
@@ -123,8 +143,10 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                                 key={t.id}
                                 onClick={() => setActiveTab(t.id)}
                                 className={clsx(
-                                    "flex-1 py-3 flex items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                                    activeTab === t.id ? "bg-white/10 text-white shadow-lg border border-white/10" : "text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                                    "flex-1 py-3.5 flex items-center justify-center gap-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                                    activeTab === t.id
+                                        ? "bg-gray-900 text-white border-gray-900 shadow-xl"
+                                        : "text-gray-400 border-transparent hover:text-gray-900 hover:bg-white hover:border-gray-200"
                                 )}
                             >
                                 {t.icon}
@@ -133,36 +155,36 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                         ))}
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-10">
                         {activeTab === 'layers' && (
                             <>
                                 {/* Layers Selector */}
-                                <div className="space-y-4">
-                                    <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-4">Active Elements</h3>
-                                    <div className="grid grid-cols-1 gap-2.5">
+                                <div className="space-y-6">
+                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Active Elements</h3>
+                                    <div className="grid grid-cols-1 gap-3">
                                         {metadata.overlayElements.map(el => (
                                             <div
                                                 key={el.id}
                                                 onClick={() => setActiveOverlayId(el.id)}
                                                 className={clsx(
-                                                    "p-4 rounded-2xl cursor-pointer flex items-center justify-between border-2 transition-all",
+                                                    "p-5 rounded-2xl cursor-pointer flex items-center justify-between border-2 transition-all",
                                                     activeOverlayId === el.id
-                                                        ? 'bg-blue-600/10 border-blue-600/50 shadow-lg shadow-blue-900/20'
-                                                        : 'bg-black/30 border-white/5 hover:border-white/10 group'
+                                                        ? 'bg-blue-50/50 border-blue-500/50 shadow-lg shadow-blue-500/5'
+                                                        : 'bg-white border-gray-100 hover:border-gray-300 group'
                                                 )}
                                             >
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-5">
                                                     <div className={clsx(
-                                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                                                        activeOverlayId === el.id ? "bg-blue-600 text-white scale-110 shadow-lg" : "bg-white/5 text-gray-500 group-hover:bg-white/10 group-hover:text-gray-300"
+                                                        "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-sm",
+                                                        activeOverlayId === el.id ? "bg-blue-600 text-white scale-110 shadow-xl shadow-blue-500/20" : "bg-gray-50 text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600"
                                                     )}>
                                                         {el.id === 'avatar' && <Play size={20} />}
                                                         {el.id === 'logo' && <Plus size={20} />}
                                                         {el.id === 'username' && <Layers size={20} />}
                                                     </div>
                                                     <div>
-                                                        <span className={clsx("text-xs font-black uppercase tracking-[0.15em] block transition-colors", activeOverlayId === el.id ? "text-white" : "text-gray-400 group-hover:text-gray-300")}>{el.id}</span>
-                                                        <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">{el.visible ? 'Visible' : 'Hidden'}</span>
+                                                        <span className={clsx("text-xs font-black uppercase tracking-[0.15em] block transition-colors", activeOverlayId === el.id ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700")}>{el.id}</span>
+                                                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{el.visible ? 'Visible' : 'Hidden'}</span>
                                                     </div>
                                                 </div>
                                                 <button
@@ -171,8 +193,8 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                                                         handleUpdateOverlay(el.id, { visible: !el.visible });
                                                     }}
                                                     className={clsx(
-                                                        "p-2.5 rounded-xl transition-all border",
-                                                        el.visible ? "bg-green-500/10 border-green-500/20 text-green-500" : "bg-red-500/10 border-red-500/20 text-red-500"
+                                                        "p-3 rounded-2xl transition-all border",
+                                                        el.visible ? "bg-green-50 text-green-600 border-green-100" : "bg-red-50 text-red-600 border-red-100"
                                                     )}
                                                 >
                                                     {el.visible ? <CheckCircle className="w-4 h-4" /> : <X className="w-4 h-4" />}
@@ -183,15 +205,18 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                                 </div>
 
                                 {/* Active Overlay Controls */}
-                                <div className="pt-8 border-t border-white/5">
-                                    <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-6">Properties: <span className="text-blue-400">{activeOverlayId}</span></h3>
-                                    <OverlayControls overlay={activeOverlay} onUpdate={handleUpdateOverlay} />
+                                <div className="pt-10 border-t border-gray-100">
+                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-8">Properties: <span className="text-blue-600">{activeOverlayId}</span></h3>
+                                    <div className="bg-gray-50/50 rounded-3xl p-6 border border-gray-100 shadow-sm">
+                                        <OverlayControls overlay={activeOverlay} onUpdate={handleUpdateOverlay} />
+                                    </div>
                                 </div>
                             </>
                         )}
 
                         {activeTab === 'audio' && (
-                            <div className="animate-in fade-in slide-in-from-right-4">
+                            <div className="animate-in fade-in slide-in-from-right-4 space-y-6">
+                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Audio Master</h3>
                                 <AudioConfig
                                     config={metadata.audioConfig}
                                     onChange={(val) => setMetadata(prev => ({ ...prev, audioConfig: val }))}
@@ -200,7 +225,8 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                         )}
 
                         {activeTab === 'footer' && (
-                            <div className="animate-in fade-in slide-in-from-right-4">
+                            <div className="animate-in fade-in slide-in-from-right-4 space-y-6">
+                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Footer Appearance</h3>
                                 <FooterConfig
                                     config={metadata.footerConfig}
                                     onChange={(val) => setMetadata(prev => ({ ...prev, footerConfig: val }))}
@@ -209,20 +235,22 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                         )}
 
                         {activeTab === 'settings' && (
-                            <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
-                                <div className="bg-black/40 rounded-3xl p-6 border border-white/5 space-y-6">
-                                    <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Quick Post Adjustments</h3>
+                            <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
+                                <div className="bg-white rounded-3xl p-8 border border-gray-100 space-y-8 shadow-sm">
+                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Canvas Adjustments</h3>
 
-                                    <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest block">Canvas Aspect Ratio</label>
-                                        <div className="grid grid-cols-2 gap-2">
+                                    <div className="space-y-5">
+                                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block">Aspect Ratio</label>
+                                        <div className="grid grid-cols-2 gap-3">
                                             {["original", "1:1", "4:5", "16:9", "9:16"].map(r => (
                                                 <button
                                                     key={r}
                                                     onClick={() => setEditMetadata(prev => ({ ...prev, crop: { ...prev.crop, ratio: r } }))}
                                                     className={clsx(
-                                                        "p-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all",
-                                                        editMetadata.crop.ratio === r ? "bg-white text-black border-white shadow-xl" : "bg-white/5 text-gray-500 border-white/5 hover:border-white/10"
+                                                        "p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all",
+                                                        editMetadata.crop.ratio === r
+                                                            ? "bg-gray-900 border-gray-900 text-white shadow-xl scale-105"
+                                                            : "bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-gray-900 shadow-sm"
                                                     )}
                                                 >
                                                     {r}
@@ -231,17 +259,22 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest block">Color Filters</label>
-                                        <select
-                                            value={editMetadata.filters.preset}
-                                            onChange={(e) => setEditMetadata(prev => ({ ...prev, filters: { ...prev.filters, preset: e.target.value } }))}
-                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3 text-xs font-bold text-white outline-none focus:border-blue-500 transition-colors appearance-none"
-                                        >
-                                            {["original", "aden", "clarendon", "crema", "gingham", "juno", "lark", "ludwig", "moon", "perpetua", "reyes", "slumber"].map(f => (
-                                                <option key={f} value={f} className="bg-gray-950">{f.toUpperCase()}</option>
-                                            ))}
-                                        </select>
+                                    <div className="space-y-5 pt-4">
+                                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block">Global Filter</label>
+                                        <div className="relative">
+                                            <select
+                                                value={editMetadata.filters.preset}
+                                                onChange={(e) => setEditMetadata(prev => ({ ...prev, filters: { ...prev.filters, preset: e.target.value } }))}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 text-xs font-black text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all appearance-none cursor-pointer"
+                                            >
+                                                {["original", "aden", "clarendon", "crema", "gingham", "juno", "lark", "ludwig", "moon", "perpetua", "reyes", "slumber"].map(f => (
+                                                    <option key={f} value={f} className="bg-white">{f.toUpperCase()}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                                <ChevronDown size={16} />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
