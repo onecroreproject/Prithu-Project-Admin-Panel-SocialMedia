@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import PrithuLogo from "../Assets/Logo/prithulogo.png";
 import { useSidebar } from "../context/SidebarContext";
 import { useAdminAuth } from "../context/adminAuthContext";
+import { useUpdates } from "../context/UpdateContext";
 import SidebarWidget from "./SidebarWidget";
 import {
   Grid,
@@ -21,7 +22,9 @@ import {
   BarChart3,
   Database,
   HardDrive,
-  Search
+  Search,
+  Zap,
+  Bell
 } from "lucide-react";
 
 const mainNavItems = [
@@ -128,6 +131,19 @@ const mainNavItems = [
     path: "/settings/server/management",
     permission: "canViewSystemLogs"
   },
+  {
+    icon: <Zap className="w-5 h-5" />,
+    name: "What's New",
+    path: "/social/whats-new",
+    permission: null,
+    badge: true
+  },
+  {
+    icon: <Bell className="w-5 h-5" />,
+    name: "Updates Management",
+    path: "/settings/updates/management",
+    permission: "canManageUpdates"
+  }
 ];
 
 const SocialMediaSidebar = ({ user }) => {
@@ -139,6 +155,8 @@ const SocialMediaSidebar = ({ user }) => {
     setIsMobileOpen,
     expandMain
   } = useSidebar();
+
+  const { unreadCount } = useUpdates();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -479,6 +497,21 @@ const SocialMediaSidebar = ({ user }) => {
                     </motion.span>
                   )}
                 </AnimatePresence>
+
+                {nav.badge && unreadCount > 0 && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className={`
+                      absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center
+                      bg-red-500 text-white text-[10px] font-bold rounded-full
+                      border-2 border-white dark:border-gray-900 shadow-sm
+                      ${(isHovered || isMobileOpen) ? "relative top-auto right-auto ml-auto" : ""}
+                    `}
+                  >
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </motion.div>
+                )}
               </Link>
             )}
 

@@ -5,6 +5,7 @@ import { AnimatePresence } from "framer-motion";
 // Context Providers
 import { AdminAuthProvider } from "./context/adminAuthContext";
 import { AdminProfileProvider } from "./context/adminProfileContext";
+import { UpdateProvider } from "./context/UpdateContext";
 
 // Auth Pages
 import SignIn from "./pages/AuthPages/SignIn";
@@ -30,6 +31,8 @@ import CreatorTable from "./components/tables/UserTabel/creatorTable";
 import TrendingCreatorsPage from "./pages/trendingCreator";
 import BlogListPage from "./pages/BlogManagement/BlogListPage";
 import AddBlogPage from "./pages/BlogManagement/AddBlogPage";
+import WhatsNew from "./pages/Updates/WhatsNew";
+import UpdateManagement from "./pages/Updates/UpdateManagement";
 
 import UserFeedReportTable from "./components/tables/UserTabel/userReportTable";
 import CategoryManagementPage from "./pages/CategoryManagementPage";
@@ -166,7 +169,10 @@ function AnimatedRoutes() {
           <Route path="/settings/reportandfeedback/management" element={<AdminFeedbackPage />} />
           <Route path="/settings/footer/management" element={<FooterManagementPage />} />
           <Route path="/settings/server/management" element={<ServerManagement />} />
+          <Route path="/settings/updates/management" element={<UpdateManagement />} />
           <Route path="/settings/admin/studio" element={<AdminStudioLayout />} />
+
+          <Route path="/social/whats-new" element={<WhatsNew />} />
 
           {/* ====== SEO MODULE ROUTES ====== */}
           <Route path="/seo/dashboard" element={<SEODashboard />} />
@@ -215,12 +221,14 @@ export default function App() {
   return (
     <AdminAuthProvider>
       <AdminProfileProvider>
-        <Router>
-          <ScrollToTop />
-          <ErrorBoundary FallbackComponent={RouteErrorFallback}>
-            <AnimatedRoutes />
-          </ErrorBoundary>
-        </Router>
+        <UpdateProvider>
+          <Router>
+            <ScrollToTop />
+            <ErrorBoundary FallbackComponent={RouteErrorFallback}>
+              <AnimatedRoutes />
+            </ErrorBoundary>
+          </Router>
+        </UpdateProvider>
       </AdminProfileProvider>
     </AdminAuthProvider>
   );

@@ -30,6 +30,8 @@ export const AdminProfileProvider = ({ children }) => {
       setProfile(null);
       return;
     }
+    // Set profile to null while fetching to avoid showing stale data from previous user
+    setProfile(null);
     setLoading(true);
     try {
       const res = await api.get("/api/admin/profile", {

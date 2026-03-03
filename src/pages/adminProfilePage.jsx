@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAdminProfile } from "../context/adminProfileContext";
 
 export default function AdminProfileEdit({ isOpen = true, onClose }) {
-  const { profile, updateProfile, updating } = useAdminProfile();
+  const { profile, updateProfile, updating, loading } = useAdminProfile();
 
   // ✅ Initialize formData and socialLinks with fallback
   const getInitialFormData = () => ({
@@ -135,6 +135,17 @@ export default function AdminProfileEdit({ isOpen = true, onClose }) {
       alert("Copied!");
     }
   };
+
+  if (loading && !profile) {
+    return (
+      <div className="flex items-center justify-center p-12 w-full h-full min-h-[400px]">
+        <div className="flex flex-col items-center">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-500 font-medium">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!show) return null;
 
