@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -8,12 +8,15 @@ import {
     FileText,
     Check,
     X,
-    Loader2
+    Loader2,
+    Crop as CropIcon
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import MyCropper from "react-easy-crop";
 import { createBlog, updateBlog, fetchAllBlogsAdmin } from "../../Services/blogService";
 import getMediaUrl from "../../Utils/mediaUrl";
 import { CKEditor } from 'ckeditor4-react';
+import { getCroppedImg } from "../../Utils/cropImage";
 
 const AddBlogPage = () => {
     const { id } = useParams();
@@ -30,6 +33,13 @@ const AddBlogPage = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState("");
     const [isEditorReady, setIsEditorReady] = useState(!isEdit);
+
+    // Cropper State
+    const [imageToCrop, setImageToCrop] = useState(null);
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [showCropper, setShowCropper] = useState(false);
 
     // If editing, fetch blog data
     const { data: blogs = [], isLoading: isLoadingBlog } = useQuery({
@@ -79,9 +89,10 @@ const AddBlogPage = () => {
         data.append("title", formData.title);
         data.append("content", formData.content);
         data.append("isPublished", formData.isPublished);
+
         if (selectedFile) {
-            data.append("image", selectedFile);
-        } else if (formData.image) {
+            data.append("image", selectedFile, "blog-image.jpg");
+        } else if (formData.image && typeof formData.image === 'string') {
             data.append("image", formData.image);
         }
 
@@ -95,8 +106,31 @@ const AddBlogPage = () => {
                 toast.error("Please select an image file");
                 return;
             }
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                setImageToCrop(reader.result);
+                setShowCropper(true);
+            };
+        }
+    };
+
+    const onCropComplete = useCallback((_croppedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    }, []);
+
+    const handleCropSave = async () => {
+        try {
+            const croppedImageBlob = await getCroppedImg(imageToCrop, croppedAreaPixels);
+            setSelectedFile(croppedImageBlob);
+            setPreviewUrl(URL.createObjectURL(croppedImageBlob));
+            setShowCropper(false);
+            setImageToCrop(null);
+            toast.success("Image cropped successfully!");
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to crop image");
         }
     };
 
@@ -127,6 +161,68 @@ const AddBlogPage = () => {
     return (
         <div className="p-6 max-w-5xl mx-auto space-y-6">
             <Toaster position="top-right" />
+
+            {/* Cropper Modal */}
+            {showCropper && (
+                <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="p-4 border-b flex items-center justify-between">
+                            <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                                <CropIcon className="w-5 h-5 text-blue-600" />
+                                Crop Feature Image
+                            </h2>
+                            <button onClick={() => setShowCropper(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                <X className="w-5 h-5 text-gray-500" />
+                            </button>
+                        </div>
+
+                        <div className="relative flex-1 bg-gray-900 min-h-[400px]">
+                            <MyCropper
+                                image={imageToCrop}
+                                crop={crop}
+                                zoom={zoom}
+                                aspect={16 / 9}
+                                onCropChange={setCrop}
+                                onCropComplete={onCropComplete}
+                                onZoomChange={setZoom}
+                            />
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                    <span>Zoom Level</span>
+                                    <span>{Math.round(zoom * 100)}%</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    value={zoom}
+                                    min={1}
+                                    max={3}
+                                    step={0.1}
+                                    onChange={(e) => setZoom(e.target.value)}
+                                    className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setShowCropper(false)}
+                                    className="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleCropSave}
+                                    className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+                                >
+                                    Crop & Use Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -214,7 +310,7 @@ const AddBlogPage = () => {
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <ImageIcon className="w-8 h-8 mb-2 text-gray-400 group-hover:text-blue-500 transition-colors" />
                                             <p className="text-xs font-bold text-gray-500">
-                                                {selectedFile ? selectedFile.name : "Click to choose image"}
+                                                {selectedFile ? "Change cropped image" : "Click to choose image"}
                                             </p>
                                         </div>
                                     </label>
@@ -234,7 +330,7 @@ const AddBlogPage = () => {
                                             type="button"
                                             onClick={() => {
                                                 setSelectedFile(null);
-                                                setPreviewUrl(formData.image || "");
+                                                setPreviewUrl(formData.image ? getMediaUrl(formData.image) : "");
                                             }}
                                             className="absolute top-2 right-2 p-1 bg-white/80 backdrop-blur-sm rounded-full shadow-sm opacity-0 group-hover/preview:opacity-100 transition-opacity hover:bg-red-50 text-red-500"
                                         >

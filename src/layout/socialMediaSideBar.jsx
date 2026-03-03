@@ -61,7 +61,7 @@ const mainNavItems = [
       { name: "User Feed Request", path: "/social/post/request/approval", permission: "canManageUserFeedRequest" },
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
-      { name: "Party Management", path: "/social/party/management", permission: "canManageFeeds" },
+      { name: "Party Management", path: "/social/party/management", permission: "canManageParties" },
     ],
   },
   {
@@ -84,7 +84,7 @@ const mainNavItems = [
   {
     icon: <CreditCard className="w-5 h-5" />,
     name: "Subscriptions",
-    permission: "canManageSettings",
+    permission: "canManageSubscriptions",
     subItems: [
       { name: "Manage Subscriptions", path: "/settings/subscription/page", permission: "canManageSettingsSubscriptions" },
     ],
@@ -92,33 +92,33 @@ const mainNavItems = [
   {
     icon: <Cog className="w-5 h-5" />,
     name: "Company Management",
-    permission: "canFaqManagement",
+    permission: "canManageFAQs",
     subItems: [
-      { name: "FAQ Settings", path: "/settings/faq/management", permission: "canFaqManagement" },
+      { name: "FAQ Settings", path: "/settings/faq/management", permission: "canManageFAQs" },
       { name: "Support Management", path: "/settings/reportandfeedback/management", permission: "canManageUserFeedbacks" },
-      { name: "Footer Settings", path: "/settings/footer/management", permission: "canManageSettings" },
-      { name: "Company Info", path: "/settings/company/info", permission: "canViewSystemLogs" },
+      { name: "Footer Settings", path: "/settings/footer/management", permission: "canManageFooter" },
+      { name: "Company Info", path: "/settings/company/info", permission: "canViewCompanyInfo" },
     ],
   },
   {
     icon: <Search className="w-5 h-5" />,
     name: "SEO Management",
-    permission: "canManageSettings",
+    permission: "canManageSEO",
     subItems: [
-      { name: "SEO Dashboard", path: "/seo/dashboard", permission: "canManageSettings" },
-      { name: "Global Settings", path: "/seo/settings", permission: "canManageSettings" },
-      { name: "Feed SEO", path: "/seo/feeds", permission: "canManageSettings" },
-      { name: "Media SEO", path: "/seo/media", permission: "canManageSettings" },
-      { name: "Redirect Manager", path: "/seo/redirects", permission: "canManageSettings" },
+      { name: "SEO Dashboard", path: "/seo/dashboard", permission: "canViewSEODashboard" },
+      { name: "Global Settings", path: "/seo/settings", permission: "canManageSEOGlobal" },
+      { name: "Feed SEO", path: "/seo/feeds", permission: "canManageSEOFeeds" },
+      { name: "Media SEO", path: "/seo/media", permission: "canManageSEOMedia" },
+      { name: "Redirect Manager", path: "/seo/redirects", permission: "canManageSEORedirects" },
     ],
   },
   {
     icon: <FileText className="w-5 h-5" />,
     name: "Blog Management",
-    permission: "canManageFeeds",
+    permission: "canManageBlogs",
     subItems: [
-      { name: "List Blog", path: "/social/blog/list", permission: "canManageFeeds" },
-      { name: "Add Blog", path: "/social/blog/add", permission: "canManageFeeds" },
+      { name: "List Blog", path: "/social/blog/list", permission: "canManageBlogList" },
+      { name: "Add Blog", path: "/social/blog/add", permission: "canManageBlogAdd" },
     ],
   },
   {
