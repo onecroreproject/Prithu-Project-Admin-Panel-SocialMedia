@@ -126,7 +126,7 @@ const MediaCard = ({
             </div>
 
             {/* Content Section */}
-            <div className="p-5 space-y-4 flex-1 flex flex-col bg-white">
+            <div className="p-5 space-y-4 flex-1 flex flex-col bg-gray-50/40">
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <input
@@ -146,7 +146,7 @@ const MediaCard = ({
                     <div className="relative">
                         <button
                             onClick={() => setIsCatOpen(!isCatOpen)}
-                            className="w-full bg-gray-50 text-gray-800 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-bold flex justify-between items-center hover:bg-white hover:border-blue-100 transition-all shadow-sm outline-none focus:ring-4 focus:ring-blue-500/5"
+                            className="w-full bg-white text-gray-800 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-bold flex justify-between items-center hover:bg-white hover:border-blue-100 transition-all shadow-sm outline-none focus:ring-4 focus:ring-blue-500/5"
                         >
                             <span className="truncate pr-4 uppercase tracking-wider">
                                 {selectedNames.length > 0 ? selectedNames.join(", ") : "Select Categories"}
@@ -160,7 +160,7 @@ const MediaCard = ({
                                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                                    className="absolute z-50 bottom-full mb-2 w-full bg-white border border-gray-100 rounded-2xl shadow-2xl p-2 ring-1 ring-black/5 overflow-hidden"
+                                    className="absolute z-50 top-full mt-2 w-full bg-white border border-gray-100 rounded-2xl shadow-2xl p-2 ring-1 ring-black/5 overflow-hidden"
                                 >
                                     <div className="max-h-52 overflow-y-auto custom-scrollbar p-1">
                                         {categories.map(c => (
@@ -187,7 +187,7 @@ const MediaCard = ({
                         value={fileData.caption}
                         onChange={(e) => onUpdateField('caption', e.target.value)}
                         placeholder="Content narrative..."
-                        className="w-full h-24 bg-gray-50 text-gray-800 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-blue-500/5 focus:bg-white focus:border-blue-200 outline-none resize-none transition-all placeholder:text-gray-300 leading-relaxed custom-scrollbar"
+                        className="w-full h-24 bg-white text-gray-800 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-blue-500/5 focus:bg-white focus:border-blue-200 outline-none resize-none transition-all placeholder:text-gray-300 leading-relaxed custom-scrollbar"
                     />
                 </div>
 
