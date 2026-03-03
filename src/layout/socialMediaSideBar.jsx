@@ -23,7 +23,6 @@ import {
   Database,
   HardDrive,
   Search,
-  Zap,
   Bell
 } from "lucide-react";
 
@@ -130,13 +129,6 @@ const mainNavItems = [
     name: "Server Management",
     path: "/settings/server/management",
     permission: "canViewSystemLogs"
-  },
-  {
-    icon: <Zap className="w-5 h-5" />,
-    name: "What's New",
-    path: "/social/whats-new",
-    permission: null,
-    badge: true
   },
   {
     icon: <Bell className="w-5 h-5" />,
