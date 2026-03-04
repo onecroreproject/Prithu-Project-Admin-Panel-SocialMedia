@@ -1,4 +1,4 @@
-import axiosApi from "../utils/axiosApi";
+import axiosApi from "../Utils/axiosApi";
 
 /**
  * Get Promotional Email Dashboard Stats
