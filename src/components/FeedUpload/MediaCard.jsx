@@ -2,6 +2,7 @@ import { Trash2, Edit2, Play, Layout, CheckCircle2, ChevronDown, Check } from 'l
 import React from 'react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
+import CategorySelector from '../common/CategorySelector';
 
 const MediaCard = ({
     fileData,
@@ -143,45 +144,16 @@ const MediaCard = ({
                 </div>
 
                 <div className="space-y-3 flex-1">
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsCatOpen(!isCatOpen)}
-                            className="w-full bg-white text-gray-800 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-bold flex justify-between items-center hover:bg-white hover:border-blue-100 transition-all shadow-sm outline-none focus:ring-4 focus:ring-blue-500/5"
-                        >
-                            <span className="truncate pr-4 uppercase tracking-wider">
-                                {selectedNames.length > 0 ? selectedNames.join(", ") : "Select Categories"}
-                            </span>
-                            <ChevronDown size={14} className={clsx("transition-transform shrink-0", isCatOpen && "rotate-180")} />
-                        </button>
-
-                        <AnimatePresence>
-                            {isCatOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                                    className="absolute z-50 top-full mt-2 w-full bg-white border border-gray-100 rounded-2xl shadow-2xl p-2 ring-1 ring-black/5 overflow-hidden"
-                                >
-                                    <div className="max-h-52 overflow-y-auto custom-scrollbar p-1">
-                                        {categories.map(c => (
-                                            <div
-                                                key={c.categoryId}
-                                                onClick={() => toggleCategory(c.categoryId)}
-                                                className="flex items-center justify-between px-4 py-2.5 hover:bg-blue-50 hover:text-blue-700 rounded-xl cursor-pointer transition-all group"
-                                            >
-                                                <span className="text-[11px] font-black uppercase tracking-widest">{c.categoriesName}</span>
-                                                {selectedIds.includes(c.categoryId) && (
-                                                    <div className="w-4 h-4 bg-blue-600 rounded-lg flex items-center justify-center text-white scale-110 shadow-lg shadow-blue-500/30">
-                                                        <Check size={10} strokeWidth={4} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                    <CategorySelector
+                        categories={categories}
+                        selectedIds={fileData.categoryIds || (fileData.categoryId ? [fileData.categoryId] : [])}
+                        onChange={(ids) => {
+                            onUpdateField('categoryIds', ids);
+                            onUpdateField('categoryId', ids[0] || '');
+                        }}
+                        placeholder="Select Categories"
+                        variant="light"
+                    />
 
                     <textarea
                         value={fileData.caption}

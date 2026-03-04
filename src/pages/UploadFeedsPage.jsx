@@ -5,6 +5,7 @@ import MediaCard from '../components/upload/MediaCard';
 import TemplateEditor from '../components/template/TemplateEditor';
 import PostEditor from '../components/upload/PostEditor';
 import LivePreview from '../components/upload/LivePreview';
+import CategorySelector from '../components/common/CategorySelector';
 import { Loader2, Upload, Calendar, Folder } from 'lucide-react';
 
 const UploadFeedsPage = () => {
@@ -101,18 +102,17 @@ const UploadFeedsPage = () => {
                             </label>
                         </div>
                         <div className="relative group">
-                            <Folder className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 group-hover:text-gray-400 transition-colors" size={16} />
-                            <select
-                                disabled={!globalSettings.applyCategoryToAll}
-                                value={globalSettings.categoryId}
-                                onChange={(e) => updateGlobalSettings('categoryId', e.target.value)}
-                                className="w-56 pl-10 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-30 transition-all hover:border-gray-600 focus:border-blue-500"
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map(c => (
-                                    <option key={c.categoryId} value={c.categoryId}>{c.categoriesName}</option>
-                                ))}
-                            </select>
+                            <CategorySelector
+                                className="w-64"
+                                categories={categories}
+                                selectedIds={globalSettings.categoryIds || (globalSettings.categoryId ? [globalSettings.categoryId] : [])}
+                                onChange={(ids) => {
+                                    updateGlobalSettings('categoryIds', ids);
+                                    if (ids.length > 0) updateGlobalSettings('categoryId', ids[0]);
+                                    else updateGlobalSettings('categoryId', '');
+                                }}
+                                placeholder="Select Categories"
+                            />
                         </div>
                     </div>
 

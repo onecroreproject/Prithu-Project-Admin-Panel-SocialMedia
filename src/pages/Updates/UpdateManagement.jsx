@@ -22,6 +22,7 @@ const UpdateForm = ({ editingUpdate, onClose, onSaved }) => {
     const [formData, setFormData] = useState({
         title: editingUpdate?.title || '',
         description: editingUpdate?.description || '',
+        version: editingUpdate?.version || '',
     });
     const [mediaFile, setMediaFile] = useState(null);
     const [mediaPreview, setMediaPreview] = useState(editingUpdate?.media || null);
@@ -47,6 +48,7 @@ const UpdateForm = ({ editingUpdate, onClose, onSaved }) => {
         const data = new FormData();
         data.append('title', formData.title);
         data.append('description', formData.description);
+        data.append('version', formData.version);
         data.append('targetRole', 'all');   // always target all users
         data.append('isActive', true);       // always active
         if (mediaFile) data.append('media', mediaFile);
@@ -100,17 +102,29 @@ const UpdateForm = ({ editingUpdate, onClose, onSaved }) => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 space-y-6">
-                        {/* Title */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Title *</label>
-                            <input
-                                required
-                                type="text"
-                                placeholder="Enter update title..."
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-900 dark:text-white"
-                                value={formData.title}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            />
+                        {/* Title & Version Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Title *</label>
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="Enter update title..."
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-900 dark:text-white"
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Version</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. v1.2.0"
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-900 dark:text-white"
+                                    value={formData.version}
+                                    onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                                />
+                            </div>
                         </div>
 
                         {/* Description — CKEditor 4 */}
@@ -352,7 +366,14 @@ const UpdateManagement = () => {
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold text-gray-900 dark:text-white line-clamp-1">{update.title}</div>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="font-bold text-gray-900 dark:text-white line-clamp-1">{update.title}</div>
+                                                                {update.version && (
+                                                                    <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded-md">
+                                                                        {update.version}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                             <div
                                                                 className="text-xs text-gray-500 line-clamp-1 truncate max-w-[300px]"
                                                                 dangerouslySetInnerHTML={{ __html: update.description }}

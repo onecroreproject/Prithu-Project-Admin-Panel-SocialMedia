@@ -6,6 +6,7 @@ import TemplateEditor from './template/TemplateEditor';
 import PostEditor from './PostEditor';
 import LivePreview from './LivePreview';
 import { Settings, Send, Calendar, Tag, ChevronDown, LayoutGrid, Check } from 'lucide-react';
+import CategorySelector from '../common/CategorySelector';
 import { clsx } from 'clsx';
 
 const FeedUploadPage = () => {
@@ -116,39 +117,16 @@ const FeedUploadPage = () => {
                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Auto-Categorize</h4>
                         </div>
                         <div className="relative">
-                            <button
-                                onClick={() => setGlobalCatOpen(!globalCatOpen)}
-                                className="w-full bg-gray-50 text-gray-700 border border-gray-200 rounded-2xl px-5 py-3 text-xs flex justify-between items-center focus:ring-2 focus:ring-blue-500/20 outline-none transition-all hover:bg-gray-100"
-                            >
-                                <span className="truncate">
-                                    {(globalSettings.categoryIds && globalSettings.categoryIds.length > 0)
-                                        ? categories.filter(c => globalSettings.categoryIds.includes(c.categoryId)).map(c => c.categoriesName).join(", ")
-                                        : "Select Categories"}
-                                </span>
-                                <ChevronDown size={14} className={clsx("transition-transform", globalCatOpen && "rotate-180")} />
-                            </button>
-
-                            {globalCatOpen && (
-                                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-60 overflow-y-auto p-2">
-                                    {categories.map(c => (
-                                        <div
-                                            key={c.categoryId}
-                                            onClick={() => {
-                                                const current = globalSettings.categoryIds || [];
-                                                const next = current.includes(c.categoryId)
-                                                    ? current.filter(id => id !== c.categoryId)
-                                                    : [...current, c.categoryId];
-                                                updateGlobalSettings('categoryIds', next);
-                                                updateGlobalSettings('categoryId', next[0] || '');
-                                            }}
-                                            className="flex items-center justify-between px-4 py-3 hover:bg-blue-50 hover:text-blue-700 rounded-xl cursor-pointer transition-colors"
-                                        >
-                                            <span className="text-xs font-medium">{c.categoriesName}</span>
-                                            {(globalSettings.categoryIds || []).includes(c.categoryId) && <Check size={14} className="text-blue-600" />}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                            <CategorySelector
+                                categories={categories}
+                                selectedIds={globalSettings.categoryIds || (globalSettings.categoryId ? [globalSettings.categoryId] : [])}
+                                onChange={(ids) => {
+                                    updateGlobalSettings('categoryIds', ids);
+                                    updateGlobalSettings('categoryId', ids[0] || '');
+                                }}
+                                placeholder="Select Categories"
+                                variant="light"
+                            />
                         </div>
                         <label className="flex items-center gap-3 cursor-pointer group">
                             <input

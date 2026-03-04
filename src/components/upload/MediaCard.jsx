@@ -1,5 +1,5 @@
-import React from 'react';
-import { Eye, Edit2, X } from 'lucide-react';
+import { Eye, Edit2, X, Folder } from 'lucide-react';
+import CategorySelector from '../common/CategorySelector';
 
 const MediaCard = ({
     fileData,
@@ -17,7 +17,7 @@ const MediaCard = ({
     return (
         <div className={`bg-gray-900 border rounded-2xl p-4 flex flex-col gap-4 group transition-all hover:shadow-2xl hover:shadow-blue-500/10 ${fileData.isEdited ? 'border-yellow-500/50 ring-1 ring-yellow-500/20' : 'border-gray-800 hover:border-blue-500/50'}`}>
             {/* Preview Section */}
-            <div className="relative aspect-[9/16] bg-black rounded-xl overflow-hidden shadow-inner group/preview">
+            <div className="relative aspect-9/16 bg-black rounded-xl overflow-hidden shadow-inner group/preview">
                 {isVideo ? (
                     <video
                         src={fileData.preview}
@@ -67,7 +67,7 @@ const MediaCard = ({
                     </div>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/preview:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/preview:opacity-100 transition-opacity" />
 
                 {/* Actions Shortcut */}
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover/preview:opacity-100 translate-y-2 group-hover/preview:translate-y-0 transition-all duration-300 z-20">
@@ -123,16 +123,16 @@ const MediaCard = ({
                 </div>
 
                 <div className="space-y-2">
-                    <select
-                        value={fileData.categoryId}
-                        onChange={(e) => onUpdateField('categoryId', e.target.value)}
-                        className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-                    >
-                        <option value="">Select Category</option>
-                        {categories.map(c => (
-                            <option key={c.categoryId} value={c.categoryId}>{c.categoriesName}</option>
-                        ))}
-                    </select>
+                    <CategorySelector
+                        categories={categories}
+                        selectedIds={fileData.categoryIds || (fileData.categoryId ? [fileData.categoryId] : [])}
+                        onChange={(ids) => {
+                            onUpdateField('categoryIds', ids);
+                            if (ids.length > 0) onUpdateField('categoryId', ids[0]);
+                            else onUpdateField('categoryId', '');
+                        }}
+                        placeholder="Select Categories"
+                    />
 
                     <div className="flex items-center justify-between p-2 bg-gray-800/50 rounded-lg border border-gray-800">
                         <div className="flex items-center gap-2">
