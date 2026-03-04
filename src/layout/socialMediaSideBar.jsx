@@ -49,19 +49,10 @@ const mainNavItems = [
   },
   {
     icon: <Users className="w-5 h-5" />,
-    name: "Creator Profile",
-    permission: "canManageCreators",
-    subItems: [
-      { name: "Trending Creator", path: "/social/trending/creator", permission: "canTrendingCreators" }
-    ]
-  },
-  {
-    icon: <Users className="w-5 h-5" />,
     name: "Feed Management",
     permission: "canManageFeeds",
     subItems: [
       { name: "Treanding Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
-      { name: "User Feed Request", path: "/social/post/request/approval", permission: "canManageUserFeedRequest" },
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
       { name: "Party Management", path: "/social/party/management", permission: "canManageParties" },
@@ -77,20 +68,36 @@ const mainNavItems = [
     ],
   },
   {
-    icon: <Shield className="w-5 h-5" />,
-    name: "Admin Management",
-    permission: "canManageChildAdmins",
-    subItems: [
-      { name: "ChildAdmin Creation", path: "/settings/child/admin/page", permission: "canManageChildAdminsCreation" },
-    ],
-  },
-  {
     icon: <CreditCard className="w-5 h-5" />,
     name: "Subscriptions",
     permission: "canManageSubscriptions",
     subItems: [
       { name: "Manage Subscriptions", path: "/settings/subscription/page", permission: "canManageSettingsSubscriptions" },
     ],
+  },
+  {
+    icon: <FileText className="w-5 h-5" />,
+    name: "Blog Management",
+    permission: "canManageBlogs",
+    subItems: [
+      { name: "List Blog", path: "/social/blog/list", permission: "canManageBlogList" },
+      { name: "Add Blog", path: "/social/blog/add", permission: "canManageBlogAdd" },
+    ],
+  },
+  {
+    icon: <Shield className="w-5 h-5" />,
+    name: "Admin Management",
+    permission: "canManageChildAdmins",
+    subItems: [
+      { name: "Admin Creation", path: "/settings/child/admin/page", permission: "canManageChildAdminsCreation" },
+      { name: "Admin List", path: "/settings/child/admin/list", permission: "canManageChildAdmins" },
+    ],
+  },
+  {
+    icon: <Bell className="w-5 h-5" />,
+    name: "Updates Management",
+    path: "/settings/updates/management",
+    permission: "canManageUpdates"
   },
   {
     icon: <Cog className="w-5 h-5" />,
@@ -116,25 +123,10 @@ const mainNavItems = [
     ],
   },
   {
-    icon: <FileText className="w-5 h-5" />,
-    name: "Blog Management",
-    permission: "canManageBlogs",
-    subItems: [
-      { name: "List Blog", path: "/social/blog/list", permission: "canManageBlogList" },
-      { name: "Add Blog", path: "/social/blog/add", permission: "canManageBlogAdd" },
-    ],
-  },
-  {
     icon: <HardDrive className="w-5 h-5" />,
     name: "Server Management",
     path: "/settings/server/management",
     permission: "canViewSystemLogs"
-  },
-  {
-    icon: <Bell className="w-5 h-5" />,
-    name: "Updates Management",
-    path: "/settings/updates/management",
-    permission: "canManageUpdates"
   }
 ];
 
@@ -164,23 +156,31 @@ const SocialMediaSidebar = ({ user }) => {
     if (!user) return [];
     if (user.role === "Admin") return items;
 
+    const granted = user.grantedPermissions || [];
+
     return items
       .filter(
         (item) =>
-          !item.permission || user.grantedPermissions.includes(item.permission)
+          !item.permission || granted.includes(item.permission)
       )
       .map((item) => {
-        const allowedSubs =
-          item.subItems?.filter(
-            (sub) =>
-              !sub.permission ||
-              user.grantedPermissions.includes(sub.permission) ||
-              user.grantedPermissions.includes(item.permission)
-          ) || [];
+        if (!item.subItems) return item;
+
+        const allowedSubs = item.subItems.filter(
+          (sub) =>
+            !sub.permission || granted.includes(sub.permission)
+        );
 
         return { ...item, subItems: allowedSubs };
       })
-      .filter((item) => !item.subItems || item.subItems.length > 0);
+      .filter((item) => {
+        // If it's a parent with sub-items, only show if at least one sub-item is allowed
+        if (item.subItems) {
+          return item.subItems.length > 0;
+        }
+        // If it's a standalone link, it's already cleared by the first filter
+        return true;
+      });
   };
 
   // Filter menu based on permissions and add dynamic items

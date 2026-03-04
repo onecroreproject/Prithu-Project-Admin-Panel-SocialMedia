@@ -8,7 +8,14 @@ const PublicRoute = ({ children }) => {
 
     // If already logged in, redirect to the dashboard or the page they were trying to access
     if (admin) {
-        const origin = location.state?.from?.pathname || "/";
+        let origin = location.state?.from?.pathname || "/";
+
+        // 🛡️ Safety Guard: If origin is a child admin profile but current user is not a Child_Admin,
+        // fallback to root to avoid stale session viewing.
+        if (origin.includes("/settings/child/admin/profile/") && admin.role !== "Child_Admin") {
+            origin = "/";
+        }
+
         return <Navigate to={origin} replace />;
     }
 

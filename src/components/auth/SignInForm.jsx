@@ -34,19 +34,21 @@ export default function SignInForm() {
     setIsSubmitting(true);
     const result = await login(email, password);
 
-    // After login, use the role from context or the result
-    if (role === "Child_Admin" || admin?.role === "Child_Admin") {
-      const adminId = admin?.userId || admin?._id || admin?.id;
-      if (adminId) {
-        navigate(`/settings/child/admin/profile/${adminId}`);
+    if (result) {
+      const { admin: newAdmin, role: newRole } = result;
+      if (newRole === "Child_Admin" || newAdmin?.role === "Child_Admin") {
+        const adminId = newAdmin?.userId || newAdmin?._id || newAdmin?.id;
+        if (adminId) {
+          navigate(`/settings/child/admin/profile/${adminId}`, { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
       } else {
-        navigate("/");
+        navigate("/", { replace: true });
       }
-    } else if (role === "Admin" || admin?.role === "Admin") {
-      navigate("/");
     }
     setIsSubmitting(false);
-  }, [email, password, login, role, admin, navigate]);
+  }, [email, password, login, navigate]);
 
   // Simplified animations with reduced motion support
   const containerVariants = reducedMotion ? {
@@ -204,7 +206,7 @@ export default function SignInForm() {
                 <button
                   type="submit"
                   disabled={loading || isSubmitting}
-                  className="relative w-full py-3 text-base font-medium text-white transition-all duration-200 bg-gradient-to-r from-brand-500 to-brand-600 rounded-lg shadow hover:shadow-md hover:from-brand-600 hover:to-brand-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                  className="relative w-full py-3 text-base font-medium text-white transition-all duration-200 bg-linear-to-r from-brand-500 to-brand-600 rounded-lg shadow hover:shadow-md hover:from-brand-600 hover:to-brand-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
                 >
                   {(loading || isSubmitting) ? (
                     <span className="flex items-center justify-center gap-2">

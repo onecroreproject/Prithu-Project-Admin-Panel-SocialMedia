@@ -32,6 +32,8 @@ const ChildAdminProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     userName: "",
+    email: "",
+    password: "",
     phoneNumber: "",
     bio: "",
     socialLinks: {
@@ -102,6 +104,8 @@ const ChildAdminProfile = () => {
     try {
       const fd = new FormData();
       fd.append("userName", formData.userName);
+      fd.append("email", formData.email);
+      fd.append("password", formData.password);
       fd.append("phoneNumber", formData.phoneNumber);
       fd.append("bio", formData.bio);
       fd.append("socialLinks", JSON.stringify(formData.socialLinks));

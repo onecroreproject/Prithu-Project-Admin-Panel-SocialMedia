@@ -89,7 +89,40 @@ export default function ChildAdminDetails({ profile, isEditing, formData, setFor
             }
           />
         </div>
-        <Info label="Email" value={profile.email} />
+        <Info
+          label="Email"
+          value={
+            isEditing ? (
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="Email Address"
+                className="bg-gray-50 border border-gray-300 px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
+              />
+            ) : (
+              profile.email
+            )
+          }
+        />
+        <Info
+          label="Password"
+          value={
+            isEditing ? (
+              <input
+                type="text"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Password"
+                className="bg-gray-50 border border-gray-300 px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
+              />
+            ) : (
+              profile.plainPassword || "********"
+            )
+          }
+        />
         <Info label="Active Status" value={profile.isActive ? "Active" : "Inactive"} />
         <Info label="Approval Status" value={profile.isApprovedByParent ? "Approved" : "Pending"} />
         <Info label="Created At" value={new Date(profile.createdAt).toLocaleString()} />

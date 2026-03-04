@@ -102,6 +102,8 @@ export const AdminAuthProvider = ({ children }) => {
       setAdmin({ ...adminData, token, grantedPermissions, role: userRole });
       setRole(userRole);
       updateActivity(); // Mark active on login
+
+      return { admin: { ...adminData, token, grantedPermissions, role: userRole }, role: userRole };
     } catch (err) {
       console.error("Login error:", err.response?.data || err);
       setError(err.response?.data?.error || "Login failed");

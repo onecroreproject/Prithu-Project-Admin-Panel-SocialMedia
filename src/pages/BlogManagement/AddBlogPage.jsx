@@ -91,7 +91,11 @@ const AddBlogPage = () => {
         data.append("isPublished", formData.isPublished);
 
         if (selectedFile) {
-            data.append("image", selectedFile, "blog-image.jpg");
+            // Generate a unique filename based on title + random string to send to backend
+            const cleanTitle = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 30);
+            const randomSuffix = Math.random().toString(36).substring(2, 6);
+            const fileName = `${cleanTitle}_${randomSuffix}.jpg`;
+            data.append("image", selectedFile, fileName);
         } else if (formData.image && typeof formData.image === 'string') {
             data.append("image", formData.image);
         }
@@ -164,19 +168,19 @@ const AddBlogPage = () => {
 
             {/* Cropper Modal */}
             {showCropper && (
-                <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="p-4 border-b flex items-center justify-between">
-                            <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="p-4 sm:p-5 border-b dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-800 sticky top-0 z-10">
+                            <h2 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
                                 <CropIcon className="w-5 h-5 text-blue-600" />
                                 Crop Feature Image
                             </h2>
-                            <button onClick={() => setShowCropper(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                            <button onClick={() => setShowCropper(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
                                 <X className="w-5 h-5 text-gray-500" />
                             </button>
                         </div>
 
-                        <div className="relative flex-1 bg-gray-900 min-h-[400px]">
+                        <div className="relative w-full aspect-video bg-gray-950 max-h-[60vh] sm:max-h-[70vh]">
                             <MyCropper
                                 image={imageToCrop}
                                 crop={crop}
@@ -185,38 +189,44 @@ const AddBlogPage = () => {
                                 onCropChange={setCrop}
                                 onCropComplete={onCropComplete}
                                 onZoomChange={setZoom}
+                                objectFit="contain"
                             />
                         </div>
 
-                        <div className="p-6 space-y-4">
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                    <span>Zoom Level</span>
-                                    <span>{Math.round(zoom * 100)}%</span>
+                        <div className="p-4 sm:p-8 bg-gray-50 dark:bg-gray-900/50 space-y-6">
+                            <div className="space-y-3">
+                                <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    <span>Adjust Zoom</span>
+                                    <span className="text-blue-600 dark:text-blue-400 font-mono">{Math.round(zoom * 100)}%</span>
                                 </div>
-                                <input
-                                    type="range"
-                                    value={zoom}
-                                    min={1}
-                                    max={3}
-                                    step={0.1}
-                                    onChange={(e) => setZoom(e.target.value)}
-                                    className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                />
+                                <div className="flex items-center gap-4">
+                                    <span className="text-xs font-bold text-gray-400">-</span>
+                                    <input
+                                        type="range"
+                                        value={zoom}
+                                        min={1}
+                                        max={3}
+                                        step={0.1}
+                                        onChange={(e) => setZoom(e.target.value)}
+                                        className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                    />
+                                    <span className="text-xs font-bold text-gray-400">+</span>
+                                </div>
                             </div>
 
-                            <div className="flex gap-3 pt-2">
+                            <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowCropper(false)}
-                                    className="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all"
+                                    className="flex-1 py-3.5 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-2xl font-bold hover:bg-white dark:hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleCropSave}
-                                    className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+                                    className="flex-1 py-3.5 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2 group"
                                 >
-                                    Crop & Use Image
+                                    <Check className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                    Save Cropped Image
                                 </button>
                             </div>
                         </div>

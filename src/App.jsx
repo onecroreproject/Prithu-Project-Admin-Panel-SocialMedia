@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 // App.jsx
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -42,7 +43,8 @@ import PartyManagement from "./pages/PartyManagement/PartyManagement";
 import SettingsDashboard from "./pages/Dashboard/settingsDashboard";
 import ChildAdminPage from "./pages/ChildAdminRegister/childAdminPage";
 import ChildAdminPermissionPage from "./pages/ChildAdminRegister/childAdminPermissionPage";
-import ChildAdminProfile from "./pages/ChildAdminProfilePage/childAdminProfilePage";
+const ChildAdminProfile = lazy(() => import("./pages/ChildAdminProfilePage/childAdminProfilePage")); // Changed to lazy import
+const ChildAdminListPage = lazy(() => import("./pages/ChildAdmin/ChildAdminListPage")); // Added lazy import
 import AdminProfilePage from "./pages/adminProfilePage";
 import SubscriptionPage from "./pages/subscriptionPage";
 import SalesDashboard from "./pages/SalesDashboard/salesdashBoardPage";
@@ -149,15 +151,16 @@ function AnimatedRoutes() {
 
           {/* Blog Management */}
           <Route path="/social/blog/list" element={<BlogListPage />} />
-          <Route path="/social/blog/add" element={<AddBlogPage />} />
-          <Route path="/social/blog/edit/:id" element={<AddBlogPage />} />
+          <Route path="/social/blog/add" element={<Suspense fallback={<div>Loading...</div>}><AddBlogPage /></Suspense>} />
+          <Route path="/social/blog/edit/:id" element={<Suspense fallback={<div>Loading...</div>}><AddBlogPage /></Suspense>} />
 
 
           {/* ====== SETTINGS MODULE ROUTES ====== */}
           <Route path="/settings/dashboard" element={<SettingsDashboard />} />
           <Route path="/settings/child/admin/page" element={<ChildAdminPage />} />
+          <Route path="/settings/child/admin/list" element={<Suspense fallback={<div>Loading...</div>}><ChildAdminListPage /></Suspense>} />
+          <Route path="/settings/child/admin/profile/:id" element={<Suspense fallback={<div>Loading...</div>}><ChildAdminProfile /></Suspense>} />
           <Route path="/settings/childadmin/permission/:id" element={<ChildAdminPermissionPage />} />
-          <Route path="/settings/child/admin/profile/:id" element={<ChildAdminProfile />} />
           <Route path="/settings/admin/profile/page" element={<AdminProfilePage />} />
           <Route path="/settings/subscription/page" element={<SubscriptionPage />} />
           <Route path="/settings/sales/dashboard" element={<SalesDashboard />} />
