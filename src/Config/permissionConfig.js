@@ -7,7 +7,7 @@ export const PERMISSION_HIERARCHY = [
     {
         name: "Dashboard & Sales",
         parent: "canManageSalesDashboard",
-        children: [] // Single item parents don't necessarily need children for the UI toggle
+        children: []
     },
     {
         name: "User Management",
@@ -15,9 +15,14 @@ export const PERMISSION_HIERARCHY = [
         children: ["canManageUsersDetail"]
     },
     {
+        name: "Creator Management",
+        parent: "canManageCreators",
+        children: ["canTrendingCreators"]
+    },
+    {
         name: "Feed Management",
         parent: "canManageFeeds",
-        children: ["canManageTrendingFeeds", "canManageUpload", "canManageCategories", "canManageParties"]
+        children: ["canManageTrendingFeeds", "canManageUserFeedRequest", "canManageUpload", "canManageCategories", "canManageParties"]
     },
     {
         name: "Report Management",
@@ -46,13 +51,18 @@ export const PERMISSION_HIERARCHY = [
     },
     {
         name: "Company Management",
-        parent: "canManageFAQs", // We use canManageFAQs as parent for grouping
+        parent: "canManageFAQs",
         children: ["canManageUserFeedbacks", "canManageFooter", "canViewCompanyInfo"]
     },
     {
         name: "SEO Management",
         parent: "canManageSEO",
         children: ["canViewSEODashboard", "canManageSEOGlobal", "canManageSEOFeeds", "canManageSEOMedia", "canManageSEORedirects"]
+    },
+    {
+        name: "Email Management",
+        parent: "canManageEmails",
+        children: []
     },
     {
         name: "Server Management",

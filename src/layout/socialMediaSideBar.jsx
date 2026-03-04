@@ -23,7 +23,8 @@ import {
   Database,
   HardDrive,
   Search,
-  Bell
+  Bell,
+  Mail
 } from "lucide-react";
 
 const mainNavItems = [
@@ -120,6 +121,15 @@ const mainNavItems = [
       { name: "Feed SEO", path: "/seo/feeds", permission: "canManageSEOFeeds" },
       { name: "Media SEO", path: "/seo/media", permission: "canManageSEOMedia" },
       { name: "Redirect Manager", path: "/seo/redirects", permission: "canManageSEORedirects" },
+    ],
+  },
+  {
+    icon: <Mail className="w-5 h-5" />,
+    name: "Email Management",
+    permission: "canManageEmails",
+    subItems: [
+      { name: "Email Dashboard", path: "/settings/email/dashboard", permission: null },
+      { name: "Template Editor", path: "/settings/email/templates", permission: null },
     ],
   },
   {

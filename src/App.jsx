@@ -92,6 +92,8 @@ import RedirectManager from "./pages/AdminPages/RedirectManager";
 import PageSEOMatagement from "./pages/AdminPages/PageSEOMatagement";
 import FeedSEOMatagement from "./pages/AdminPages/FeedSEOMatagement";
 import MediaSEOMatagement from "./pages/AdminPages/MediaSEOMatagement";
+import EmailManagementDashboard from "./pages/EmailManagement/EmailManagementDashboard";
+import TemplateEditor from "./pages/EmailManagement/TemplateEditor";
 
 // Create separate dashboard components or use existing ones
 // For now, we'll use SocialMediaDashboard as a placeholder for analytics
@@ -184,6 +186,10 @@ function AnimatedRoutes() {
           <Route path="/seo/pages" element={<PageSEOMatagement />} />
           <Route path="/seo/feeds" element={<FeedSEOMatagement />} />
           <Route path="/seo/media" element={<MediaSEOMatagement />} />
+
+          {/* ====== EMAIL MANAGEMENT MODULE ROUTES ====== */}
+          <Route path="/settings/email/dashboard" element={<EmailManagementDashboard />} />
+          <Route path="/settings/email/templates" element={<TemplateEditor />} />
 
           {/* ====== DRIVE MODULE ROUTES ====== */}
           <Route path="/drive/dashboard" element={<GoogleDriveDashboard />} />
