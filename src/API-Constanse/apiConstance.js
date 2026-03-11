@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
 
   DASHBOARD_METRICKS: "/api/admin/dashboard/metricks/counts",
   DASHBOARD_USER_REGITRATION_CHART: "/api/admin/users/monthly-registrations",
+  DASHBOARD_HEARTBEAT: "/api/admin/dashboard/heartbeat",
   DASHBOARD_SUBSCRIPTION_RATIO_CHART: "/api/admin/user/subscriptionration",
 
 

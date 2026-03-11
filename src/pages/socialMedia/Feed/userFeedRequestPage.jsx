@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../../Utils/axiosApi';
+import api from '../../../Services/apiService';
 import {
   FaSearch,
   FaFilter,

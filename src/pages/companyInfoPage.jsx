@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../Utils/axiosApi';
+import axios from '../Services/apiService';
 import {
   Save,
   Eye,

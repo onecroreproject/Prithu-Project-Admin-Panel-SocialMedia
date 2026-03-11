@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "../Utils/axiosApi";
+import axios from "../Services/apiService";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaFire,

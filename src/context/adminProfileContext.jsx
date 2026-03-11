@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import api from "../Utils/axiosApi";
+import api from "../Services/apiService";
 import { useAdminAuth } from "./adminAuthContext";
 
 // Create Context
@@ -34,9 +34,7 @@ export const AdminProfileProvider = ({ children }) => {
     setProfile(null);
     setLoading(true);
     try {
-      const res = await api.get("/api/admin/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get("/api/admin/profile");
       setProfile(res.data?.profile || null);
     } catch (err) {
       console.error("Error fetching admin profile", err);
@@ -78,7 +76,6 @@ export const AdminProfileProvider = ({ children }) => {
 
       await api.put(endpoint, fd, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });

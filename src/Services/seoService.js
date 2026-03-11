@@ -1,4 +1,4 @@
-import api from "../Utils/axiosApi";
+import api from "../apiService";
 import { API_ENDPOINTS } from "../API-Constanse/apiConstance";
 
 const SEOService = {

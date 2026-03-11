@@ -1,8 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { FaUsers, FaUserCheck, FaUserPlus, FaUserSlash, FaFlag, FaUserShield } from "react-icons/fa";
-import { fetchMetrics } from "../../../Services/DashboardServices/metricksServices";
+import { 
+  Users, 
+  UserCheck, 
+  UserPlus, 
+  UserX, 
+  Flag, 
+  ShieldCheck,
+  Server
+} from "lucide-react";
+import api from "../../../Services/apiService";
+import { useDashboardHeartbeat } from "../../../hooks/useDashboardHeartbeat";
 import ChildAdminListModal from "./ChildAdminListModal";
 
 // Responsive Skeleton Loader
@@ -20,12 +28,26 @@ export default function TodayMetrics() {
   const navigate = useNavigate();
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["todayMetrics"],
-    queryFn: fetchMetrics,
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
-  });
+  const { data: heartbeat, isLoading, isError } = useDashboardHeartbeat();
+  const [systemMetrics, setSystemMetrics] = useState(null);
+
+  const data = heartbeat?.metrics;
+
+  useEffect(() => {
+    const fetchSystemMetrics = async () => {
+      try {
+        const response = await api.get('/api/admin/system/metrics');
+        if (response.data.success) {
+          setSystemMetrics(response.data.data);
+        }
+      } catch (err) {
+        console.error("System Metrics Error");
+      }
+    };
+    fetchSystemMetrics();
+    const interval = setInterval(fetchSystemMetrics, 60000); // Poll every minute
+    return () => clearInterval(interval);
+  }, []);
 
   // Responsive Loading State
   if (isLoading) {
@@ -48,7 +70,7 @@ export default function TodayMetrics() {
     return (
       <div className="text-center py-6 sm:py-8 px-4">
         <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-50 mb-3">
-          <FaUsers className="text-red-400 text-lg sm:text-xl" />
+          <Users className="text-red-400 text-lg sm:text-xl" />
         </div>
         <p className="text-red-500 font-medium text-sm sm:text-base">
           Failed to load metrics
@@ -71,27 +93,27 @@ export default function TodayMetrics() {
       key: "totalUsers",
       title: "Total Users",
       value: data.totalUsers,
-      icon: FaUsers,
+      icon: Users,
       color: "bg-gradient-to-br from-blue-500 to-blue-600",
       border: "border-blue-100",
       trend: null,
       description: "All registered users",
     },
     {
-      key: "activeUsersToday",
-      title: "Active Today",
-      value: data.activeUsersToday,
-      icon: FaUserCheck,
+      key: "onlineUsers",
+      title: "Online Users",
+      value: data.onlineUsers,
+      icon: UserCheck,
       color: "bg-gradient-to-br from-emerald-500 to-emerald-600",
       border: "border-emerald-100",
-      trend: "+12%",
-      description: "Users active today",
+      trend: "Live",
+      description: "Currently online users",
     },
     {
       key: "newRegistrationsToday",
       title: "New Today",
       value: data.newRegistrationsToday,
-      icon: FaUserPlus,
+      icon: UserPlus,
       color: "bg-gradient-to-br from-violet-500 to-violet-600",
       border: "border-violet-100",
       trend: null,
@@ -101,7 +123,7 @@ export default function TodayMetrics() {
       key: "suspendedUsers",
       title: "Suspended",
       value: data.suspendedUsers,
-      icon: FaUserSlash,
+      icon: UserX,
       color: "bg-gradient-to-br from-rose-500 to-rose-600",
       border: "border-rose-100",
       trend: null,
@@ -111,7 +133,7 @@ export default function TodayMetrics() {
       key: "totalReports",
       title: "Total Reports",
       value: data.totalReports,
-      icon: FaFlag,
+      icon: Flag,
       color: "bg-gradient-to-br from-amber-500 to-amber-600",
       border: "border-amber-100",
       trend: "-3%",
@@ -121,7 +143,7 @@ export default function TodayMetrics() {
       key: "totalChildAdmins",
       title: "Total Child Admins",
       value: data.totalChildAdmins,
-      icon: FaUserShield,
+      icon: ShieldCheck,
       color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
       border: "border-indigo-100",
       trend: null,
@@ -131,11 +153,21 @@ export default function TodayMetrics() {
       key: "onlineChildAdmins",
       title: "Online Admins",
       value: data.onlineChildAdmins,
-      icon: FaUserCheck,
+      icon: UserCheck,
       color: "bg-gradient-to-br from-cyan-500 to-cyan-600",
       border: "border-cyan-100",
       trend: "Live",
       description: "Admins currently active",
+    },
+    {
+      key: "systemHealth",
+      title: "System Performance",
+      value: systemMetrics?.apiPerformance.requestsPerMinute ?? "--",
+      icon: Server,
+      color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
+      border: "border-indigo-100",
+      trend: systemMetrics?.apiPerformance.avgResponseTime || "--",
+      description: `Status: ${systemMetrics?.healthCheck.server || "Checking..."}`,
     },
   ];
 
@@ -148,6 +180,10 @@ export default function TodayMetrics() {
   };
 
   const handleMetricClick = (key) => {
+    if (key === "systemHealth") {
+      navigate("/settings/server/management");
+      return;
+    }
     if (key === "totalReports") {
       navigate("/social/user-reportinfo");
       return;
@@ -157,9 +193,9 @@ export default function TodayMetrics() {
       return;
     }
 
-    const navigableMetrics = ["totalUsers", "activeUsersToday", "newRegistrationsToday", "suspendedUsers"];
+    const navigableMetrics = ["totalUsers", "onlineUsers", "newRegistrationsToday", "suspendedUsers"];
     if (navigableMetrics.includes(key)) {
-      navigate(`/social/profile?filter=${key}`);
+      navigate(`/social/profile?filter=${key === "onlineUsers" ? "online" : key}`);
     }
   };
 
@@ -179,7 +215,7 @@ export default function TodayMetrics() {
               w-full cursor-pointer`}
           >
             {/* Glow effect - hidden on mobile for performance */}
-            <div className="hidden sm:block absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"></div>
+            <div className="hidden sm:block absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none"></div>
 
             <div className="relative z-10 w-full">
               {/* Header Section */}
@@ -188,7 +224,7 @@ export default function TodayMetrics() {
                   <div
                     className={`rounded-lg sm:rounded-xl p-2 sm:p-2.5 ${metric.color} shadow-md group-hover:shadow-lg transition-shadow
                       w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11
-                      flex-shrink-0`}
+                      shrink-0`}
                   >
                     <metric.icon className="text-white text-sm sm:text-base md:text-lg" />
                   </div>
@@ -205,7 +241,7 @@ export default function TodayMetrics() {
                 {/* Trend Badge - hidden on extra small screens */}
                 {metric.trend && (
                   <span
-                    className={`hidden xs:inline-flex text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ml-1 flex-shrink-0 ${metric.trend.startsWith("+")
+                    className={`hidden xs:inline-flex text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ml-1 shrink-0 ${metric.trend.startsWith("+")
                       ? "bg-emerald-50 text-emerald-700"
                       : "bg-rose-50 text-rose-700"
                       }`}
@@ -221,7 +257,7 @@ export default function TodayMetrics() {
                   <span className="font-bold text-gray-900 text-xl sm:text-2xl md:text-3xl">
                     {formatNumber(metric.value)}
                   </span>
-                  <div className="hidden sm:block h-1.5 w-1.5 rounded-full bg-gray-300 flex-shrink-0"></div>
+                  <div className="hidden sm:block h-1.5 w-1.5 rounded-full bg-gray-300 shrink-0"></div>
                 </div>
 
                 {/* Specific details for Online Admins */}
@@ -244,7 +280,7 @@ export default function TodayMetrics() {
                     <div
                       className={`h-full rounded-full ${metric.key === "totalUsers"
                         ? "bg-blue-500"
-                        : metric.key === "activeUsersToday"
+                        : metric.key === "onlineUsers"
                           ? "bg-emerald-500"
                           : metric.key === "newRegistrationsToday"
                             ? "bg-violet-500"
@@ -262,7 +298,7 @@ export default function TodayMetrics() {
             </div>
 
             {/* Bottom border on hover - hidden on mobile */}
-            <div className="hidden sm:block absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="hidden sm:block absolute bottom-0 left-4 right-4 h-0.5 bg-linear-to-r from-transparent via-gray-200 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
             {/* Mobile indicator - visible only on mobile */}
             <div className="sm:hidden absolute bottom-2 right-2">

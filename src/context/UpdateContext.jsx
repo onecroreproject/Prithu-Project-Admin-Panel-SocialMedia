@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client';
-import api from '../Utils/axiosApi';
+import api from '../Services/apiService';
 import { useAdminAuth } from './adminAuthContext';
 
 const UpdateContext = createContext();

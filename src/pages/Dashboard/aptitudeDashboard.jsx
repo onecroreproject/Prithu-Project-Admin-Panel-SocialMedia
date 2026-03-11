@@ -24,7 +24,7 @@ import {
   Database,
   Activity
 } from "lucide-react";
-import axios from "../../Utils/axiosApi";
+import axios from "../../Services/apiService";
 
 const AptitudeDashboard = () => {
   const [stats, setStats] = useState({

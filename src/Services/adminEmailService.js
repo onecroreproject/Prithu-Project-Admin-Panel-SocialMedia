@@ -1,13 +1,11 @@
-import axiosApi from "../Utils/axiosApi";
+import api from "./apiService";
 
 /**
  * Get Promotional Email Dashboard Stats
  */
-export const getPromoDashboardStats = async (token) => {
+export const getPromoDashboardStats = async () => {
     try {
-        const response = await axiosApi.get("/api/admin/email/promo/stats", {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get("/api/admin/email/promo/stats");
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -17,11 +15,9 @@ export const getPromoDashboardStats = async (token) => {
 /**
  * List all promotional templates
  */
-export const getPromotionTemplates = async (token) => {
+export const getPromotionTemplates = async () => {
     try {
-        const response = await axiosApi.get("/api/admin/email/promo/templates", {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get("/api/admin/email/promo/templates");
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -31,11 +27,9 @@ export const getPromotionTemplates = async (token) => {
 /**
  * Get content of a specific template
  */
-export const getTemplateContent = async (fileName, token) => {
+export const getTemplateContent = async (fileName) => {
     try {
-        const response = await axiosApi.get(`/api/admin/email/promo/templates/${fileName}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get(`/api/admin/email/promo/templates/${fileName}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -45,11 +39,9 @@ export const getTemplateContent = async (fileName, token) => {
 /**
  * Save template (Create or Update)
  */
-export const savePromotionTemplate = async (templateData, token) => {
+export const savePromotionTemplate = async (templateData) => {
     try {
-        const response = await axiosApi.post("/api/admin/email/promo/templates", templateData, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.post("/api/admin/email/promo/templates", templateData);
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -59,11 +51,9 @@ export const savePromotionTemplate = async (templateData, token) => {
 /**
  * Delete template
  */
-export const deletePromotionTemplate = async (fileName, token) => {
+export const deletePromotionTemplate = async (fileName) => {
     try {
-        const response = await axiosApi.delete(`/api/admin/email/promo/templates/${fileName}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.delete(`/api/admin/email/promo/templates/${fileName}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error;
@@ -73,14 +63,10 @@ export const deletePromotionTemplate = async (fileName, token) => {
 /**
  * Trigger Promotional Batch Manually
  */
-export const triggerPromoBatch = (token) => {
-    return axiosApi.post("/api/admin/email/promo/trigger-batch", {}, {
-        headers: { Authorization: `Bearer ${token}` }
-    }).then(res => res.data);
+export const triggerPromoBatch = () => {
+    return api.post("/api/admin/email/promo/trigger-batch", {}).then(res => res.data);
 };
 
-export const toggleCampaignStatus = (pause, token) => {
-    return axiosApi.patch("/api/admin/email/promo/toggle-status", { pause }, {
-        headers: { Authorization: `Bearer ${token}` }
-    }).then(res => res.data);
+export const toggleCampaignStatus = (pause) => {
+    return api.patch("/api/admin/email/promo/toggle-status", { pause }).then(res => res.data);
 };

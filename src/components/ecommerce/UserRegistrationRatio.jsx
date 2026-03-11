@@ -13,17 +13,20 @@ import {
   FiCalendar,
   FiRefreshCw
 } from "react-icons/fi";
-import { fetchMonthlyRegistrations } from "../../Services/DashboardServices/userRegistrationChartServices";
+import { fetchMonthlyRegistrations } from "../../Services/DashboardServices/dashboardOverviewServices";
 
 export default function UserRegistrationRatio() {
   const [isOpen, setIsOpen] = useState(false);
   const [viewMode, setViewMode] = useState("registrations"); // "registrations", "active", "suspended"
   const [timeRange, setTimeRange] = useState("yearly"); // "yearly", "quarterly", "monthly"
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
 
   // ✅ Fetch registration data
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["monthlyRegistrations"],
-    queryFn: fetchMonthlyRegistrations,
+    queryKey: ["monthlyRegistrations", timeRange, selectedYear],
+    queryFn: () => fetchMonthlyRegistrations({ range: timeRange, year: selectedYear }),
+    refetchInterval: 60000,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -36,6 +39,7 @@ export default function UserRegistrationRatio() {
         suspendedUsers: Array(12).fill(0),
         growthPercentages: Array(12).fill(0),
         currentYear: new Date().getFullYear(),
+        categories: [],
         totals: {
           registrations: 0,
           activeUsers: 0,
@@ -54,7 +58,7 @@ export default function UserRegistrationRatio() {
       registrations: monthlyData.reduce((a, b) => a + b, 0),
       activeUsers: activeUsers.reduce((a, b) => a + b, 0),
       suspendedUsers: suspendedUsers.reduce((a, b) => a + b, 0),
-      avgGrowth: (growthPercentages.reduce((a, b) => a + b, 0) / 12).toFixed(1)
+      avgGrowth: (growthPercentages.reduce((a, b) => a + b, 0) / monthlyData.length).toFixed(1)
     };
 
     return {
@@ -63,6 +67,7 @@ export default function UserRegistrationRatio() {
       suspendedUsers,
       growthPercentages,
       currentYear: data.year,
+      categories: data.categories || [],
       totals
     };
   }, [data]);
@@ -155,7 +160,7 @@ export default function UserRegistrationRatio() {
       colors: ["transparent"]
     },
     xaxis: {
-      categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      categories: processedData.categories,
       axisBorder: {
         show: false
       },
@@ -369,7 +374,42 @@ export default function UserRegistrationRatio() {
               })}
             </div>
 
-            {/* Dropdown Menu */}
+           
+
+            {/* Year Selector Dropdown */}
+            <div className="relative inline-block">
+              <button
+                onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                aria-label="Select Year"
+              >
+                <FiCalendar />
+                {selectedYear}
+              </button>
+              <Dropdown
+                isOpen={isYearDropdownOpen}
+                onClose={() => setIsYearDropdownOpen(false)}
+                className="w-32 p-2 shadow-lg border border-gray-200"
+              >
+                {[new Date().getFullYear(), new Date().getFullYear() - 1, new Date().getFullYear() - 2].map((year) => (
+                  <DropdownItem
+                    key={year}
+                    onItemClick={() => {
+                      setSelectedYear(year);
+                      setIsYearDropdownOpen(false);
+                    }}
+                    className={`flex items-center justify-center p-2 rounded-md text-sm ${selectedYear === year
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                  >
+                    {year}
+                  </DropdownItem>
+                ))}
+              </Dropdown>
+            </div>
+
+             {/* Dropdown Menu */}
             <div className="relative inline-block">
               <button
                 onClick={toggleDropdown}

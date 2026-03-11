@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import api from "../Utils/axiosApi";
+import api from "../Services/apiService";
 import { API_ENDPOINTS } from "../API-Constanse/apiConstance";
 
 
@@ -204,9 +204,7 @@ export const AdminAuthProvider = ({ children }) => {
         adminType: "Child_Admin",
       };
 
-      const res = await api.post(API_ENDPOINTS.CHILD_ADMIN_REGISTER, payload, {
-        headers: { Authorization: `Bearer ${admin?.token}` },
-      });
+      const res = await api.post(API_ENDPOINTS.CHILD_ADMIN_REGISTER, payload);
 
       setError(null);
       return res.data;

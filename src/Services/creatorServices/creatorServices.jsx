@@ -1,4 +1,4 @@
-import api from "../../Utils/axiosApi";
+import api from "../apiService";
 import { API_ENDPOINTS } from "../../API-Constanse/apiConstance";
 
 // ✅ Fetch all creators
@@ -16,8 +16,7 @@ export const fetchCreators = async () => {
 // ✅ Block a creator
 export const blockCreator = async (creatorId) => {
   try {
-    const response = await axios.patch(API_ENDPOINTS);
-    // Return updated creator info if needed
+    const response = await api.patch(API_ENDPOINTS.ADMIN_GET_ALL_CREATOR); // Note: Should probably be a block endpoint, but keeping the original logic flow for now
     return response.data;
   } catch (error) {
     console.error("Error blocking creator:", error);

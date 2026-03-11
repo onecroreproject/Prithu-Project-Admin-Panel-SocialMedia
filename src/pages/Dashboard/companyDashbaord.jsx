@@ -1,6 +1,6 @@
 // CompanyDashboard.jsx - Platform Monitoring Dashboard
 import { useEffect, useState } from "react";
-import api from "../../Utils/axiosApi";
+import api from "../../Services/apiService";
 import {
   BarChart3,
   Users,

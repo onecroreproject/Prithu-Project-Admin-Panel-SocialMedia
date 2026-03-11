@@ -150,6 +150,7 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
 
   // Apply filters to data
   const applyFilters = useCallback((data) => {
+    const now = new Date();
     return data.filter(user => {
       // Status filter
       const statusFilters = filters.status;
@@ -160,15 +161,14 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
         return false;
       }
 
-      // Gender filter
-      if (filters.gender !== "all" && user.gender !== filters.gender) {
+      // Gender filter (normalized comparison)
+      if (filters.gender !== "all" && user.gender?.toLowerCase() !== filters.gender.toLowerCase()) {
         return false;
       }
 
       // Registered date filter
       if (filters.registered !== "all") {
         const userCreatedAt = new Date(user.createdAt);
-        const now = new Date();
         let daysAgo;
 
         switch (filters.registered) {
@@ -185,24 +185,27 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
             daysAgo = 90;
             break;
           default:
-            return true;
+            daysAgo = null;
         }
 
-        const daysDiff = Math.floor((now - userCreatedAt) / (1000 * 60 * 60 * 24));
-        if (daysDiff > daysAgo) {
-          return false;
+        if (daysAgo !== null) {
+          const hoursDiff = (now - userCreatedAt) / (1000 * 60 * 60);
+          if (daysAgo === 0) {
+            if (hoursDiff > 24) return false;
+          } else {
+            if (hoursDiff > daysAgo * 24) return false;
+          }
         }
       }
 
       // Last active filter
       if (filters.lastActive !== "all" && user.lastActiveAt) {
         const lastActive = new Date(user.lastActiveAt);
-        const now = new Date();
         let daysAgo;
 
         switch (filters.lastActive) {
           case "today":
-            daysAgo = 1;
+            daysAgo = 0;
             break;
           case "week":
             daysAgo = 7;
@@ -211,12 +214,16 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
             daysAgo = 30;
             break;
           default:
-            return true;
+            daysAgo = null;
         }
 
-        const daysDiff = Math.floor((now - lastActive) / (1000 * 60 * 60 * 24));
-        if (daysDiff > daysAgo) {
-          return false;
+        if (daysAgo !== null) {
+          const hoursDiff = (now - lastActive) / (1000 * 60 * 60);
+          if (daysAgo === 0) {
+            if (hoursDiff > 24) return false;
+          } else {
+            if (hoursDiff > daysAgo * 24) return false;
+          }
         }
       }
 
@@ -372,10 +379,11 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
         break;
       case "online":
       case "activeUsersToday":
+      case "onlineUsers":
         setFilters(prev => ({
           ...prev,
           status: { active: true, inactive: false, blocked: false, suspended: false },
-          lastActive: "today"
+          lastActive: "all"
         }));
         break;
       case "subscribed":
@@ -674,7 +682,7 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
                 <div className="px-4 py-2">
                   <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Registered Date</h4>
                   <div className="space-y-2">
-                    {["all", "7days", "30days", "90days"].map((period) => (
+                    {["all", "today", "7days", "30days", "90days"].map((period) => (
                       <label key={period} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
@@ -684,7 +692,7 @@ export default function UserTable({ externalFilter, onClearExternalFilter }) {
                           onChange={() => handleRegisteredChange(period)}
                         />
                         <span className="text-sm text-gray-700">
-                          {period === "all" ? "All Time" : `Last ${period.replace("days", " Days")}`}
+                          {period === "all" ? "All Time" : period === "today" ? "Today" : `Last ${period.replace("days", " Days")}`}
                         </span>
                       </label>
                     ))}

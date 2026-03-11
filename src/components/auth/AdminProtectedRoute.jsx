@@ -2,8 +2,8 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "../../context/adminAuthContext";
 
-const AdminProtectedRoute = ({ children }) => {
-    const { admin, loading } = useAdminAuth();
+const AdminProtectedRoute = ({ children, requiredRole }) => {
+    const { admin, role, loading } = useAdminAuth();
     const location = useLocation();
 
     if (loading) {
@@ -16,6 +16,11 @@ const AdminProtectedRoute = ({ children }) => {
 
     if (!admin) {
         return <Navigate to="/signin" state={{ from: location }} replace />;
+    }
+
+    if (requiredRole && role !== requiredRole) {
+        // If user doesn't have the required role, redirect to dashboard or show unauthorized
+        return <Navigate to="/" replace />;
     }
 
     return children;

@@ -1,9 +1,11 @@
-import Api from "../../Utils/axiosApi.js";
+import Api from "../apiService.js";
 import { API_ENDPOINTS } from "../../API-Constanse/apiConstance.js";
 
 // ✅ Fetch all users
 export const fetchUsers = async () => {
-  const res = await Api.get(API_ENDPOINTS.USER_DETAIL);
+  const res = await Api.get(API_ENDPOINTS.USER_DETAIL, {
+    params: { limit: 1000 }
+  });
   return res.data.users;
 };
 

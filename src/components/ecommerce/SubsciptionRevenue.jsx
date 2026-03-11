@@ -1,15 +1,12 @@
 import Chart from "react-apexcharts";
-import { useQuery } from "@tanstack/react-query";
+import { useDashboardHeartbeat } from "../../hooks/useDashboardHeartbeat";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { fetchSubscriptionStats } from "../../Services/DashboardServices/subscriptionRatioChartServices";
 
 export default function SubscriptionRevenue() {
-  const { data: stats = {}, isLoading, isError } = useQuery({
-    queryKey: ["subscriptionStats"],
-    queryFn: fetchSubscriptionStats,
-    staleTime: 1000 * 60 * 5, // cache for 5 minutes
-  });
+  const { data: heartbeat, isLoading, isError } = useDashboardHeartbeat();
+
+  const stats = heartbeat?.revenue || {};
 
 
 

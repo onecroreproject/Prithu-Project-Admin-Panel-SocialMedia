@@ -41,7 +41,7 @@ import {
   CheckSquare,
   Square
 } from 'lucide-react';
-import api from '../../Utils/axiosApi';
+import api from '../../Services/apiService';
 
 const AnalyticsPage = () => {
   const { testId } = useParams();

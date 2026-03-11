@@ -5,7 +5,7 @@ import {
     X, Upload, Check, Loader2, Image as ImageIcon, ArrowLeft
 } from 'lucide-react';
 import { CKEditor } from 'ckeditor4-react';
-import api from '../../Utils/axiosApi';
+import api from '../../Services/apiService';
 import { toast } from 'react-toastify';
 
 const formatDate = (dateString) => {

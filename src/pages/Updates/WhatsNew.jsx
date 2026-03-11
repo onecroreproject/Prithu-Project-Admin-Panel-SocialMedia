@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Calendar, User, Eye, CheckCircle2, Image as ImageIcon, ExternalLink, RefreshCw } from 'lucide-react';
-import api from '../../Utils/axiosApi';
+import api from '../../Services/apiService';
 import { useUpdates } from '../../context/UpdateContext';
 
 const formatDate = (dateString) => {

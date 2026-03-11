@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "../Utils/axiosApi";
+import axios from "../Services/apiService";
 import toast, { Toaster } from "react-hot-toast";
 import TrendingCreatorsTable from "../pages/Tables/CreatorTable/trendingCreatorTable";
 import {

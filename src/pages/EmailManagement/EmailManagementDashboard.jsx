@@ -15,7 +15,7 @@ export default function EmailManagementDashboard() {
     const fetchStats = async () => {
         try {
             setLoading(true);
-            const response = await getPromoDashboardStats(token);
+            const response = await getPromoDashboardStats();
             setStats(response.data);
         } catch (error) {
             toast.error("Failed to fetch dashboard stats");
@@ -40,7 +40,7 @@ export default function EmailManagementDashboard() {
 
         try {
             setTriggering(true);
-            const response = await triggerPromoBatch(token);
+            const response = await triggerPromoBatch();
             toast.success(`Batch triggered: ${response.processed} users added to queue`);
             fetchStats();
         } catch (error) {
@@ -59,7 +59,7 @@ export default function EmailManagementDashboard() {
         if (!window.confirm(confirmMsg)) return;
 
         try {
-            const response = await toggleCampaignStatus(newPauseState, token);
+            const response = await toggleCampaignStatus(newPauseState);
             toast.success(response.message);
             setStats(prev => ({ ...prev, isPaused: response.isPaused }));
         } catch (error) {

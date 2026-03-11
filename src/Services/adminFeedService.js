@@ -1,16 +1,10 @@
-import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
+import api from './apiService';
 
 const adminService = {
   // Get all categories
-  getCategories: async (token) => {
+  getCategories: async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/admin/get/feed/category`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await api.get('/api/admin/get/feed/category');
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -19,13 +13,9 @@ const adminService = {
   },
 
   // Upload feed
-  uploadFeed: async (formData, token, onProgress) => {
+  uploadFeed: async (formData, onProgress) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/admin/feed-upload`, formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        },
+      const response = await api.post('/api/admin/feed-upload', formData, {
         onUploadProgress: onProgress
       });
       return response.data;
@@ -36,13 +26,10 @@ const adminService = {
   },
 
   // Get feeds
-  getFeeds: async (page = 1, limit = 20, token) => {
+  getFeeds: async (page = 1, limit = 20) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/feeds`, {
-        params: { page, limit },
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await api.get('/api/feeds', {
+        params: { page, limit }
       });
       return response.data;
     } catch (error) {
@@ -52,13 +39,9 @@ const adminService = {
   },
 
   // Update feed
-  updateFeed: async (feedId, data, token) => {
+  updateFeed: async (feedId, data) => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/api/admin/feeds/${feedId}`, data, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await api.put(`/api/admin/feeds/${feedId}`, data);
       return response.data;
     } catch (error) {
       console.error('Error updating feed:', error);
@@ -67,13 +50,9 @@ const adminService = {
   },
 
   // Delete feed
-  deleteFeed: async (feedId, token) => {
+  deleteFeed: async (feedId) => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/api/admin/feeds/${feedId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await api.delete(`/api/admin/feeds/${feedId}`);
       return response.data;
     } catch (error) {
       console.error('Error deleting feed:', error);

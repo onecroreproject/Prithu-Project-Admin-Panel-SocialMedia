@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from '../Utils/axiosApi';
+import axios from '../Services/apiService';
 import {
   Box,
   Grid,
@@ -94,12 +94,7 @@ const GoogleDriveDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await axios.get(`/api/admin/drive/dashboard`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await axios.get(`/api/admin/drive/dashboard`);
       if (response.data.success) {
         setDashboardData(response.data);
         setError(null);
@@ -120,12 +115,7 @@ const GoogleDriveDashboard = () => {
     setCommandSuccess(null);
 
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await axios.post(`/api/admin/drive/command`, formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await axios.post(`/api/admin/drive/command`, formData);
 
       if (response.data.success) {
         setCommandSuccess(response.data.message);

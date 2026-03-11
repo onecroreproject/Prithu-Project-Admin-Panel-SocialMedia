@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from '../Utils/axiosApi';
+import axios from '../Services/apiService';
 import toast, { Toaster } from 'react-hot-toast';
 import {
   Search,

@@ -8,8 +8,15 @@ import PageMeta from "../../components/common/PageMeta";
 import { useEffect, useState } from "react";
 import { useAdminAuth } from "../../context/adminAuthContext";
 import { useNavigate } from "react-router";
-import { FiMenu, FiX, FiGrid, FiTrendingUp, FiUsers, FiDollarSign } from "react-icons/fi";
-import api from "../../Utils/axiosApi";
+import { 
+  Menu, 
+  X, 
+  LayoutGrid, 
+  TrendingUp, 
+  Users, 
+  DollarSign 
+} from "lucide-react";
+import api from "../../Services/apiService";
 import { API_ENDPOINTS } from "../../API-Constanse/apiConstance";
 
 export default function SocialMediaDashboard() {
@@ -64,7 +71,7 @@ export default function SocialMediaDashboard() {
               className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
               aria-label="Toggle menu"
             >
-              {sidebarOpen ? <FiX className="text-gray-600" /> : <FiMenu className="text-gray-600" />}
+              {sidebarOpen ? <X className="text-gray-600" /> : <Menu className="text-gray-600" />}
             </button>
             <h1 className="text-lg font-semibold text-gray-800">Dashboard</h1>
           </div>
@@ -80,11 +87,11 @@ export default function SocialMediaDashboard() {
       <div className="md:hidden px-4 py-3 bg-gray-50 border-b border-gray-100">
         <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
           {[
-            { id: "metrics", label: "Metrics", icon: FiGrid },
-            { id: "analytics", label: "Analytics", icon: FiTrendingUp },
-            { id: "users", label: "Users", icon: FiUsers },
-            admin?.role === "Admin" && { id: "childAdmins", label: "Child Admins", icon: FiUsers },
-            { id: "revenue", label: "Revenue", icon: FiDollarSign },
+            { id: "metrics", label: "Metrics", icon: LayoutGrid },
+            { id: "analytics", label: "Analytics", icon: TrendingUp },
+            { id: "users", label: "Users", icon: Users },
+            admin?.role === "Admin" && { id: "childAdmins", label: "Child Admins", icon: Users },
+            { id: "revenue", label: "Revenue", icon: DollarSign },
           ].filter(Boolean).map((item) => (
             <button
               key={item.id}
@@ -302,66 +309,7 @@ export default function SocialMediaDashboard() {
                     </div>
                   </div>
 
-                  {/* Full Width Chart - Platform Statistics */}
-                  {/* <div className="col-span-12 mt-4 sm:mt-5 md:mt-6">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                            <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
-                            Platform Statistics Overview
-                          </h2>
-                          <p className="text-sm text-gray-500 mt-1">Comprehensive analytics and insights</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <select className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option>Last 7 days</option>
-                            <option>Last 30 days</option>
-                            <option>Last quarter</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="p-3 sm:p-4 md:p-6">
-                        <StatisticsChart />
-                      </div>
-                    </div>
-                  </div> */}
-
                   {/* Bottom Split Section */}
-                  {/* <div className="col-span-12 lg:col-span-5 xl:col-span-5">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-full">
-                      <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-                        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                          <div className="w-1 h-6 bg-rose-500 rounded-full"></div>
-                          User Demographics
-                        </h2>
-                        <p className="text-sm text-gray-500 mt-1">User distribution by age and location</p>
-                      </div>
-                      <div className="p-3 sm:p-4 md:p-6">
-                        <DemographicCard />
-                      </div>
-                    </div>
-                  </div> */}
-
-                  {/* <div className="col-span-12 lg:col-span-7 xl:col-span-7">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-full">
-                      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <div>
-                          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                            <div className="w-1 h-6 bg-indigo-500 rounded-full"></div>
-                            Recent Activity & Orders
-                          </h2>
-                          <p className="text-sm text-gray-500 mt-1">Latest user activities and transactions</p>
-                        </div>
-                        <button className="text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 hover:bg-blue-50 rounded-lg transition-colors">
-                          View All →
-                        </button>
-                      </div>
-                      <div className="p-3 sm:p-4 md:p-6">
-                        <RecentOrders />
-                      </div>
-                    </div>
-                  </div> */}
                 </div>
               </>
             )}
@@ -370,10 +318,10 @@ export default function SocialMediaDashboard() {
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 shadow-lg z-40">
               <div className="flex justify-around">
                 {[
-                  { icon: FiGrid, label: "Home", color: "text-blue-600" },
-                  { icon: FiTrendingUp, label: "Analytics", color: "text-gray-600" },
-                  { icon: FiUsers, label: "Users", color: "text-gray-600" },
-                  { icon: FiDollarSign, label: "Revenue", color: "text-gray-600" },
+                  { icon: LayoutGrid, label: "Home", color: "text-blue-600" },
+                  { icon: TrendingUp, label: "Analytics", color: "text-gray-600" },
+                  { icon: Users, label: "Users", color: "text-gray-600" },
+                  { icon: DollarSign, label: "Revenue", color: "text-gray-600" },
                 ].map((item, index) => (
                   <button
                     key={index}

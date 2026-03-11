@@ -1,4 +1,4 @@
-import Api from "../../Utils/axiosApi.js";
+import Api from "../apiService.js";
 import { API_ENDPOINTS } from "../../API-Constanse/apiConstance.js";
 
 
