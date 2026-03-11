@@ -1,4 +1,4 @@
-import api from "../apiService";
+import api from "./apiService";
 import { API_ENDPOINTS } from "../API-Constanse/apiConstance";
 
 const SEOService = {
