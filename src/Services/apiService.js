@@ -60,6 +60,9 @@ api.interceptors.response.use(
     if (status === 401 && !isAuthPage) {
       console.warn("⚠️ Unauthorized: Redirecting to sign-in …");
       localStorage.removeItem("token");
+      localStorage.removeItem("admin");
+      localStorage.removeItem("role");
+      localStorage.removeItem("lastActive");
       window.location.replace("/signin");
     }
 
