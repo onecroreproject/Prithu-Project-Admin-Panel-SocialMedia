@@ -18,6 +18,7 @@ import ParentAdminCard from "./Components/parentAdminCard";
 import PermissionsCard from "./Components/permissionCard";
 import ConfirmModal from "./Components/confimModel";
 import { useAdminAuth } from "../../context/adminAuthContext";
+import defaultAvatar from "../../Assets/Images/default-avatar.png";
 
 const fadeLeft = {
   hidden: { opacity: 0, x: -40 },
@@ -61,7 +62,7 @@ const ChildAdminProfile = () => {
   const profile = profileData ? {
     ...profileData,
     userName: profileData.profile?.userName || profileData.userName,
-    profileAvatar: profileData.profile?.profileAvatar || "/default-avatar.png",
+    profileAvatar: profileData.profile?.profileAvatar || defaultAvatar,
     socialLinks: profileData.profile?.socialLinks || {},
   } : null;
 

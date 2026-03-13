@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import Info from "./Info";
 import { useAdminAuth } from "../../../context/adminAuthContext";
 import { updateChildAdminProfile } from "../../../Services/childAdminServices/childAdminServices";
+import defaultAvatar from "../../../Assets/Images/default-avatar.png";
 
 export default function ProfileSidebar({
   profile,
@@ -59,11 +60,11 @@ export default function ProfileSidebar({
       {/* Profile Avatar */}
       <div className="relative group">
         <img
-          src={previewAvatar || (profile.profile?.profileAvatar || profile.profileAvatar)}
+          src={previewAvatar || (profile.profile?.profileAvatar || profile.profileAvatar) || defaultAvatar}
           alt="Profile Avatar"
           className="w-32 h-32 rounded-full object-cover mb-4 border-4 border-white shadow-md"
           onError={(e) => {
-            e.target.src = "/default-avatar.png";
+            e.target.src = defaultAvatar;
           }}
         />
         {isEditing && (

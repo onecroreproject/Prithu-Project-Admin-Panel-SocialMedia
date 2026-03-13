@@ -4,6 +4,7 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/adminAuthContext";
 import { useAdminProfile } from "../../context/adminProfileContext";
+import defaultAvatar from "../../Assets/Images/default-avatar.png";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,8 +41,9 @@ export default function UserDropdown() {
           {admin?.userName ? (
             <img
               className="object-cover w-full h-full"
-              src={profile?.profileAvatar}
+              src={profile?.profileAvatar || defaultAvatar}
               alt={admin.userName}
+              onError={(e) => { e.target.src = defaultAvatar; }}
             />
           ) : (
             "?"

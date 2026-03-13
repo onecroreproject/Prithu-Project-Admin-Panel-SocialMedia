@@ -5,6 +5,7 @@ import { getChildAdmins, deleteChildAdmin } from "../../Services/childAdminServi
 import { Eye, Trash2, Mail, User, Clock, ShieldCheck } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import defaultAvatar from "../../Assets/Images/default-avatar.png";
 
 const ChildAdminListPage = () => {
     const navigate = useNavigate();
@@ -88,10 +89,10 @@ const ChildAdminListPage = () => {
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
                                                     <img
-                                                        src={admin.profileAvatar || "/default-avatar.png"}
+                                                        src={admin.profileAvatar || defaultAvatar}
                                                         alt={admin.userName}
                                                         className="h-full w-full object-cover"
-                                                        onError={(e) => e.target.src = "/default-avatar.png"}
+                                                        onError={(e) => e.target.src = defaultAvatar}
                                                     />
                                                 </div>
                                                 <div>

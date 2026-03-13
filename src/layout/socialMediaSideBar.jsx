@@ -197,6 +197,11 @@ const SocialMediaSidebar = ({ user }) => {
   const filteredNavItems = useMemo(() => {
     let items = filterMenu(mainNavItems);
 
+    // Hide "Dashboard" for Child Admins
+    if (user && user.role === "Child_Admin") {
+      items = items.filter(item => item.name !== "Dashboard");
+    }
+
     // Add Profile link for Child Admins at the top
     if (user && user.role === "Child_Admin") {
       const profileId = user._id || user.id || user.userId;
