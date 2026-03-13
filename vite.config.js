@@ -8,33 +8,57 @@ export default defineConfig({
     svgr(),  // no svgrOptions needed for default export
   ],
   build: {
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1000,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+            const path = id.replace(/\\/g, '/');
+            // Core React & Router
+            if (
+              path.includes('node_modules/react/') ||
+              path.includes('node_modules/react-dom/') ||
+              path.includes('node_modules/react-router/') ||
+              path.includes('node_modules/react-router-dom/') ||
+              path.includes('node_modules/scheduler/')
+            ) {
               return 'vendor-react';
             }
-            if (id.includes('framer-motion')) {
+            // Major libraries
+            if (path.includes('node_modules/framer-motion/')) {
               return 'vendor-framer-motion';
             }
-            if (id.includes('@tanstack/react-query')) {
+            if (path.includes('node_modules/@tanstack/react-query/')) {
               return 'vendor-react-query';
             }
-            if (id.includes('chart.js') || id.includes('react-chartjs-2') || id.includes('recharts') || id.includes('apexcharts') || id.includes('react-apexcharts')) {
+            if (
+              path.includes('node_modules/chart.js/') ||
+              path.includes('node_modules/react-chartjs-2/') ||
+              path.includes('node_modules/recharts/') ||
+              path.includes('node_modules/apexcharts/') ||
+              path.includes('node_modules/react-apexcharts/')
+            ) {
               return 'vendor-charts';
             }
-            if (id.includes('lucide-react') || id.includes('react-icons')) {
+            if (
+              path.includes('node_modules/lucide-react/') ||
+              path.includes('node_modules/react-icons/')
+            ) {
               return 'vendor-icons';
             }
-            if (id.includes('@mui') || id.includes('@emotion')) {
+            if (
+              path.includes('node_modules/@mui/') ||
+              path.includes('node_modules/@emotion/')
+            ) {
               return 'vendor-mui';
             }
-            return 'vendor-others'; // other dependencies
+            return 'vendor-others';
           }
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 });
