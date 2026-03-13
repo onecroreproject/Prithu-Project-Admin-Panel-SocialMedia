@@ -61,7 +61,7 @@ const FollowersModal = ({ followers, onClose }) => {
                             className="w-12 h-12 rounded-full"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                             <span className="text-lg font-semibold text-blue-600">
                               {follower.userName?.charAt(0).toUpperCase()}
                             </span>

@@ -19,7 +19,7 @@ export default function RecentWithdrawalUsers() {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative rounded-2xl border border-gray-200 bg-gradient-to-br from-indigo-50 via-white to-pink-50 px-5 pb-5 pt-5 shadow-md dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 sm:px-4 sm:pt-5 transition-all duration-500 hover:shadow-lg"
+      className="relative rounded-2xl border border-gray-200 bg-linear-to-br from-indigo-50 via-white to-pink-50 px-5 pb-5 pt-5 shadow-md dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 sm:px-4 sm:pt-5 transition-all duration-500 hover:shadow-lg"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -119,7 +119,7 @@ export default function RecentWithdrawalUsers() {
                   <img
                     src={user.avatar || "https://randomuser.me/api/portraits/lego/1.jpg"}
                     alt={user.userName}
-                    className="w-7 h-7 rounded-full object-cover ring-1 ring-indigo-300 flex-shrink-0"
+                    className="w-7 h-7 rounded-full object-cover ring-1 ring-indigo-300 shrink-0"
                   />
                   <div className="truncate min-w-0">
                     <p className="font-semibold text-gray-800 dark:text-white truncate">{user.userName}</p>

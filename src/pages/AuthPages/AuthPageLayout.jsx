@@ -15,7 +15,7 @@ export default function AuthLayout({ children }) {
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900">
       {/* Static background gradients - no animation */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900" />
+      <div className="absolute inset-0 bg-linear-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900" />
       
       <div className="relative flex flex-col lg:flex-row min-h-screen">
         {/* Left side - Form */}
@@ -26,7 +26,7 @@ export default function AuthLayout({ children }) {
         </div>
 
         {/* Right side - Brand showcase */}
-        <div className="hidden lg:flex items-center justify-center w-full lg:w-1/2 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-900/90 relative overflow-hidden">
+        <div className="hidden lg:flex items-center justify-center w-full lg:w-1/2 bg-linear-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-900/90 relative overflow-hidden">
           {/* Grid Shape */}
           <div className="absolute inset-0 z-0">
             <GridShape />
@@ -48,7 +48,7 @@ export default function AuthLayout({ children }) {
 
               {/* Slogan - simplified */}
               <div className="space-y-3 text-center">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-500 to-purple-500 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-linear-to-r from-brand-500 to-purple-500 bg-clip-text text-transparent">
                   Prithu Wellness
                 </h1>
                 

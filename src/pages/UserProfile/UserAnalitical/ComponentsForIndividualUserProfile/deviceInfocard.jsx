@@ -49,9 +49,9 @@ const DeviceInfoCard = ({ device }) => {
         Device Information
       </h3>
       
-      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5 mb-6">
+      <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-2xl p-5 mb-6">
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white">
+          <div className="p-3 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl text-white">
             {getDeviceIcon(device.deviceType)}
           </div>
           <div>

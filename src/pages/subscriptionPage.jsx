@@ -17,7 +17,7 @@ const SubscriptionPage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col gap-10 p-6 md:p-10 bg-gradient-to-tr from-indigo-50 via-purple-50 to-pink-50 min-h-screen"
+      className="flex flex-col gap-10 p-6 md:p-10 bg-linear-to-tr from-indigo-50 via-purple-50 to-pink-50 min-h-screen"
     >
       {/* Top - Form */}
       <motion.div

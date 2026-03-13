@@ -122,10 +122,10 @@ export default function TrendingFeedsTable() {
 
   // Get trending badge color
   const getTrendingBadge = (trendingScore) => {
-    if (trendingScore > 400) return 'bg-gradient-to-r from-red-500 to-orange-500 text-white';
-    if (trendingScore > 200) return 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white';
-    if (trendingScore > 100) return 'bg-gradient-to-r from-yellow-500 to-green-500 text-white';
-    return 'bg-gradient-to-r from-blue-500 to-purple-500 text-white';
+    if (trendingScore > 400) return 'bg-linear-to-r from-red-500 to-orange-500 text-white';
+    if (trendingScore > 200) return 'bg-linear-to-r from-orange-500 to-yellow-500 text-white';
+    if (trendingScore > 100) return 'bg-linear-to-r from-yellow-500 to-green-500 text-white';
+    return 'bg-linear-to-r from-blue-500 to-purple-500 text-white';
   };
 
   // Format large numbers
@@ -190,10 +190,10 @@ export default function TrendingFeedsTable() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-6">
+      <div className="bg-linear-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-linear-to-r from-orange-500 to-red-500 flex items-center justify-center">
               <FaTrophy className="text-white text-xl" />
             </div>
             <div>
@@ -275,7 +275,7 @@ export default function TrendingFeedsTable() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4">
+        <div className="bg-linear-to-br from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Total Views</p>
@@ -287,7 +287,7 @@ export default function TrendingFeedsTable() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 rounded-xl p-4">
+        <div className="bg-linear-to-br from-red-50 to-pink-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Total Likes</p>
@@ -299,7 +299,7 @@ export default function TrendingFeedsTable() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+        <div className="bg-linear-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Total Shares</p>
@@ -311,7 +311,7 @@ export default function TrendingFeedsTable() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+        <div className="bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Total Downloads</p>
@@ -432,9 +432,9 @@ export default function TrendingFeedsTable() {
                     {/* Rank */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white' :
-                          index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-white' :
-                            index === 2 ? 'bg-gradient-to-r from-amber-600 to-amber-800 text-white' :
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-linear-to-r from-yellow-400 to-yellow-600 text-white' :
+                          index === 1 ? 'bg-linear-to-r from-gray-300 to-gray-400 text-white' :
+                            index === 2 ? 'bg-linear-to-r from-amber-600 to-amber-800 text-white' :
                               'bg-gray-100 text-gray-700'
                           }`}>
                           {index + 1}
@@ -683,7 +683,7 @@ export default function TrendingFeedsTable() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-red-50">
+              <div className="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-orange-50 to-red-50">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">Feed Details</h3>
@@ -817,7 +817,7 @@ export default function TrendingFeedsTable() {
                       </div>
 
                       {/* Trending Info */}
-                      <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-200">
+                      <div className="bg-linear-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-200">
                         <h4 className="text-sm font-medium text-gray-700 mb-3">Trending Analysis</h4>
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
@@ -877,7 +877,7 @@ export default function TrendingFeedsTable() {
                       alert(`Action taken on feed ${selectedFeed.feedId}`);
                       setShowPreview(false);
                     }}
-                    className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:opacity-90"
+                    className="px-4 py-2 bg-linear-to-r from-orange-500 to-red-500 text-white rounded-lg hover:opacity-90"
                   >
                     Take Action
                   </button>

@@ -479,7 +479,7 @@ const CompanyDashboard = () => {
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">{stat.description}</p>
                   </div>
                   <div className={`p-2 md:p-3 rounded-full ${stat.color} bg-opacity-10 ml-3`}>
-                    <div className={`text-white p-1.5 md:p-2 rounded-lg bg-gradient-to-br ${stat.gradient}`}>
+                    <div className={`text-white p-1.5 md:p-2 rounded-lg bg-linear-to-br ${stat.gradient}`}>
                       {stat.icon}
                     </div>
                   </div>

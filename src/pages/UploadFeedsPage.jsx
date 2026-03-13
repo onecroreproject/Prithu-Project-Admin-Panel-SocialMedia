@@ -54,7 +54,7 @@ const UploadFeedsPage = () => {
                         <div className="mt-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
                             <div className="w-64 h-2 bg-gray-800 rounded-full overflow-hidden border border-gray-700">
                                 <div
-                                    className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-500 ease-out animate-pulse-slow"
+                                    className="h-full bg-linear-to-r from-blue-600 to-cyan-400 transition-all duration-500 ease-out animate-pulse-slow"
                                     style={{ width: `${overallProgress}%` }}
                                 />
                             </div>
@@ -68,9 +68,9 @@ const UploadFeedsPage = () => {
                 <button
                     onClick={upload}
                     disabled={isUploading || files.length === 0}
-                    className="group relative px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 delay-300"
+                    className="group relative px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 delay-300"
                 >
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                     {isUploading ? (
                         <>
                             <Loader2 className="animate-spin" size={20} />

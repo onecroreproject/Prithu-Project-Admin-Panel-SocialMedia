@@ -32,14 +32,14 @@ export default function PartyManagement() {
     return (
         <motion.div
             {...pageMotion}
-            className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8"
+            className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-8"
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Section */}
                 <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div className="space-y-3">
                         <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <div className="w-14 h-14 bg-linear-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                                 <Flag size={24} className="text-white" />
                             </div>
                             <div>
@@ -59,7 +59,7 @@ export default function PartyManagement() {
                                     if (tab.id === 'partyList') setEditingParty(null);
                                 }}
                                 className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${activeTab === tab.id
-                                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md"
+                                    ? "bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-md"
                                     : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                                     }`}
                             >

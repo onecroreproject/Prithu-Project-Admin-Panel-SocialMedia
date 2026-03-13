@@ -238,7 +238,7 @@ const AptitudeDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-2xl p-6 text-white">
+      <div className="bg-linear-to-r from-indigo-600 to-indigo-700 rounded-2xl p-6 text-white">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Aptitude Assessment Dashboard</h1>
@@ -588,7 +588,7 @@ const AptitudeDashboard = () => {
           </div>
 
           {/* System Status */}
-          <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-900/10 rounded-2xl border border-indigo-200 dark:border-indigo-800 p-6">
+          <div className="bg-linear-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-900/10 rounded-2xl border border-indigo-200 dark:border-indigo-800 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-indigo-500 flex items-center justify-center">
                 <Server className="w-5 h-5 text-white" />

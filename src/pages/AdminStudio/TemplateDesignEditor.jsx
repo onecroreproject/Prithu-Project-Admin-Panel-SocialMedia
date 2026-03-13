@@ -982,7 +982,7 @@ const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel, initialDesig
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="p-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+      <div className="p-6 bg-linear-to-r from-purple-600 to-pink-600 text-white">
         <h2 className="text-2xl font-bold mb-4">Template Design Editor</h2>
         <div className="flex flex-wrap gap-2">
           {['overlays', 'audio', 'footer', 'theme'].map((tab) => (
@@ -1324,7 +1324,7 @@ const TemplateDesignEditor = ({ files, audioFile, onSave, onCancel, initialDesig
         </button>
         <button
           onClick={handleSave}
-          className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition-opacity"
+          className="px-6 py-2 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition-opacity"
         >
           Save Design & Continue →
         </button>

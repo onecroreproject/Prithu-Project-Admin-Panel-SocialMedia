@@ -105,7 +105,7 @@ export default function AnalyticsStats({ stats }) {
             className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-300"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className={`p-2.5 rounded-lg bg-gradient-to-br ${config.color}`}>
+              <div className={`p-2.5 rounded-lg bg-linear-to-br ${config.color}`}>
                 <Icon className="w-5 h-5 text-white" />
               </div>
               <div className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">

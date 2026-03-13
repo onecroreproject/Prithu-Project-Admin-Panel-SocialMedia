@@ -38,7 +38,7 @@ export default function IndividualUserProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 font-medium">Loading user profile...</p>
@@ -50,7 +50,7 @@ export default function IndividualUserProfilePage() {
 
   if (isError || !userData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 max-w-md text-center">
           <div className="text-red-500 mb-4">
             <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@ export default function IndividualUserProfilePage() {
           <p className="text-gray-600 mb-6">The user profile could not be loaded. Please try again.</p>
           <button
             onClick={() => navigate("/social/profile")}
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="px-6 py-3 bg-linear-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Back to Users Dashboard
           </button>
@@ -75,7 +75,7 @@ export default function IndividualUserProfilePage() {
   return (
     <motion.div
       {...pageMotion}
-      className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100"
+      className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100"
     >
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -105,7 +105,7 @@ export default function IndividualUserProfilePage() {
                   <h1 className="text-3xl font-bold text-gray-900">{user.profile?.displayName || user.userName}</h1>
                   <p className="text-gray-600 mt-1 flex items-center gap-2">
                     <span>@{user.userName}</span>
-                    <span className="text-xs px-2 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full">
+                    <span className="text-xs px-2 py-1 bg-linear-to-r from-green-100 to-emerald-100 text-green-700 rounded-full">
                       {user.isOnline ? 'Online' : 'Offline'}
                     </span>
                   </p>
@@ -115,7 +115,7 @@ export default function IndividualUserProfilePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <button className="px-5 py-2.5 bg-linear-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl">
                 Send Message
               </button>
             </div>

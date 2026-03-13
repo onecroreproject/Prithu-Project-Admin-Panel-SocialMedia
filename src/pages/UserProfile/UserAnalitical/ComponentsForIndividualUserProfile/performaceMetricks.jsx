@@ -45,7 +45,7 @@ const PerformanceMetrics = ({ user }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       ),
-      color: "bg-gradient-to-br from-blue-500 to-blue-600",
+      color: "bg-linear-to-br from-blue-500 to-blue-600",
       textColor: "text-blue-600"
     },
     {
@@ -57,7 +57,7 @@ const PerformanceMetrics = ({ user }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
         </svg>
       ),
-      color: "bg-gradient-to-br from-purple-500 to-pink-500",
+      color: "bg-linear-to-br from-purple-500 to-pink-500",
       textColor: "text-purple-600"
     },
     {
@@ -70,7 +70,7 @@ const PerformanceMetrics = ({ user }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
         </svg>
       ),
-      color: "bg-gradient-to-br from-green-500 to-emerald-500",
+      color: "bg-linear-to-br from-green-500 to-emerald-500",
       textColor: "text-green-600"
     },
     {
@@ -82,7 +82,7 @@ const PerformanceMetrics = ({ user }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0c-.828 0-1.5.672-1.5 1.5v4.5a1.5 1.5 0 001.5 1.5h1.5a1.5 1.5 0 001.5-1.5V7.5a1.5 1.5 0 00-1.5-1.5h-1.5z" />
         </svg>
       ),
-      color: "bg-gradient-to-br from-orange-500 to-red-500",
+      color: "bg-linear-to-br from-orange-500 to-red-500",
       textColor: "text-orange-600"
     }
   ];
@@ -98,13 +98,13 @@ const PerformanceMetrics = ({ user }) => {
       
       <div className="grid grid-cols-2 gap-4">
         {statsCards.map((stat, index) => (
-          <div key={index} className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-2xl border border-gray-200">
+          <div key={index} className="bg-linear-to-br from-gray-50 to-white p-4 rounded-2xl border border-gray-200">
             <div className="flex items-start justify-between mb-3">
               <div className={`p-2 ${stat.color} rounded-xl text-white`}>
                 {stat.icon}
               </div>
               {stat.change && (
-                <span className="text-xs font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 px-2 py-1 rounded-full">
+                <span className="text-xs font-medium bg-linear-to-r from-green-100 to-emerald-100 text-green-700 px-2 py-1 rounded-full">
                   {stat.change}
                 </span>
               )}

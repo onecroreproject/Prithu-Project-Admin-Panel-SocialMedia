@@ -301,7 +301,7 @@ export default function UserAnalytics() {
   // Loading state
   if (isLoading && !isRefetching) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Header Skeleton */}
           <div className="animate-pulse mb-8">
@@ -334,10 +334,10 @@ export default function UserAnalytics() {
   // Error state
   if (isError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/10 dark:to-pink-900/10 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 flex items-center justify-center">
+          <div className="bg-linear-to-r from-red-50 to-pink-50 dark:from-red-900/10 dark:to-pink-900/10 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-linear-to-r from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 flex items-center justify-center">
               <svg className="w-10 h-10 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -350,7 +350,7 @@ export default function UserAnalytics() {
             </p>
             <button
               onClick={() => refetch()}
-              className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
+              className="px-6 py-3 bg-linear-to-r from-red-600 to-pink-600 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
             >
               <RefreshCw className="w-5 h-5" />
               Retry
@@ -362,13 +362,13 @@ export default function UserAnalytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header with user info */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 User Analytics Dashboard
               </h1>
               <div className="flex items-center gap-3 mt-3">
@@ -417,7 +417,7 @@ export default function UserAnalytics() {
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                 }}
-                className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
+                className="px-4 py-2.5 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
                 <DownloadIcon className="w-4 h-4" />
                 Export Report
@@ -565,7 +565,7 @@ export default function UserAnalytics() {
                             key={pageNum}
                             onClick={() => setCurrentPage(pageNum)}
                             className={`w-10 h-10 flex items-center justify-center text-sm rounded-lg transition-all ${currentPage === pageNum
-                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                                ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                               }`}
                           >

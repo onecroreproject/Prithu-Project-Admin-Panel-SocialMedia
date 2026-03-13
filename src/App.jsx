@@ -138,11 +138,11 @@ function AnimatedRoutes() {
             <Route path="/social/whats-new" element={<WhatsNew />} />
 
             {/* Settings & Admin (RBAC Applied) */}
-            <Route path="/settings/child/admin/page" element={<AdminProtectedRoute requiredRole="Admin"><ChildAdminPage /></AdminProtectedRoute>} />
-            <Route path="/settings/child/admin/list" element={<AdminProtectedRoute requiredRole="Admin"><ChildAdminListPage /></AdminProtectedRoute>} />
-            <Route path="/settings/child/admin/profile/:id" element={<AdminProtectedRoute requiredRole="Admin"><ChildAdminProfile /></AdminProtectedRoute>} />
-            <Route path="/settings/childadmin/permission/:id" element={<AdminProtectedRoute requiredRole="Admin"><ChildAdminPermissionPage /></AdminProtectedRoute>} />
-            <Route path="/settings/server/management" element={<AdminProtectedRoute requiredRole="Admin"><ServerManagement /></AdminProtectedRoute>} />
+            <Route path="/settings/child/admin/page" element={<AdminProtectedRoute requiredRoles={["Admin"]}><ChildAdminPage /></AdminProtectedRoute>} />
+            <Route path="/settings/child/admin/list" element={<AdminProtectedRoute requiredRoles={["Admin"]}><ChildAdminListPage /></AdminProtectedRoute>} />
+            <Route path="/settings/child/admin/profile/:id" element={<AdminProtectedRoute requiredRoles={["Admin", "Child_Admin"]}><ChildAdminProfile /></AdminProtectedRoute>} />
+            <Route path="/settings/childadmin/permission/:id" element={<AdminProtectedRoute requiredRoles={["Admin"]}><ChildAdminPermissionPage /></AdminProtectedRoute>} />
+            <Route path="/settings/server/management" element={<AdminProtectedRoute requiredRoles={["Admin"]}><ServerManagement /></AdminProtectedRoute>} />
             
             <Route path="/settings/admin/profile/page" element={<AdminProfilePage />} />
             <Route path="/settings/subscription/page" element={<SubscriptionPage />} />

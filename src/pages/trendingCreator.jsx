@@ -246,7 +246,7 @@ export default function TrendingCreatorsPage() {
   // Error state
   if (isError) {
     return (
-      <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+      <div className="p-6 bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen">
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
             <div className="text-red-500 dark:text-red-400 mb-4">
@@ -288,7 +288,7 @@ export default function TrendingCreatorsPage() {
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Trending Creators
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
@@ -302,7 +302,7 @@ export default function TrendingCreatorsPage() {
 
               <button
                 onClick={handleExport}
-                className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
+                className="px-4 py-2.5 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 Export
@@ -312,7 +312,7 @@ export default function TrendingCreatorsPage() {
 
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
+            <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90">Total Creators</p>
@@ -324,7 +324,7 @@ export default function TrendingCreatorsPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
+            <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90">Avg. Score</p>
@@ -339,7 +339,7 @@ export default function TrendingCreatorsPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
+            <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90">Total Followers</p>
@@ -351,7 +351,7 @@ export default function TrendingCreatorsPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-5 text-white">
+            <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90">Avg. Posts</p>
@@ -558,7 +558,7 @@ export default function TrendingCreatorsPage() {
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
                       className={`w-10 h-10 rounded-lg font-medium transition-colors ${page === pageNum
-                          ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                          ? "bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                           : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                         }`}
                     >

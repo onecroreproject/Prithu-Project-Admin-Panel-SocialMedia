@@ -21,7 +21,7 @@ export default function RecentSubscriptionUsers() {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative rounded-2xl border border-gray-200 bg-gradient-to-br from-indigo-50 via-white to-pink-50 px-5 pb-5 pt-5 shadow-md dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 sm:px-4 sm:pt-5 transition-all duration-500 hover:shadow-lg"
+      className="relative rounded-2xl border border-gray-200 bg-linear-to-br from-indigo-50 via-white to-pink-50 px-5 pb-5 pt-5 shadow-md dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 sm:px-4 sm:pt-5 transition-all duration-500 hover:shadow-lg"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">

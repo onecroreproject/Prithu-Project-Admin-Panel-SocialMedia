@@ -10,7 +10,7 @@ const ReportsCard = ({ reports }) => {
           </svg>
           User Reports
         </h3>
-        <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-200 text-center">
+        <div className="bg-linear-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-200 text-center">
           <div className="w-12 h-12 mx-auto mb-4 text-green-500">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -79,22 +79,22 @@ const ReportsCard = ({ reports }) => {
           </svg>
           User Reports
         </h3>
-        <span className="px-3 py-1 bg-gradient-to-r from-red-100 to-red-50 text-red-600 rounded-full text-sm font-medium">
+        <span className="px-3 py-1 bg-linear-to-r from-red-100 to-red-50 text-red-600 rounded-full text-sm font-medium">
           {reportStats.total} total
         </span>
       </div>
       
       {/* Report Statistics */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-gradient-to-br from-yellow-50 to-white p-3 rounded-xl border border-yellow-100">
+        <div className="bg-linear-to-br from-yellow-50 to-white p-3 rounded-xl border border-yellow-100">
           <div className="text-lg font-bold text-yellow-600">{reportStats.pending}</div>
           <div className="text-xs text-gray-500">Pending</div>
         </div>
-        <div className="bg-gradient-to-br from-green-50 to-white p-3 rounded-xl border border-green-100">
+        <div className="bg-linear-to-br from-green-50 to-white p-3 rounded-xl border border-green-100">
           <div className="text-lg font-bold text-green-600">{reportStats.resolved}</div>
           <div className="text-xs text-gray-500">Resolved</div>
         </div>
-        <div className="bg-gradient-to-br from-red-50 to-white p-3 rounded-xl border border-red-100">
+        <div className="bg-linear-to-br from-red-50 to-white p-3 rounded-xl border border-red-100">
           <div className="text-lg font-bold text-red-600">{reportStats.rejected}</div>
           <div className="text-xs text-gray-500">Rejected</div>
         </div>
@@ -104,7 +104,7 @@ const ReportsCard = ({ reports }) => {
       <div className="space-y-4">
         <h4 className="text-sm font-medium text-gray-900">Recent Reports</h4>
         {recentReports.map((report, index) => (
-          <div key={report._id} className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200 hover:shadow-sm transition-all duration-200">
+          <div key={report._id} className="bg-linear-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200 hover:shadow-sm transition-all duration-200">
             <div className="flex items-start justify-between mb-2">
               <div>
                 <span className="text-sm font-medium text-gray-900">

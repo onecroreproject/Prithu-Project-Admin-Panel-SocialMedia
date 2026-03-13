@@ -92,7 +92,7 @@ const UserDetailModal = ({ user, isOpen, onClose }) => {
                 { action: 'Requested test access', time: '2 days ago' },
               ].map((activity, index) => (
                 <div key={index} className="flex items-start">
-                  <div className="flex-shrink-0 w-2 h-2 mt-2 bg-blue-500 rounded-full"></div>
+                  <div className="shrink-0 w-2 h-2 mt-2 bg-blue-500 rounded-full"></div>
                   <div className="ml-4">
                     <p className="text-sm text-gray-900">{activity.action}</p>
                     <p className="text-xs text-gray-500 flex items-center">

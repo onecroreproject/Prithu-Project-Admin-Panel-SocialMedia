@@ -63,7 +63,7 @@ const UserEngagement = ({ user }) => {
       
       <div className="space-y-6">
         {/* Engagement Overview */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5">
+        <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h4 className="font-medium text-gray-900">Engagement Overview</h4>
@@ -89,10 +89,10 @@ const UserEngagement = ({ user }) => {
         {/* Post Frequency */}
         <div>
           <h4 className="text-sm font-medium text-gray-900 mb-3">Post Frequency</h4>
-          <div className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200">
+          <div className="bg-linear-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
+                <div className="p-2 bg-linear-to-br from-green-500 to-emerald-500 rounded-lg">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -114,11 +114,11 @@ const UserEngagement = ({ user }) => {
         <div>
           <h4 className="text-sm font-medium text-gray-900 mb-3">Follower Metrics</h4>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gradient-to-br from-purple-50 to-white p-4 rounded-xl border border-gray-200">
+            <div className="bg-linear-to-br from-purple-50 to-white p-4 rounded-xl border border-gray-200">
               <div className="text-lg font-bold text-purple-600">{user.followers?.length || 0}</div>
               <div className="text-sm text-gray-500">Followers</div>
             </div>
-            <div className="bg-gradient-to-br from-pink-50 to-white p-4 rounded-xl border border-gray-200">
+            <div className="bg-linear-to-br from-pink-50 to-white p-4 rounded-xl border border-gray-200">
               <div className="text-lg font-bold text-pink-600">{user.following?.length || 0}</div>
               <div className="text-sm text-gray-500">Following</div>
             </div>
@@ -128,14 +128,14 @@ const UserEngagement = ({ user }) => {
         {/* Active Hours (Placeholder) */}
         <div>
           <h4 className="text-sm font-medium text-gray-900 mb-3">Most Active</h4>
-          <div className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200">
+          <div className="bg-linear-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600">Peak Activity</span>
               <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">Afternoon</span>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                className="h-full bg-linear-to-r from-blue-500 to-cyan-500 rounded-full"
                 style={{ width: '70%' }}
               ></div>
             </div>

@@ -124,7 +124,7 @@ export default function SocialMediaDashboard() {
       </div>
 
       {/* Main Content Container */}
-      <div className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <div className="relative min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50/30">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>

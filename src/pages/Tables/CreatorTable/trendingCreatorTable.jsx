@@ -49,10 +49,10 @@ const formatNumber = (num) => {
 
 // Get trending score color
 const getScoreColor = (score) => {
-  if (score >= 80) return "bg-gradient-to-r from-green-500 to-emerald-600";
-  if (score >= 60) return "bg-gradient-to-r from-blue-500 to-cyan-600";
-  if (score >= 40) return "bg-gradient-to-r from-yellow-500 to-orange-500";
-  return "bg-gradient-to-r from-gray-400 to-gray-500";
+  if (score >= 80) return "bg-linear-to-r from-green-500 to-emerald-600";
+  if (score >= 60) return "bg-linear-to-r from-blue-500 to-cyan-600";
+  if (score >= 40) return "bg-linear-to-r from-yellow-500 to-orange-500";
+  return "bg-linear-to-r from-gray-400 to-gray-500";
 };
 
 export default function TrendingCreatorsTable({ 
@@ -183,7 +183,7 @@ export default function TrendingCreatorsTable({
         animate={{ opacity: 1 }}
       >
         <div className="text-center py-16 px-4">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
             <Users className="w-10 h-10 text-gray-400" />
           </div>
           <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -207,7 +207,7 @@ export default function TrendingCreatorsTable({
       >
         <div className="max-w-full overflow-x-auto">
           <Table className="min-w-full text-sm">
-            <TableHeader className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+            <TableHeader className="border-b border-gray-200 dark:border-gray-700 bg-linear-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
               <TableRow>
                 <TableCell 
                   isHeader 
@@ -305,11 +305,11 @@ export default function TrendingCreatorsTable({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2, delay: idx * 0.02 }}
-                    className="group hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-700/50 dark:hover:to-gray-800/50 transition-all duration-200"
+                    className="group hover:bg-linear-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-700/50 dark:hover:to-gray-800/50 transition-all duration-200"
                   >
                     <TableCell className="px-6 py-4 sticky left-0 bg-white dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-700/50 z-10 min-w-[220px]">
                       <div className="flex items-center gap-3">
-                        <div className="relative flex-shrink-0">
+                        <div className="relative shrink-0">
                           <div className="w-12 h-12 overflow-hidden rounded-full border-2 border-white dark:border-gray-700 shadow-lg">
                             <img 
                               width={48} 
@@ -323,7 +323,7 @@ export default function TrendingCreatorsTable({
                             />
                           </div>
                           {creator.trendingScore >= 80 && (
-                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-sm">
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-linear-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-sm">
                               <Flame className="w-3 h-3 text-white" />
                             </div>
                           )}
@@ -459,15 +459,15 @@ export default function TrendingCreatorsTable({
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-600"></div>
+                <div className="w-3 h-3 rounded-full bg-linear-to-r from-green-500 to-emerald-600"></div>
                 <span className="text-xs">High Score (80+)</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-600"></div>
+                <div className="w-3 h-3 rounded-full bg-linear-to-r from-blue-500 to-cyan-600"></div>
                 <span className="text-xs">Good Score (60-79)</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500"></div>
+                <div className="w-3 h-3 rounded-full bg-linear-to-r from-yellow-500 to-orange-500"></div>
                 <span className="text-xs">Medium Score (40-59)</span>
               </div>
             </div>

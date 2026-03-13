@@ -27,7 +27,7 @@ export default function AdminChildPage() {
 
   return (
     <motion.div
-      className="flex w-full min-h-screen bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50"
+      className="flex w-full min-h-screen bg-linear-to-r from-blue-50 via-purple-50 to-pink-50"
       variants={fadeLeft}
       initial="hidden"
       animate="visible"
@@ -54,7 +54,7 @@ export default function AdminChildPage() {
         <h2 className="text-xl font-semibold mb-4 text-violet-700">Child Admin List</h2>
         <div className="flex-1 overflow-y-auto">
           <table className="min-w-full border-2 border-violet-200 bg-white rounded-xl shadow-xl transition-shadow">
-            <thead className="bg-gradient-to-r from-blue-100 via-violet-100 to-pink-100 sticky top-0 z-10">
+            <thead className="bg-linear-to-r from-blue-100 via-violet-100 to-pink-100 sticky top-0 z-10">
               <tr>
                 <th className="py-2 px-3 text-left text-violet-800">Admin ID</th>
                 <th className="py-2 px-3 text-left text-violet-800">Email</th>

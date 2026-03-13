@@ -57,7 +57,7 @@ const FollowingModal = ({ following, onClose }) => {
                             className="w-12 h-12 rounded-full"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-100 to-purple-200 flex items-center justify-center">
                             <span className="text-lg font-semibold text-purple-600">
                               {follow.userName?.charAt(0).toUpperCase()}
                             </span>

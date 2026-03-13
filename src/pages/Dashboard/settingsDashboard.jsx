@@ -159,7 +159,7 @@ const SettingsDashboard = ({ user }) => {
                 <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">{stat.change}</p>
               </div>
               <div className={`p-3 rounded-full ${stat.color} bg-opacity-10`}>
-                <div className={`text-white p-2 rounded-lg bg-gradient-to-br ${stat.gradient}`}>
+                <div className={`text-white p-2 rounded-lg bg-linear-to-br ${stat.gradient}`}>
                   {stat.icon}
                 </div>
               </div>
@@ -226,7 +226,7 @@ const SettingsDashboard = ({ user }) => {
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div 
-                    className="bg-gradient-to-r from-purple-500 to-purple-400 h-2 rounded-full" 
+                    className="bg-linear-to-r from-purple-500 to-purple-400 h-2 rounded-full" 
                     style={{ width: `${Math.min(stats.platformGrowth, 100)}%` }}
                   />
                 </div>
@@ -248,14 +248,14 @@ const SettingsDashboard = ({ user }) => {
             <div className="space-y-4">
               {recentActivity.map((activity) => (
                 <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <div className="flex-shrink-0 mt-0.5">
+                  <div className="shrink-0 mt-0.5">
                     {getStatusIcon(activity.type)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{activity.action}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{activity.details}</p>
                   </div>
-                  <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                  <div className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
                     {activity.time}
                   </div>
                 </div>
@@ -315,7 +315,7 @@ const SettingsDashboard = ({ user }) => {
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                 <div 
-                  className="bg-gradient-to-r from-blue-500 to-blue-400 h-2 rounded-full" 
+                  className="bg-linear-to-r from-blue-500 to-blue-400 h-2 rounded-full" 
                   style={{ width: '85.2%' }}
                 />
               </div>
@@ -325,7 +325,7 @@ const SettingsDashboard = ({ user }) => {
       </div>
 
       {/* Summary */}
-      <div className="bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-900/10 rounded-xl p-6 border border-purple-200 dark:border-purple-800">
+      <div className="bg-linear-to-r from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-900/10 rounded-xl p-6 border border-purple-200 dark:border-purple-800">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">Platform Summary</h3>

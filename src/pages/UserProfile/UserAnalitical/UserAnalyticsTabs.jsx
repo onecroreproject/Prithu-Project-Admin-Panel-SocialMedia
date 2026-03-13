@@ -37,7 +37,7 @@ export default function UserAnalyticsTabs({ activeTab, onTabChange }) {
             {activeTab === tab.id && (
               <motion.div
                 layoutId="activeTab"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-blue-500 to-purple-500"
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               />
             )}

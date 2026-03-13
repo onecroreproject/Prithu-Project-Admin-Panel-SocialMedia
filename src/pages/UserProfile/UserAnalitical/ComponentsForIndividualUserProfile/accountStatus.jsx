@@ -110,7 +110,7 @@ export default function AccountStats({ user }) {
         </div>
 
         {/* Activity Score */}
-        <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+        <div className="p-3 bg-linear-to-r from-blue-50 to-blue-100 rounded-lg">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-blue-600" />
@@ -120,7 +120,7 @@ export default function AccountStats({ user }) {
           </div>
           <div className="w-full bg-white rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
+              className="bg-linear-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
               style={{ width: `${user.activityScore || 0}%` }}
             />
           </div>

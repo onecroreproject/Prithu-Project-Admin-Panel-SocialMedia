@@ -894,7 +894,7 @@ const AnalyticsPage = () => {
                       {/* User Column */}
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
+                          <div className="shrink-0 h-10 w-10">
                             {item.avatar ? (
                               <img
                                 src={item.avatar}
