@@ -131,3 +131,9 @@ export const fetchUserDownloaded = async (userId, params) => {
   const res = await Api.get(`${API_ENDPOINTS.USER_ANALYTICS_DOWNLOADED}/${userId}${buildQueryParams(params)}`);
   return res.data.downloadedFeeds;
 };
+
+// ✅ Fetch Account Deletion/Deactivation Logs
+export const fetchUserDeleteLogs = async (params) => {
+  const res = await Api.get(API_ENDPOINTS.USER_DELETE_LOGS, { params });
+  return res.data;
+};

@@ -44,6 +44,7 @@ const CategoryManagementPage = lazy(() => import("./pages/CategoryManagementPage
 const PartyManagement = lazy(() => import("./pages/PartyManagement/PartyManagement"));
 const TrendingFeedsTable = lazy(() => import("./pages/treandingFeed"));
 const UsersWillingToPost = lazy(() => import("./pages/socialMedia/Feed/userFeedRequestPage"));
+const UserDeletionLogsPage = lazy(() => import("./pages/UserProfile/UserDeletionLogsPage"));
 
 // Settings & Admin
 const ChildAdminPage = lazy(() => import("./pages/ChildAdminRegister/childAdminPage"));
@@ -129,6 +130,7 @@ function AnimatedRoutes() {
             <Route path="/social/tree" element={<ReferralTreePage />} />
             <Route path="/social/trending/feed" element={<TrendingFeedsTable />} />
             <Route path="/social/post/request/approval" element={<UsersWillingToPost />} />
+            <Route path="/social/user/deletion-logs" element={<UserDeletionLogsPage />} />
             <Route path="/social/admin/upload/page" element={<UploadPage />} />
             <Route path="/social/category/management" element={<CategoryManagementPage />} />
             <Route path="/social/party/management" element={<PartyManagement />} />

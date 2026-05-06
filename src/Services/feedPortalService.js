@@ -29,4 +29,11 @@ export const feedPortalService = {
         const response = await api.get(`${API_URL}/api/downloads/status/${jobId}`);
         return response.data;
     },
+
+    exportFeedInteractionsCSV: async () => {
+        const response = await api.get(`${API_URL}/api/export/csv`, {
+            responseType: 'blob'
+        });
+        return response;
+    }
 };

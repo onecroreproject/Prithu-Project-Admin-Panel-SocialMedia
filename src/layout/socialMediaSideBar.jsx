@@ -46,6 +46,7 @@ const mainNavItems = [
     permission: "canManageUsers",
     subItems: [
       { name: "User Detail", path: "/social/profile", permission: "canManageUsersDetail" },
+      { name: "Deletion Logs", path: "/social/user/deletion-logs", permission: "canManageUsers" },
     ],
   },
   {

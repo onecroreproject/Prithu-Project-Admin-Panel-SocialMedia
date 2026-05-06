@@ -25,9 +25,12 @@ import {
   FaStar,
   FaBookmark,
   FaThumbsDown,
-  FaTrophy
+  FaTrophy,
+  FaFileExport
 } from "react-icons/fa";
 import { TrendingUp, Clock, Award } from "lucide-react";
+import toast from 'react-hot-toast';
+import { feedPortalService } from '../Services/feedPortalService';
 
 // API service function using Axios
 const fetchTrendingFeeds = async (filters) => {
@@ -56,6 +59,7 @@ export default function TrendingFeedsTable() {
   });
   const [selectedFeed, setSelectedFeed] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // Fetch trending feeds
   const { data: apiResponse, isLoading, isError, error, refetch } = useQuery({
@@ -95,6 +99,36 @@ export default function TrendingFeedsTable() {
       search: '',
       limit: 20
     });
+  };
+
+  const handleExportCSV = async () => {
+    setExporting(true);
+    const toastId = toast.loading('Generating CSV export...');
+    try {
+      const response = await feedPortalService.exportFeedInteractionsCSV();
+      
+      // Create a blob from the response data
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link and trigger download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `feed_interactions_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success('CSV exported successfully', { id: toastId });
+    } catch (error) {
+      console.error('Export CSV error:', error);
+      toast.error('Failed to export CSV', { id: toastId });
+    } finally {
+      setExporting(false);
+    }
   };
 
   // Format date
@@ -210,6 +244,14 @@ export default function TrendingFeedsTable() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportCSV}
+              disabled={exporting}
+              className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium transition-all shadow-xs ${exporting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <FaFileExport className={`${exporting ? 'animate-bounce' : ''}`} />
+              {exporting ? 'Exporting...' : 'Export CSV'}
+            </button>
             <span className="text-sm text-gray-500">
               {new Date().toLocaleDateString()}
             </span>

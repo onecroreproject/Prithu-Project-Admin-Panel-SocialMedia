@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   USER_ANALYTICS_DOWNLOADED: "/api/downloaded",
   USER_ANALYTICS_NON_INTERESTED: "/api/nonInterested",
   ADMIN_DELETE_USER: "/api/admin/delete/user",
+  USER_DELETE_LOGS: "/api/admin/user/delete-logs",
 
 
   DASHBOARD_METRICKS: "/api/admin/dashboard/metricks/counts",
