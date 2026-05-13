@@ -41,6 +41,12 @@ const mainNavItems = [
     permission: "canManageSalesDashboard"
   },
   {
+    icon: <Database className="w-5 h-5" />,
+    name: "Reco Analytics",
+    path: "/social/recommendation-dashboard",
+    permission: "canManageSalesDashboard"
+  },
+  {
     icon: <User className="w-5 h-5" />,
     name: "User Profile",
     permission: "canManageUsers",
