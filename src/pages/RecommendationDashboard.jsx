@@ -29,6 +29,7 @@ const RecommendationDashboard = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [isTraining, setIsTraining] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -120,6 +121,22 @@ const RecommendationDashboard = () => {
     }
   };
 
+  const handleTriggerTraining = async () => {
+    if (!window.confirm("This will recalculate all user recommendation scores and refresh the ML engine. Continue?")) return;
+    
+    setIsTraining(true);
+    try {
+      const res = await api.post('/api/admin/analytics/trigger-ml-training');
+      alert(res.data.message || "ML Training Triggered Successfully!");
+      fetchData(); // Refresh data
+    } catch (err) {
+      console.error("Training Trigger Error:", err);
+      alert(err.response?.data?.message || "Failed to trigger ML training. Please try again.");
+    } finally {
+      setIsTraining(false);
+    }
+  };
+
   const KPICard = ({ title, value, icon: Icon, trend, color }) => (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -163,19 +180,34 @@ const RecommendationDashboard = () => {
           <p className="text-gray-400 font-medium">Analyze your ML engine's performance and user behavior</p>
         </div>
         
-        <div className="flex items-center gap-3 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
-          {['24h', '7d', '30d'].map((r) => (
-            <button
-              key={r}
-              onClick={() => setRange(r)}
-              className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${range === r ? 'bg-green-500 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              {r.toUpperCase()}
-            </button>
-          ))}
-          <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-xl transition-all">
-            <Filter className="w-5 h-5" />
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={handleTriggerTraining}
+            disabled={isTraining}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl font-black text-sm transition-all shadow-lg ${isTraining ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-900 text-white hover:bg-black active:scale-95 shadow-gray-200'}`}
+          >
+            {isTraining ? (
+              <RefreshCcw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Zap className="w-4 h-4 text-amber-400" />
+            )}
+            {isTraining ? 'Training AI...' : 'Train ML Engine'}
           </button>
+
+          <div className="flex items-center gap-3 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
+            {['24h', '7d', '30d'].map((r) => (
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${range === r ? 'bg-green-500 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                {r.toUpperCase()}
+              </button>
+            ))}
+            <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-xl transition-all">
+              <Filter className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -345,12 +377,21 @@ const RecommendationDashboard = () => {
             </h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={timeInsights}>
+                <BarChart data={timeInsights} barSize={25}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                  <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+                  <XAxis 
+                    dataKey="period" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fill: '#9CA3AF', fontSize: 11}} 
+                    interval={0}
+                  />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
-                  <Tooltip cursor={{fill: '#F9FAFB'}} contentStyle={{borderRadius: '20px', border: 'none'}} />
-                  <Bar dataKey="views" fill="#3B82F6" radius={[10, 10, 0, 0]} />
+                  <Tooltip 
+                    cursor={{fill: '#F9FAFB'}} 
+                    contentStyle={{borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} 
+                  />
+                  <Bar dataKey="views" fill="#3B82F6" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -401,11 +442,16 @@ const RecommendationDashboard = () => {
             </h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dayInsights}>
-                  <XAxis dataKey="dayName" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 10}} />
+                <BarChart data={dayInsights} barSize={35}>
+                  <XAxis 
+                    dataKey="dayName" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fill: '#9CA3AF', fontSize: 11}} 
+                  />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
-                  <Tooltip contentStyle={{borderRadius: '20px', border: 'none'}} />
-                  <Bar dataKey="avgWatchTime" fill="#F59E0B" radius={[10, 10, 0, 0]} />
+                  <Tooltip contentStyle={{borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
+                  <Bar dataKey="avgWatchTime" fill="#F59E0B" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -437,7 +483,13 @@ const RecommendationDashboard = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                <XAxis dataKey="_id" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+                <XAxis 
+                  dataKey="_id" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: '#9CA3AF', fontSize: 11}} 
+                  minTickGap={30}
+                />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
                 <Tooltip 
                   contentStyle={{borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}}
@@ -454,12 +506,32 @@ const RecommendationDashboard = () => {
           <h3 className="text-xl font-black text-gray-800 mb-6">Top Interest Categories</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topCategories.map(c => ({ name: c.categoryInfo.name, value: Math.round(c.totalWatchTime / 60) }))}>
+              <BarChart 
+                data={topCategories.map(c => ({ name: c.categoryInfo.name, value: Math.round(c.totalWatchTime / 60) }))}
+                margin={{ top: 10, right: 10, left: 0, bottom: 50 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 10}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} label={{ value: 'Mins', angle: -90, position: 'insideLeft' }} />
-                <Tooltip cursor={{fill: '#F9FAFB'}} contentStyle={{borderRadius: '16px', border: 'none'}} />
-                <Bar dataKey="value" radius={[10, 10, 0, 0]}>
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: '#9CA3AF', fontSize: 11}}
+                  interval={0}
+                  angle={-25}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: '#9CA3AF', fontSize: 12}} 
+                  label={{ value: 'Mins', angle: -90, position: 'insideLeft', offset: 10, fill: '#9CA3AF', fontSize: 12, fontWeight: 'bold' }} 
+                />
+                <Tooltip 
+                  cursor={{fill: '#F9FAFB'}} 
+                  contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} 
+                />
+                <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={40}>
                   {topCategories.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
