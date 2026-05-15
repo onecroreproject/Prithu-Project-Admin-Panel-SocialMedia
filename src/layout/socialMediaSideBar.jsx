@@ -60,8 +60,9 @@ const mainNavItems = [
     name: "Feed Management",
     permission: "canManageFeeds",
     subItems: [
-      { name: "Treanding Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
+      { name: "Trending Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
+      { name: "Video Dashboard", path: "/settings/video-compression", permission: "canManageFeeds" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
       { name: "Party Management", path: "/social/party/management", permission: "canManageParties" },
     ],

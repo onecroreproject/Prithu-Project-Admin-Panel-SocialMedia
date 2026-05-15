@@ -98,4 +98,9 @@ export const API_ENDPOINTS = {
   SEO_SITEMAP: "/api/admin/seo/sitemap",
   SEO_ROBOTS: "/api/admin/seo/robots",
   UPDATE_PAGE_SEO: "/api/admin/static-page",
+  
+  // Video Compression Endpoints
+  VIDEO_COMPRESSION_STATS: "/api/admin/video-compression/stats",
+  VIDEO_COMPRESSION_BULK_START: "/api/admin/video-compression/bulk-start",
+  VIDEO_COMPRESSION_RETRY: "/api/admin/video-compression/retry",
 };
