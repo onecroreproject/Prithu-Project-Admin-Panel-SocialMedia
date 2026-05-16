@@ -321,14 +321,14 @@ const VideoCompressionDashboard = () => {
                     <button
                         onClick={handleToggleMLQueue}
                         disabled={mlActionLoading}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold border text-sm ${
+                        className={`flex items-center gap-2 px-6 py-2 rounded-xl transition-all shadow-lg font-bold text-sm ${
                             mlStats?.stats?.queue?.isPaused 
-                            ? 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100' 
-                            : 'bg-amber-50 border-amber-200 text-amber-600 hover:bg-amber-100'
+                            ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-500/25' 
+                            : 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/25'
                         }`}
                     >
-                        {mlStats?.stats?.queue?.isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-                        {mlStats?.stats?.queue?.isPaused ? 'Resume ML Service' : 'Pause ML Service'}
+                        {mlStats?.stats?.queue?.isPaused ? <Play className="w-4 h-4" /> : <StopCircle className="w-4 h-4" />}
+                        {mlStats?.stats?.queue?.isPaused ? 'Start ML Service' : 'Stop ML Service'}
                     </button>
                     <button
                         onClick={handleStartMLAnalysis}
@@ -345,21 +345,17 @@ const VideoCompressionDashboard = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/20">
                     <p className="text-xs text-indigo-600 font-bold uppercase">Total Eligible</p>
                     <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.total || 0}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/10 p-4 rounded-2xl border border-green-100 dark:border-green-900/20">
-                    <p className="text-xs text-green-600 font-bold uppercase">Deep Analyzed (v2)</p>
-                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.analyzedV2 || 0}</p>
-                </div>
-                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/20">
-                    <p className="text-xs text-blue-600 font-bold uppercase">Legacy (v1)</p>
-                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.analyzedV1 || 0}</p>
+                    <p className="text-xs text-green-600 font-bold uppercase">Analyzed</p>
+                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.analyzed || 0}</p>
                 </div>
                 <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/20">
-                    <p className="text-xs text-amber-600 font-bold uppercase">Pending v2 Upgrade</p>
+                    <p className="text-xs text-amber-600 font-bold uppercase">Pending Analysis</p>
                     <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.pending || 0}</p>
                 </div>
                 <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-2xl border border-red-100 dark:border-red-900/20">
@@ -371,10 +367,10 @@ const VideoCompressionDashboard = () => {
                 <div className="flex-1 bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
                     <div 
                         className="h-full bg-indigo-500 transition-all duration-1000"
-                        style={{ width: `${(mlStats?.stats?.analyzedV2 / (mlStats?.stats?.total || 1)) * 100}%` }}
+                        style={{ width: `${(mlStats?.stats?.analyzed / (mlStats?.stats?.total || 1)) * 100}%` }}
                     ></div>
                 </div>
-                <span className="text-xs font-bold text-gray-500">{Math.round((mlStats?.stats?.analyzedV2 / (mlStats?.stats?.total || 1)) * 100)}% Deep Analysis Progress (v2)</span>
+                <span className="text-xs font-bold text-gray-500">{Math.round((mlStats?.stats?.analyzed / (mlStats?.stats?.total || 1)) * 100)}% Analysis Progress</span>
             </div>
         </div>
       </div>
