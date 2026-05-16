@@ -8,6 +8,7 @@ const MediaCard = ({
     fileData,
     categories,
     isUploading,
+    viewMode = 'grid',
     onRemove,
     onToggleMode,
     onEdit,
@@ -15,35 +16,23 @@ const MediaCard = ({
     onLivePreview,
     onUpdateField
 }) => {
-    const [isCatOpen, setIsCatOpen] = React.useState(false);
     const isVideo = fileData.file.type.startsWith('video');
+    const isList = viewMode === 'list';
 
-    const toggleCategory = (catId) => {
-        const current = fileData.categoryIds || (fileData.categoryId ? [fileData.categoryId] : []);
-        const exists = current.includes(catId);
-        let next;
-        if (exists) {
-            next = current.filter(id => id !== catId);
-        } else {
-            next = [...current, catId];
-        }
-        onUpdateField('categoryIds', next);
-        if (next.length > 0) {
-            onUpdateField('categoryId', next[0]);
-        } else {
-            onUpdateField('categoryId', '');
-        }
-    };
-
-    const selectedIds = fileData.categoryIds || (fileData.categoryId ? [fileData.categoryId] : []);
-    const selectedNames = categories
-        .filter(c => selectedIds.includes(c.categoryId))
-        .map(c => c.categoriesName);
+    const selectedIds = (fileData.categoryIds && fileData.categoryIds.length > 0)
+        ? fileData.categoryIds
+        : (fileData.categoryId ? [fileData.categoryId] : []);
 
     return (
-        <div className="bg-white border border-gray-100 rounded-[2rem] overflow-hidden group shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-200 transition-all duration-500 flex flex-col h-full transform hover:-translate-y-2">
+        <div className={clsx(
+            "bg-white border border-gray-100 rounded-3xl group shadow-sm transition-all duration-500 flex transform relative z-10 hover:z-20 focus-within:z-50",
+            isList ? "flex-row h-48 hover:shadow-xl hover:border-blue-200" : "flex-col h-full hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-200 hover:-translate-y-2"
+        )}>
             {/* Visual Preview */}
-            <div className="relative aspect-4/3 overflow-hidden bg-gray-50 shrink-0">
+            <div className={clsx(
+                "relative overflow-hidden bg-gray-50 shrink-0",
+                isList ? "w-64 h-full rounded-l-3xl" : "aspect-4/3 rounded-t-3xl"
+            )}>
                 {isVideo ? (
                     <video
                         src={fileData.preview}
@@ -63,13 +52,13 @@ const MediaCard = ({
 
                 {/* Progress Overlay */}
                 {fileData.progress > 0 && (
-                    <div className="absolute inset-0 bg-white/90 backdrop-blur-md flex items-center justify-center p-6 z-20">
+                    <div className="absolute inset-0 bg-white/90 backdrop-blur-md flex items-center justify-center p-4 z-20">
                         <div className="w-full space-y-2">
-                            <div className="flex justify-between text-[11px] font-black text-blue-600 uppercase tracking-widest">
+                            <div className="flex justify-between text-[10px] font-black text-blue-600 uppercase tracking-widest">
                                 <span>Uploading</span>
                                 <span>{fileData.progress}%</span>
                             </div>
-                            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-blue-500 rounded-full transition-all duration-300 shadow-lg shadow-blue-500/40"
                                     style={{ width: `${fileData.progress}%` }}
@@ -82,7 +71,7 @@ const MediaCard = ({
                 {/* Mode Badge */}
                 <div className="absolute top-3 left-3 z-20">
                     <div className={clsx(
-                        "px-3 py-1 rounded-xl text-[8px] font-black uppercase tracking-widest shadow-xl backdrop-blur-md border border-white/20 transition-all",
+                        "px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-xl backdrop-blur-md border border-white/20 transition-all",
                         fileData.uploadMode === 'template'
                             ? 'bg-blue-600 text-white'
                             : 'bg-white/90 text-gray-700'
@@ -95,58 +84,59 @@ const MediaCard = ({
                 <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 translate-y-2 group-hover:translate-y-0">
                     <button
                         onClick={() => onLivePreview(fileData.id)}
-                        className="w-10 h-10 bg-white/95 hover:bg-white text-gray-900 rounded-2xl flex items-center justify-center transition-all hover:scale-110 shadow-xl"
+                        className="w-8 h-8 bg-white/95 hover:bg-white text-gray-900 rounded-xl flex items-center justify-center transition-all hover:scale-110 shadow-xl"
                         title="Live Preview"
                     >
-                        <Play size={18} fill="currentColor" />
+                        <Play size={14} fill="currentColor" />
                     </button>
                     <button
                         onClick={() => onEdit(fileData.id)}
-                        className="w-10 h-10 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl flex items-center justify-center transition-all hover:scale-110 shadow-xl shadow-blue-500/30"
+                        className="w-8 h-8 bg-blue-600 hover:bg-blue-500 text-white rounded-xl flex items-center justify-center transition-all hover:scale-110 shadow-xl shadow-blue-500/30"
                         title="Template Editor"
                     >
-                        <Layout size={18} />
+                        <Layout size={14} />
                     </button>
                     {!isVideo && (
                         <button
                             onClick={() => onEditPost(fileData.id)}
-                            className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl flex items-center justify-center transition-all hover:scale-110 shadow-xl shadow-purple-500/30"
+                            className="w-8 h-8 bg-purple-600 hover:bg-purple-500 text-white rounded-xl flex items-center justify-center transition-all hover:scale-110 shadow-xl shadow-purple-500/30"
                             title="Quick Edit"
                         >
-                            <Edit2 size={18} />
+                            <Edit2 size={14} />
                         </button>
                     )}
                     <button
                         onClick={() => onRemove(fileData.id)}
-                        className="w-10 h-10 bg-rose-50 hover:bg-rose-600 text-rose-500 hover:text-white rounded-2xl flex items-center justify-center transition-all hover:scale-110 border border-rose-100 shadow-xl"
+                        className="w-8 h-8 bg-rose-50 hover:bg-rose-600 text-rose-500 hover:text-white rounded-xl flex items-center justify-center transition-all hover:scale-110 border border-rose-100 shadow-xl"
                         title="Remove"
                     >
-                        <Trash2 size={18} />
+                        <Trash2 size={14} />
                     </button>
                 </div>
             </div>
 
             {/* Content Section */}
-            <div className="p-5 space-y-4 flex-1 flex flex-col bg-gray-50/40">
-                <div className="flex items-center gap-3">
-                    <div className="relative">
+            <div className={clsx(
+                "p-4 flex-1 flex bg-gray-50/40",
+                isList ? "flex-row items-center gap-6" : "flex-col gap-3"
+            )}>
+                <div className={clsx("flex flex-col gap-3", isList ? "flex-[1.5]" : "flex-1")}>
+                    <div className="flex items-center gap-3">
                         <input
                             type="checkbox"
                             id={`mode-${fileData.id}`}
                             checked={fileData.uploadMode === 'template'}
                             onChange={(e) => onToggleMode(fileData.id, e.target.checked ? 'template' : 'normal')}
-                            className="w-4 h-4 rounded-lg border-gray-200 text-blue-600 focus:ring-blue-500/30 transition-all cursor-pointer shadow-sm"
+                            className="w-4 h-4 rounded-lg border-gray-200 text-blue-600 focus:ring-blue-500/30 transition-all cursor-pointer"
                         />
+                        <label htmlFor={`mode-${fileData.id}`} className="text-[9px] font-black text-gray-400 cursor-pointer uppercase tracking-widest hover:text-blue-600 transition-colors">
+                            Enable Feed Layers
+                        </label>
                     </div>
-                    <label htmlFor={`mode-${fileData.id}`} className="text-[10px] font-black text-gray-400 cursor-pointer uppercase tracking-[0.2em] hover:text-blue-600 transition-colors">
-                        Enable Feed Layers
-                    </label>
-                </div>
 
-                <div className="space-y-3 flex-1">
                     <CategorySelector
                         categories={categories}
-                        selectedIds={fileData.categoryIds || (fileData.categoryId ? [fileData.categoryId] : [])}
+                        selectedIds={selectedIds}
                         onChange={(ids) => {
                             onUpdateField('categoryIds', ids);
                             onUpdateField('categoryId', ids[0] || '');
@@ -154,19 +144,23 @@ const MediaCard = ({
                         placeholder="Select Categories"
                         variant="light"
                     />
+                </div>
 
+                <div className={clsx("flex flex-col gap-3", isList ? "flex-2" : "flex-1")}>
                     <textarea
                         value={fileData.caption}
                         onChange={(e) => onUpdateField('caption', e.target.value)}
                         placeholder="Content narrative..."
-                        className="w-full h-24 bg-white text-gray-800 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-blue-500/5 focus:bg-white focus:border-blue-200 outline-none resize-none transition-all placeholder:text-gray-300 leading-relaxed custom-scrollbar"
+                        className={clsx(
+                            "w-full bg-white text-gray-800 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-blue-500/5 focus:bg-white focus:border-blue-200 outline-none resize-none transition-all placeholder:text-gray-300 custom-scrollbar",
+                            isList ? "h-28" : "h-24"
+                        )}
                     />
                 </div>
 
-                {/* Scheduling Section */}
-                <div className="pt-5 border-t border-gray-50 flex flex-col gap-4">
+                <div className={clsx("flex flex-col gap-3", isList ? "flex-1" : "pt-4 border-t border-gray-100")}>
                     <div className="flex items-center justify-between">
-                        <label className="flex items-center gap-4 cursor-pointer group">
+                        <label className="flex items-center gap-3 cursor-pointer group">
                             <input
                                 type="checkbox"
                                 checked={fileData.isScheduled}
@@ -174,32 +168,35 @@ const MediaCard = ({
                                 className="hidden"
                             />
                             <div className={clsx(
-                                "w-11 h-6 rounded-full transition-all duration-300 relative flex items-center p-1 shadow-inner",
+                                "w-10 h-5 rounded-full transition-all duration-300 relative flex items-center p-1 shadow-inner",
                                 fileData.isScheduled ? 'bg-blue-600' : 'bg-gray-200'
                             )}>
                                 <div className={clsx(
-                                    "w-4 h-4 bg-white rounded-full shadow-lg transition-transform duration-300",
+                                    "w-3 h-3 bg-white rounded-full shadow-lg transition-transform duration-300",
                                     fileData.isScheduled ? 'translate-x-[20px]' : 'translate-x-0'
                                 )} />
                             </div>
-                            <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] group-hover:text-gray-900 transition-colors">Schedule Post</span>
+                            <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest group-hover:text-gray-900 transition-colors">Schedule</span>
                         </label>
                     </div>
 
-                    {fileData.isScheduled && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="overflow-hidden"
-                        >
-                            <input
-                                type="datetime-local"
-                                value={fileData.scheduleDate}
-                                onChange={(e) => onUpdateField('scheduleDate', e.target.value)}
-                                className="w-full bg-gray-50 text-gray-700 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-100 transition-all"
-                            />
-                        </motion.div>
-                    )}
+                    <AnimatePresence>
+                        {fileData.isScheduled && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <input
+                                    type="datetime-local"
+                                    value={fileData.scheduleDate}
+                                    onChange={(e) => onUpdateField('scheduleDate', e.target.value)}
+                                    className="w-full bg-white text-gray-700 border border-gray-100 rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-100 transition-all"
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>

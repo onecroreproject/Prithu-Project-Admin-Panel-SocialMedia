@@ -105,4 +105,9 @@ export const API_ENDPOINTS = {
   VIDEO_COMPRESSION_TOGGLE_QUEUE: "/api/admin/video-compression/toggle-queue",
   VIDEO_COMPRESSION_STOP_ALL: "/api/admin/video-compression/stop-all",
   VIDEO_COMPRESSION_RETRY: "/api/admin/video-compression/retry",
+
+  // ML Metadata & Cron Endpoints
+  ML_METADATA_STATS: "/api/admin/ml-metadata/stats",
+  ML_METADATA_TOGGLE: "/api/admin/ml-metadata/toggle",
+  CRON_TRIGGER: "/api/admin/cron/trigger",
 };

@@ -9,26 +9,38 @@ import {
   RefreshCw,
   Clock,
   Layout,
-  ExternalLink
+  ExternalLink,
+  Brain,
+  Sparkles,
+  Search,
+  Zap
 } from "lucide-react";
 import videoCompressionService from "../../Services/videoCompressionService";
+import mlMetadataService from "../../Services/mlMetadataService";
 import { toast } from "react-hot-toast";
 
 const VideoCompressionDashboard = () => {
   const [stats, setStats] = useState(null);
+  const [mlStats, setMlStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mlLoading, setMlLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [mlActionLoading, setMlActionLoading] = useState(false);
 
   useEffect(() => {
     fetchStats();
+    fetchMlStats();
     // Refresh stats every 30 seconds if there's processing going on
     const interval = setInterval(() => {
       if (stats?.stats?.processing > 0) {
         fetchStats(true);
       }
+      if (mlStats?.stats?.queue?.active > 0) {
+        fetchMlStats(true);
+      }
     }, 30000);
     return () => clearInterval(interval);
-  }, [stats?.stats?.processing]);
+  }, [stats?.stats?.processing, mlStats?.stats?.queue?.active]);
 
   const fetchStats = async (isSilent = false) => {
     try {
@@ -42,6 +54,20 @@ const VideoCompressionDashboard = () => {
       if (!isSilent) toast.error("Failed to load compression stats");
     } finally {
       if (!isSilent) setLoading(false);
+    }
+  };
+
+  const fetchMlStats = async (isSilent = false) => {
+    try {
+      if (!isSilent) setMlLoading(true);
+      const response = await mlMetadataService.getStats();
+      if (response.success) {
+        setMlStats(response);
+      }
+    } catch (error) {
+      console.error("Failed to fetch ML stats", error);
+    } finally {
+      if (!isSilent) setMlLoading(false);
     }
   };
 
@@ -59,6 +85,36 @@ const VideoCompressionDashboard = () => {
       toast.error("Failed to start bulk compression");
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleStartMLAnalysis = async () => {
+    try {
+      setMlActionLoading(true);
+      const response = await mlMetadataService.triggerManualAnalysis();
+      if (response.success) {
+        toast.success("ML Analysis triggered successfully");
+        fetchMlStats();
+      }
+    } catch (error) {
+        toast.error("Failed to trigger ML Analysis");
+    } finally {
+        setMlActionLoading(false);
+    }
+  };
+
+  const handleToggleMLQueue = async () => {
+    try {
+      setMlActionLoading(true);
+      const response = await mlMetadataService.toggleQueue();
+      if (response.success) {
+        toast.success(response.message);
+        fetchMlStats();
+      }
+    } catch (error) {
+        toast.error("Failed to toggle ML analysis status");
+    } finally {
+        setMlActionLoading(false);
     }
   };
 
@@ -170,31 +226,29 @@ const VideoCompressionDashboard = () => {
             {s?.isPaused ? 'Resume Service' : 'Pause Service'}
             </button>
 
-            <button
-            onClick={handleStopAll}
-            disabled={actionLoading || (!s?.processing && !s?.waitingCount)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all shadow-sm font-bold border ${
-                (!s?.processing && !s?.waitingCount)
-                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
-            }`}
-            >
-            <StopCircle className="w-4 h-4" />
-            Stop All
-            </button>
-
-            <button
-            onClick={handleStartBulk}
-            disabled={actionLoading || s?.uncompressed === 0}
-            className={`flex items-center gap-2 px-6 py-2 rounded-xl transition-all shadow-lg font-bold ${
-                s?.uncompressed === 0 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25'
-            }`}
-            >
-            {actionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-            Start Compression
-            </button>
+            {s?.processing > 0 || s?.waitingCount > 0 ? (
+              <button
+                onClick={handleStopAll}
+                disabled={actionLoading}
+                className={`flex items-center gap-2 px-6 py-2 rounded-xl transition-all shadow-lg font-bold bg-red-500 hover:bg-red-600 text-white shadow-red-500/25`}
+              >
+                {actionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <StopCircle className="w-4 h-4" />}
+                Stop Compression
+              </button>
+            ) : (
+              <button
+                onClick={handleStartBulk}
+                disabled={actionLoading || s?.uncompressed === 0}
+                className={`flex items-center gap-2 px-6 py-2 rounded-xl transition-all shadow-lg font-bold ${
+                  s?.uncompressed === 0 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25'
+                }`}
+              >
+                {actionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                Start Compression
+              </button>
+            )}
         </div>
       </div>
 
@@ -223,7 +277,7 @@ const VideoCompressionDashboard = () => {
                 ></div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/20">
                     <p className="text-xs text-blue-600 font-bold uppercase">Total Videos</p>
                     <p className="text-xl font-bold dark:text-white">{s?.totalVideos}</p>
@@ -231,6 +285,10 @@ const VideoCompressionDashboard = () => {
                 <div className="bg-green-50 dark:bg-green-900/10 p-4 rounded-2xl border border-green-100 dark:border-green-900/20">
                     <p className="text-xs text-green-600 font-bold uppercase">Compressed</p>
                     <p className="text-xl font-bold dark:text-white">{s?.compressed}</p>
+                </div>
+                <div className="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-2xl border border-purple-100 dark:border-purple-900/20">
+                    <p className="text-xs text-purple-600 font-bold uppercase">Non-Compressed</p>
+                    <p className="text-xl font-bold dark:text-white">{s?.uncompressed}</p>
                 </div>
                 <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/20">
                     <p className="text-xs text-amber-600 font-bold uppercase">Processing</p>
@@ -240,6 +298,83 @@ const VideoCompressionDashboard = () => {
                     <p className="text-xs text-red-600 font-bold uppercase">Failed</p>
                     <p className="text-xl font-bold dark:text-white">{s?.failed}</p>
                 </div>
+            </div>
+        </div>
+      </div>
+
+      {/* ML Metadata Analysis Overview */}
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-8 opacity-10">
+            <Brain className="w-32 h-32 text-indigo-500" />
+        </div>
+        
+        <div className="relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                <div>
+                    <h3 className="text-xl font-bold dark:text-white flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-indigo-500" />
+                        ML Recommendation Intelligence
+                    </h3>
+                    <p className="text-sm text-gray-500">Automated content analysis and metadata generation</p>
+                </div>
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleToggleMLQueue}
+                        disabled={mlActionLoading}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold border text-sm ${
+                            mlStats?.stats?.queue?.isPaused 
+                            ? 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100' 
+                            : 'bg-amber-50 border-amber-200 text-amber-600 hover:bg-amber-100'
+                        }`}
+                    >
+                        {mlStats?.stats?.queue?.isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                        {mlStats?.stats?.queue?.isPaused ? 'Resume ML Service' : 'Pause ML Service'}
+                    </button>
+                    <button
+                        onClick={handleStartMLAnalysis}
+                        disabled={mlActionLoading || mlStats?.stats?.pending === 0}
+                        className={`flex items-center gap-2 px-6 py-2 rounded-xl transition-all shadow-lg font-bold text-sm ${
+                            mlStats?.stats?.pending === 0 
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/25'
+                        }`}
+                    >
+                        {mlActionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                        Trigger Manual Analysis
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/20">
+                    <p className="text-xs text-indigo-600 font-bold uppercase">Total Eligible</p>
+                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.total || 0}</p>
+                </div>
+                <div className="bg-green-50 dark:bg-green-900/10 p-4 rounded-2xl border border-green-100 dark:border-green-900/20">
+                    <p className="text-xs text-green-600 font-bold uppercase">Analyzed</p>
+                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.analyzed || 0}</p>
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/20">
+                    <p className="text-xs text-amber-600 font-bold uppercase">Pending</p>
+                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.pending || 0}</p>
+                </div>
+                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/20">
+                    <p className="text-xs text-blue-600 font-bold uppercase">Active Queue</p>
+                    <p className="text-xl font-bold dark:text-white">{(mlStats?.stats?.queue?.active + mlStats?.stats?.queue?.waiting) || 0}</p>
+                </div>
+                <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-2xl border border-red-100 dark:border-red-900/20">
+                    <p className="text-xs text-red-600 font-bold uppercase">Failures</p>
+                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.failed || 0}</p>
+                </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+                <div className="flex-1 bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                    <div 
+                        className="h-full bg-indigo-500 transition-all duration-1000"
+                        style={{ width: `${(mlStats?.stats?.analyzed / (mlStats?.stats?.total || 1)) * 100}%` }}
+                    ></div>
+                </div>
+                <span className="text-xs font-bold text-gray-500">{Math.round((mlStats?.stats?.analyzed / (mlStats?.stats?.total || 1)) * 100)}% Analysis Progress</span>
             </div>
         </div>
       </div>
