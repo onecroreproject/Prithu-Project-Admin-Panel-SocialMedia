@@ -16,6 +16,16 @@ const videoCompressionService = {
     const response = await api.post(`${API_ENDPOINTS.VIDEO_COMPRESSION_RETRY}/${feedId}`);
     return response.data;
   },
+  
+  toggleQueue: async () => {
+    const response = await api.post(API_ENDPOINTS.VIDEO_COMPRESSION_TOGGLE_QUEUE);
+    return response.data;
+  },
+
+  stopAllCompression: async () => {
+    const response = await api.post(API_ENDPOINTS.VIDEO_COMPRESSION_STOP_ALL);
+    return response.data;
+  },
 };
 
 export default videoCompressionService;

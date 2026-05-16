@@ -4,6 +4,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Play,
+  Pause,
+  StopCircle,
   RefreshCw,
   Clock,
   Layout,
@@ -72,6 +74,38 @@ const VideoCompressionDashboard = () => {
     }
   };
 
+  const handleToggleQueue = async () => {
+    try {
+      setActionLoading(true);
+      const response = await videoCompressionService.toggleQueue();
+      if (response.success) {
+        toast.success(response.message);
+        fetchStats();
+      }
+    } catch (error) {
+      toast.error("Failed to toggle queue status");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleStopAll = async () => {
+    if (!window.confirm("Are you sure you want to stop all compression jobs and clear the queue? This will reset all currently processing videos.")) return;
+    
+    try {
+      setActionLoading(true);
+      const response = await videoCompressionService.stopAllCompression();
+      if (response.success) {
+        toast.success(response.message);
+        fetchStats();
+      }
+    } catch (error) {
+      toast.error("Failed to stop compression jobs");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const StatCard = ({ icon: Icon, label, value, subValue, color, trend }) => (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-4">
@@ -124,6 +158,32 @@ const VideoCompressionDashboard = () => {
             Refresh
             </button>
             <button
+            onClick={handleToggleQueue}
+            disabled={actionLoading}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all shadow-sm font-bold border ${
+                s?.isPaused 
+                ? 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100' 
+                : 'bg-amber-50 border-amber-200 text-amber-600 hover:bg-amber-100'
+            }`}
+            >
+            {s?.isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+            {s?.isPaused ? 'Resume Service' : 'Pause Service'}
+            </button>
+
+            <button
+            onClick={handleStopAll}
+            disabled={actionLoading || (!s?.processing && !s?.waitingCount)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all shadow-sm font-bold border ${
+                (!s?.processing && !s?.waitingCount)
+                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
+            }`}
+            >
+            <StopCircle className="w-4 h-4" />
+            Stop All
+            </button>
+
+            <button
             onClick={handleStartBulk}
             disabled={actionLoading || s?.uncompressed === 0}
             className={`flex items-center gap-2 px-6 py-2 rounded-xl transition-all shadow-lg font-bold ${
@@ -133,7 +193,7 @@ const VideoCompressionDashboard = () => {
             }`}
             >
             {actionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-            Start Bulk Compression
+            Start Compression
             </button>
         </div>
       </div>
@@ -260,7 +320,9 @@ const VideoCompressionDashboard = () => {
                             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50"></div>
                             <span className="text-sm font-medium dark:text-gray-300">BullMQ Worker</span>
                         </div>
-                        <span className="text-xs font-bold text-green-600 px-2 py-1 bg-green-50 rounded-md">ACTIVE</span>
+                        <span className={`text-xs font-bold px-2 py-1 rounded-md ${s?.isPaused ? 'bg-amber-50 text-amber-600' : 'bg-green-50 text-green-600'}`}>
+                            {s?.isPaused ? 'PAUSED' : 'ACTIVE'}
+                        </span>
                     </div>
 
                     <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/20">

@@ -102,5 +102,7 @@ export const API_ENDPOINTS = {
   // Video Compression Endpoints
   VIDEO_COMPRESSION_STATS: "/api/admin/video-compression/stats",
   VIDEO_COMPRESSION_BULK_START: "/api/admin/video-compression/bulk-start",
+  VIDEO_COMPRESSION_TOGGLE_QUEUE: "/api/admin/video-compression/toggle-queue",
+  VIDEO_COMPRESSION_STOP_ALL: "/api/admin/video-compression/stop-all",
   VIDEO_COMPRESSION_RETRY: "/api/admin/video-compression/retry",
 };
