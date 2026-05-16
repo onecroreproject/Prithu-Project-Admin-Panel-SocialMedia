@@ -351,16 +351,16 @@ const VideoCompressionDashboard = () => {
                     <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.total || 0}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/10 p-4 rounded-2xl border border-green-100 dark:border-green-900/20">
-                    <p className="text-xs text-green-600 font-bold uppercase">Analyzed</p>
-                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.analyzed || 0}</p>
-                </div>
-                <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/20">
-                    <p className="text-xs text-amber-600 font-bold uppercase">Pending</p>
-                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.pending || 0}</p>
+                    <p className="text-xs text-green-600 font-bold uppercase">Deep Analyzed (v2)</p>
+                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.analyzedV2 || 0}</p>
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/20">
-                    <p className="text-xs text-blue-600 font-bold uppercase">Active Queue</p>
-                    <p className="text-xl font-bold dark:text-white">{(mlStats?.stats?.queue?.active + mlStats?.stats?.queue?.waiting) || 0}</p>
+                    <p className="text-xs text-blue-600 font-bold uppercase">Legacy (v1)</p>
+                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.analyzedV1 || 0}</p>
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/20">
+                    <p className="text-xs text-amber-600 font-bold uppercase">Pending v2 Upgrade</p>
+                    <p className="text-xl font-bold dark:text-white">{mlStats?.stats?.pending || 0}</p>
                 </div>
                 <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-2xl border border-red-100 dark:border-red-900/20">
                     <p className="text-xs text-red-600 font-bold uppercase">Failures</p>
@@ -371,10 +371,10 @@ const VideoCompressionDashboard = () => {
                 <div className="flex-1 bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
                     <div 
                         className="h-full bg-indigo-500 transition-all duration-1000"
-                        style={{ width: `${(mlStats?.stats?.analyzed / (mlStats?.stats?.total || 1)) * 100}%` }}
+                        style={{ width: `${(mlStats?.stats?.analyzedV2 / (mlStats?.stats?.total || 1)) * 100}%` }}
                     ></div>
                 </div>
-                <span className="text-xs font-bold text-gray-500">{Math.round((mlStats?.stats?.analyzed / (mlStats?.stats?.total || 1)) * 100)}% Analysis Progress</span>
+                <span className="text-xs font-bold text-gray-500">{Math.round((mlStats?.stats?.analyzedV2 / (mlStats?.stats?.total || 1)) * 100)}% Deep Analysis Progress (v2)</span>
             </div>
         </div>
       </div>
