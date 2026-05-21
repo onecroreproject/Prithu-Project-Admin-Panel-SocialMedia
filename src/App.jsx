@@ -47,6 +47,8 @@ const PartyManagement = lazy(() => import("./pages/PartyManagement/PartyManageme
 const TrendingFeedsTable = lazy(() => import("./pages/treandingFeed"));
 const UsersWillingToPost = lazy(() => import("./pages/socialMedia/Feed/userFeedRequestPage"));
 const UserDeletionLogsPage = lazy(() => import("./pages/UserProfile/UserDeletionLogsPage"));
+const PromptManagementPage = lazy(() => import("./pages/PromptManagementPage"));
+const AICategoryManagementPage = lazy(() => import("./pages/AICategoryManagementPage"));
 
 // Settings & Admin
 const ChildAdminPage = lazy(() => import("./pages/ChildAdminRegister/childAdminPage"));
@@ -138,6 +140,8 @@ function AnimatedRoutes() {
             <Route path="/social/admin/upload/page" element={<UploadPage />} />
             <Route path="/social/category/management" element={<CategoryManagementPage />} />
             <Route path="/social/party/management" element={<PartyManagement />} />
+            <Route path="/social/prompts" element={<PromptManagementPage />} />
+            <Route path="/social/ai-categories" element={<AICategoryManagementPage />} />
             <Route path="/social/blog/list" element={<BlogListPage />} />
             <Route path="/social/blog/add" element={<AddBlogPage />} />
             <Route path="/social/blog/edit/:id" element={<AddBlogPage />} />

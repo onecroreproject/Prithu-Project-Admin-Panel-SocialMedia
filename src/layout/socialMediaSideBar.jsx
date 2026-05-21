@@ -65,6 +65,8 @@ const mainNavItems = [
       { name: "Video Dashboard", path: "/settings/video-compression", permission: "canManageFeeds" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
       { name: "Party Management", path: "/social/party/management", permission: "canManageParties" },
+      { name: "Prompt Management", path: "/social/prompts", permission: "canManageFeeds" },
+      { name: "aiCategories", path: "/social/ai-categories", permission: "canManageFeeds" },
     ],
   },
   {
