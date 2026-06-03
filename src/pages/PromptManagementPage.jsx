@@ -233,6 +233,14 @@ const getCroppedImg = (imageSrc, pixelCrop) => {
   });
 };
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
+const getFullImageUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  return `${API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
 export default function PromptManagementPage() {
   const navigate = useNavigate();
   const [prompts, setPrompts] = useState([]);
@@ -372,52 +380,33 @@ export default function PromptManagementPage() {
     fetchCategoriesFromApi();
   }, []);
 
-  // File upload and cropper handlers
-  const handleFileChange = (e) => {
+  // File upload handlers
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setCropImageSrc(reader.result);
-        setCrop({ x: 0, y: 0 });
-        setZoom(1);
-        setCroppedAreaPixels(null);
-        setIsCropperOpen(true);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+      setUploadingImage(true);
+      try {
+        const formData = new FormData();
+        formData.append("image", file, file.name);
 
-  const handleCropAndUpload = async () => {
-    if (!croppedAreaPixels || !cropImageSrc) {
-      return toast.error("Please crop the image correctly first");
-    }
+        const { data } = await api.post("/api/admin/prompts/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
-    setUploadingImage(true);
-    try {
-      const croppedBlob = await getCroppedImg(cropImageSrc, croppedAreaPixels);
-      const formData = new FormData();
-      formData.append("image", croppedBlob, "prompt_image.png");
-
-      const { data } = await api.post("/api/admin/prompts/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (data && data.success && data.imageUrl) {
-        setFormImageUrl(data.imageUrl);
-        toast.success("Image cropped and uploaded successfully! 🎨");
-        setIsCropperOpen(false);
-        setCropImageSrc(null);
-      } else {
-        toast.error(data.message || "Failed to upload image");
+        if (data && data.success && data.imageUrl) {
+          setFormImageUrl(data.imageUrl);
+          toast.success("Image uploaded successfully! 🎨");
+        } else {
+          toast.error(data.message || "Failed to upload image");
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        toast.error(err.response?.data?.message || "Error uploading image");
+      } finally {
+        setUploadingImage(false);
       }
-    } catch (err) {
-      console.error("Cropping upload error:", err);
-      toast.error(err.response?.data?.message || "Error cropping or uploading image");
-    } finally {
-      setUploadingImage(false);
     }
   };
 
@@ -672,7 +661,7 @@ export default function PromptManagementPage() {
                 <th className="p-4 font-bold text-gray-500 dark:text-gray-400">Title</th>
                 <th className="p-4 font-bold text-gray-500 dark:text-gray-400 w-32">Category</th>
                 <th className="p-4 font-bold text-gray-500 dark:text-gray-400 w-24">Aspect Ratio</th>
-                <th className="p-4 font-bold text-gray-500 dark:text-gray-400">Prompt Snippet</th>
+
                 <th className="p-4 font-bold text-gray-500 dark:text-gray-400 w-24 text-right">Actions</th>
               </tr>
             </thead>
@@ -692,7 +681,7 @@ export default function PromptManagementPage() {
                     <td className="p-4">
                       <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50">
                         <img
-                          src={prompt.imageUrl}
+                          src={getFullImageUrl(prompt.imageUrl)}
                           alt="preview"
                           className="w-full h-full object-cover"
                         />
@@ -713,11 +702,7 @@ export default function PromptManagementPage() {
                       {prompt.aspectRatio || "1:1"}
                     </td>
 
-                    <td className="p-4 max-w-xs md:max-w-md">
-                      <p className="truncate text-gray-500 dark:text-gray-400 font-mono" title={prompt.prompt}>
-                        {prompt.prompt}
-                      </p>
-                    </td>
+
 
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
@@ -855,13 +840,18 @@ export default function PromptManagementPage() {
                     Prompt Image *
                   </label>
                   
-                  {formImageUrl ? (
+                  {uploadingImage ? (
+                    <div className="mt-1.5 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-6 transition-all text-center bg-gray-50/50 dark:bg-white/[0.01] flex flex-col items-center justify-center min-h-[140px]">
+                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Uploading Image...</span>
+                    </div>
+                  ) : formImageUrl ? (
                     <div className="flex flex-col gap-3 mt-1.5">
                       <div className={`relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-850 flex items-center justify-center ${
                         formAspectRatio === "9:16" ? "w-28 h-48" : formAspectRatio === "16:9" ? "w-56 h-32" : "w-36 h-36"
                       }`}>
                         <img
-                          src={formImageUrl}
+                          src={getFullImageUrl(formImageUrl)}
                           alt="Cropped Preview"
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -936,89 +926,7 @@ export default function PromptManagementPage() {
         )}
       </AnimatePresence>
 
-      {/* CROP OVERLAY MODAL */}
-      <AnimatePresence>
-        {isCropperOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl max-w-md w-full flex flex-col"
-            >
-              <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-2">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-blue-600" />
-                  Crop Prompt Image
-                </h3>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30">
-                  {formAspectRatio === "9:16" ? "9:16 Portrait" : formAspectRatio === "16:9" ? "16:9 Landscape" : "1:1 Square"}
-                </span>
-              </div>
 
-              <div className="relative w-full h-80 bg-gray-950 rounded-2xl overflow-hidden mt-3">
-                <Cropper
-                  image={cropImageSrc}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={formAspectRatio === "9:16" ? 9/16 : formAspectRatio === "16:9" ? 16/9 : 1}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={(croppedArea, croppedAreaPixels) => setCroppedAreaPixels(croppedAreaPixels)}
-                />
-              </div>
-
-              <div className="mt-4 flex items-center gap-2 px-1">
-                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Zoom</span>
-                <input
-                  type="range"
-                  value={zoom}
-                  min={1}
-                  max={3}
-                  step={0.1}
-                  aria-label="Zoom"
-                  onChange={(e) => setZoom(parseFloat(e.target.value))}
-                  className="flex-1 accent-blue-600 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer"
-                />
-                <span className="text-xs font-bold text-gray-500 w-8 text-right">{zoom.toFixed(1)}x</span>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800 mt-5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsCropperOpen(false);
-                    setCropImageSrc(null);
-                  }}
-                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={uploadingImage}
-                  onClick={handleCropAndUpload}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-all shadow-md flex items-center gap-1.5 active:scale-95"
-                >
-                  {uploadingImage ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    "Apply Crop & Upload"
-                  )}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* QUICK PREVIEW DRAWER/MODAL */}
       <AnimatePresence>
@@ -1034,28 +942,20 @@ export default function PromptManagementPage() {
               initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden max-w-2xl w-full shadow-2xl flex flex-col"
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden max-w-4xl w-full shadow-2xl flex flex-col md:flex-row relative max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative h-64 bg-gray-100">
-                <img
-                  src={previewPrompt.imageUrl}
-                  alt={previewPrompt.title}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  onClick={() => setPreviewPrompt(null)}
-                  className="absolute top-4 right-4 p-1.5 rounded-full bg-black/60 text-white backdrop-blur-xs hover:bg-black/80 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <span className="absolute bottom-4 left-4 bg-black/60 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-xs">
-                  {previewPrompt.aspectRatio} | {previewPrompt.category}
-                </span>
-              </div>
+              {/* Close Button placed absolutely on top right of the whole modal */}
+              <button
+                onClick={() => setPreviewPrompt(null)}
+                className="absolute top-4 right-4 z-10 p-1.5 rounded-full bg-black/60 text-white backdrop-blur-xs hover:bg-black/80 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
 
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              {/* Left Side: Prompt Text & Details */}
+              <div className="p-6 md:p-8 flex-1 flex flex-col justify-center order-2 md:order-1 overflow-y-auto">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 pr-6">
                   {previewPrompt.title}
                 </h3>
                 
@@ -1067,7 +967,7 @@ export default function PromptManagementPage() {
                   {previewPrompt.prompt}
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   {previewPrompt.tags && previewPrompt.tags.map((tag) => (
                     <span
                       key={tag}
@@ -1078,7 +978,7 @@ export default function PromptManagementPage() {
                   ))}
                 </div>
 
-                <div className="flex justify-end gap-3 mt-6 border-t border-gray-100 dark:border-gray-800 pt-4">
+                <div className="flex justify-start gap-3 mt-6 border-t border-gray-100 dark:border-gray-800 pt-4">
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(previewPrompt.prompt);
@@ -1096,6 +996,18 @@ export default function PromptManagementPage() {
                     Close
                   </button>
                 </div>
+              </div>
+
+              {/* Right Side: Image */}
+              <div className="relative w-full md:w-1/2 bg-gray-100 flex items-center justify-center order-1 md:order-2 shrink-0">
+                <img
+                  src={getFullImageUrl(previewPrompt.imageUrl)}
+                  alt={previewPrompt.title}
+                  className="w-full h-full object-cover max-h-[90vh]"
+                />
+                <span className="absolute bottom-4 right-4 bg-black/60 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-xs">
+                  {previewPrompt.aspectRatio} | {previewPrompt.category}
+                </span>
               </div>
             </motion.div>
           </motion.div>
