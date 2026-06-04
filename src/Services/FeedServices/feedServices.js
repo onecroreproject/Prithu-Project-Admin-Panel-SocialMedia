@@ -74,11 +74,10 @@ export async function addCategory(data) {
 
 
 // ✅ Fetch Feeds
-export async function fetchFeeds() {
+export async function fetchFeeds(params = {}) {
   try {
-    const res = await Api.get(API_ENDPOINTS.ADMIN_GET_ALL_FEED);
-
-    return res.data.feeds;
+    const res = await Api.get(API_ENDPOINTS.ADMIN_GET_ALL_FEED, { params });
+    return res.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to fetch feeds");
   }
