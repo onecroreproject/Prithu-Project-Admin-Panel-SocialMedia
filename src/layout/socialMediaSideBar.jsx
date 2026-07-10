@@ -143,6 +143,18 @@ const mainNavItems = [
     ],
   },
   {
+    icon: <DollarSign className="w-5 h-5" />,
+    name: "AI Monetization",
+    permission: null,
+    subItems: [
+      { name: "Dashboard", path: "/social/monetization/dashboard", permission: null },
+      { name: "Credit Packages", path: "/social/monetization/packages", permission: null },
+      { name: "Transactions", path: "/social/monetization/transactions", permission: null },
+      { name: "Revenue Analytics", path: "/social/monetization/revenue", permission: null },
+      { name: "Credit Usage", path: "/social/monetization/usage", permission: null },
+    ],
+  },
+  {
     icon: <HardDrive className="w-5 h-5" />,
     name: "Server Management",
     path: "/settings/server/management",

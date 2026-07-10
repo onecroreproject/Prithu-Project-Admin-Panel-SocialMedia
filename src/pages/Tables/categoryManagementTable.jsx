@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, Pencil, Trash, Check, ChevronUp, ChevronDown } from "lucide-react";
+import { Eye, Pencil, Trash, Check, ChevronUp, ChevronDown, Download } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { fetchCategories, deleteCategory, updateCategory } from "../../Services/FeedServices/feedServices";
 
@@ -76,6 +76,26 @@ export default function CategoryManagement() {
     return valueB - valueA;
   });
 
+  const handleExportCSV = () => {
+    if (categories.length === 0) return toast.error("No data to export");
+    const headers = ["ID", "Category Name", "Video Count", "Audio Count", "Image Count", "Total Content"];
+    const csvContent = [
+      headers.join(","),
+      ...sortedCategories.map((cat, idx) => 
+        [idx + 1, `"${cat.categoriesName || ''}"`, cat.videoCount || 0, cat.audioCount || 0, cat.imageCount || 0, cat.totalFeeds || 0].join(",")
+      )
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "category_data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (isLoading) return <p>Loading categories...</p>;
   if (isError) return <p className="text-red-500">Error: {error.message}</p>;
 
@@ -83,7 +103,16 @@ export default function CategoryManagement() {
     <div className="max-w-6xl mx-auto mt-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
       <Toaster position="top-right" reverseOrder={false} />
 
-      <h2 className="text-lg font-semibold mb-4 dark:text-white/90">Category Management</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold dark:text-white/90">Category Management</h2>
+        <button
+          onClick={handleExportCSV}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export Data
+        </button>
+      </div>
 
       {categories.length === 0 ? (
         <p>No categories found.</p>
@@ -95,13 +124,14 @@ export default function CategoryManagement() {
               <th className="p-2">Name</th>
 
               {/* Sortable columns */}
-              {["videoCount", "imageCount", "totalFeeds"].map((key) => (
+              {["videoCount", "audioCount", "imageCount", "totalFeeds"].map((key) => (
                 <th
                   key={key}
                   className="p-2 cursor-pointer select-none"
                   onClick={() => handleSort(key)}
                 >
                   {key === "videoCount" && "Video Content"}
+                  {key === "audioCount" && "Audio Content"}
                   {key === "imageCount" && "Image Content"}
                   {key === "totalFeeds" && "Total Content"}
 
@@ -141,6 +171,7 @@ export default function CategoryManagement() {
                 </td>
 
                 <td className="p-2  text-center">{cat.videoCount}</td>
+                <td className="p-2 text-center">{cat.audioCount || 0}</td>
                 <td className="p-2 text-center">{cat.imageCount}</td>
                 <td className="p-2 text-center">{cat.totalFeeds}</td>
 
