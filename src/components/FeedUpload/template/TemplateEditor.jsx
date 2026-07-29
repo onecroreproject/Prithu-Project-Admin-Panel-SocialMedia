@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Save, Plus, Layers, Play, Settings, Music, Palette, CheckCircle, X, ChevronDown } from 'lucide-react';
+import { Save, Plus, Layers, Play, Settings, Music, Palette, CheckCircle, X, ChevronDown, Calendar, Download } from 'lucide-react';
 import CanvasPreview from './CanvasPreview';
 import OverlayControls from './OverlayControls';
 import AudioConfig from './AudioConfig';
@@ -26,6 +26,11 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                     id: 'username', type: 'username', visible: true, text: 'User Name',
                     xPercent: 10, yPercent: 80, wPercent: 30, hPercent: 5,
                     animation: { enabled: true, direction: 'bottom', speed: 1 }
+                },
+                {
+                    id: 'calendar', type: 'calendar', visible: true,
+                    xPercent: 70, yPercent: 20, wPercent: 20, hPercent: 15,
+                    animation: { enabled: true, direction: 'right', speed: 1 }
                 }
             ],
             audioConfig: { enabled: false, volume: 1 },
@@ -78,6 +83,21 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
         };
     }, [onClose]);
 
+    const handleDownload = useCallback(async () => {
+        const node = document.getElementById('download-canvas-container');
+        if (!node) return;
+        try {
+            const { toPng } = await import('html-to-image');
+            const dataUrl = await toPng(node, { quality: 1, pixelRatio: 2 });
+            const link = document.createElement('a');
+            link.download = `post-frame-${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+        } catch (err) {
+            console.error('Error downloading image', err);
+        }
+    }, []);
+
     const activeOverlay = metadata.overlayElements.find(el => el.id === activeOverlayId);
 
     return (
@@ -96,6 +116,13 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                 <div className="flex items-center gap-8">
                     <button onClick={onClose} className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all">
                         Discard Changes
+                    </button>
+                    <button
+                        onClick={handleDownload}
+                        className="px-8 py-4 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-2xl flex items-center gap-3 font-black uppercase text-[10px] tracking-[0.2em] transition-all transform hover:scale-105 active:scale-95"
+                    >
+                        <Download size={18} />
+                        Download Image
                     </button>
                     <button
                         onClick={handleSave}
@@ -160,7 +187,30 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                             <>
                                 {/* Layers Selector */}
                                 <div className="space-y-6">
-                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Active Elements</h3>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Active Elements</h3>
+                                        {!metadata.overlayElements.find(el => el.id === 'calendar') && (
+                                            <button 
+                                                onClick={() => {
+                                                    setMetadata(prev => ({
+                                                        ...prev,
+                                                        overlayElements: [
+                                                            ...prev.overlayElements,
+                                                            {
+                                                                id: 'calendar', type: 'calendar', visible: true,
+                                                                xPercent: 70, yPercent: 20, wPercent: 20, hPercent: 15,
+                                                                animation: { enabled: true, direction: 'right', speed: 1 }
+                                                            }
+                                                        ]
+                                                    }));
+                                                    setActiveOverlayId('calendar');
+                                                }}
+                                                className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-blue-100 transition-all flex items-center gap-1"
+                                            >
+                                                <Plus size={10} /> Calendar
+                                            </button>
+                                        )}
+                                    </div>
                                     <div className="grid grid-cols-1 gap-3">
                                         {metadata.overlayElements.map(el => (
                                             <div
@@ -181,6 +231,7 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                                                         {el.id === 'avatar' && <Play size={20} />}
                                                         {el.id === 'logo' && <Plus size={20} />}
                                                         {el.id === 'username' && <Layers size={20} />}
+                                                        {el.id === 'calendar' && <Calendar size={20} />}
                                                     </div>
                                                     <div>
                                                         <span className={clsx("text-xs font-black uppercase tracking-[0.15em] block transition-colors", activeOverlayId === el.id ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700")}>{el.id}</span>
@@ -258,7 +309,42 @@ const TemplateEditor = ({ fileData, onClose, onSave, onUpdateEditMetadata }) => 
                                             ))}
                                         </div>
                                     </div>
-
+                                    <div className="space-y-5 pt-4">
+                                        <div className="flex justify-between items-center px-1">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Image Zoom</label>
+                                            <span className="text-[10px] font-black text-blue-600">{(editMetadata.crop.zoomLevel || 1).toFixed(2)}x</span>
+                                        </div>
+                                        <input
+                                            type="range" min="1" max="3" step="0.05"
+                                            value={editMetadata.crop.zoomLevel || 1}
+                                            onChange={(e) => setEditMetadata(prev => ({ ...prev, crop: { ...prev.crop, zoomLevel: parseFloat(e.target.value) } }))}
+                                            className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+                                        />
+                                    </div>
+                                    <div className="space-y-5 pt-4">
+                                        <div className="flex justify-between items-center px-1">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Pan X</label>
+                                            <span className="text-[10px] font-black text-blue-600">{editMetadata.crop.position?.x || 0}%</span>
+                                        </div>
+                                        <input
+                                            type="range" min="-100" max="100" step="1"
+                                            value={editMetadata.crop.position?.x || 0}
+                                            onChange={(e) => setEditMetadata(prev => ({ ...prev, crop: { ...prev.crop, position: { ...prev.crop.position, x: parseFloat(e.target.value) } } }))}
+                                            className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+                                        />
+                                    </div>
+                                    <div className="space-y-5 pt-4">
+                                        <div className="flex justify-between items-center px-1">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Pan Y</label>
+                                            <span className="text-[10px] font-black text-blue-600">{editMetadata.crop.position?.y || 0}%</span>
+                                        </div>
+                                        <input
+                                            type="range" min="-100" max="100" step="1"
+                                            value={editMetadata.crop.position?.y || 0}
+                                            onChange={(e) => setEditMetadata(prev => ({ ...prev, crop: { ...prev.crop, position: { ...prev.crop.position, y: parseFloat(e.target.value) } } }))}
+                                            className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+                                        />
+                                    </div>
                                     <div className="space-y-5 pt-4">
                                         <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block">Global Filter</label>
                                         <div className="relative">

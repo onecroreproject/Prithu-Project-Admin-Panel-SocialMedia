@@ -13,9 +13,17 @@ const CategorySelector = ({
     const [searchTerm, setSearchTerm] = useState('');
     const dropdownRef = useRef(null);
 
-    const selectedCategories = categories.filter(c => selectedIds.includes(c.categoryId));
-    const filteredCategories = categories.filter(c =>
-        c.categoriesName.toLowerCase().includes(searchTerm.toLowerCase())
+    // Normalize category data to handle different field names from different endpoints
+    const normalizedCategories = categories.map(cat => ({
+        id: String(cat.categoryId || cat._id || ''),
+        name: cat.categoriesName || cat.categoryName || cat.name || "Unnamed Category"
+    })).filter(cat => cat.id); // Filter out any that didn't have an ID
+
+    const selectedCategories = normalizedCategories.filter(c => 
+        selectedIds.some(sid => String(sid) === c.id)
+    );
+    const filteredCategories = normalizedCategories.filter(c =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     useEffect(() => {
@@ -53,14 +61,14 @@ const CategorySelector = ({
 
                 {selectedCategories.map(cat => (
                     <span
-                        key={cat.categoryId}
+                        key={cat.id}
                         className="bg-blue-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1.5 animate-in zoom-in-95 duration-200"
                     >
-                        {cat.categoriesName}
+                        {cat.name}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                toggleCategory(cat.categoryId);
+                                toggleCategory(cat.id);
                             }}
                             className="hover:text-blue-200 transition-colors"
                         >
@@ -100,20 +108,20 @@ const CategorySelector = ({
                             </div>
                         ) : (
                             filteredCategories.map(cat => {
-                                const isSelected = selectedIds.includes(cat.categoryId);
+                                const isSelected = selectedIds.some(sid => String(sid) === cat.id);
                                 return (
                                     <div
-                                        key={cat.categoryId}
+                                        key={cat.id}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            toggleCategory(cat.categoryId);
+                                            toggleCategory(cat.id);
                                         }}
                                         className={`flex items-center justify-between px-4 py-2.5 rounded-xl cursor-pointer transition-all duration-200 mb-1 last:mb-0 ${isSelected
                                                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                                                 : isLight ? 'hover:bg-blue-50 text-gray-700' : 'hover:bg-gray-800 text-gray-300'
                                             }`}
                                     >
-                                        <span className="text-[11px] font-black uppercase tracking-widest">{cat.categoriesName}</span>
+                                        <span className="text-[11px] font-black uppercase tracking-widest">{cat.name}</span>
                                         {isSelected && (
                                             <Check size={12} strokeWidth={4} />
                                         )}
@@ -124,22 +132,6 @@ const CategorySelector = ({
                     </div>
                 </div>
             )}
-
-            <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: ${isLight ? '#E5E7EB' : '#374151'};
-                    border-radius: 10px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: ${isLight ? '#D1D5DB' : '#4b5563'};
-                }
-            `}</style>
         </div>
     );
 };

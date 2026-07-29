@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { clsx } from 'clsx';
-import { X, Plus, Move, Maximize2, Type, Image as ImageIcon, Layers, CheckCircle, Play } from 'lucide-react';
+import { X, Plus, Move, Maximize2, Type, Image as ImageIcon, Layers, CheckCircle, Play, Calendar } from 'lucide-react';
 
 const directions = [
     'top', 'top-right', 'right', 'bottom-right',
@@ -82,6 +82,7 @@ const OverlayControls = React.memo(({ overlay, onUpdate }) => {
                     {overlay.type === 'avatar' && <ImageIcon size={20} />}
                     {overlay.type === 'logo' && <Plus size={20} />}
                     {overlay.type === 'username' && <Type size={20} />}
+                    {overlay.type === 'calendar' && <Calendar size={20} />}
                 </div>
                 <div>
                     <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest leading-none">Core Metadata</h3>
@@ -165,31 +166,35 @@ const OverlayControls = React.memo(({ overlay, onUpdate }) => {
                 </div>
             )}
 
-            {/* Avatar Specific Settings */}
+            {/* Shape / Geometry Settings */}
+            {(overlay.type === 'avatar' || overlay.type === 'calendar') && (
+                <div className="space-y-6 pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <Maximize2 className="text-blue-600" size={14} />
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Frame Geometry</h4>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                        {['round', 'square', 'rectangle'].map((shape) => (
+                            <button
+                                key={shape}
+                                onClick={() => handleChange('shape', shape)}
+                                className={clsx(
+                                    "py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all",
+                                    (overlay.shape || (overlay.type === 'calendar' ? 'rectangle' : 'round')) === shape
+                                        ? "bg-gray-900 text-white border-gray-900 shadow-xl scale-105"
+                                        : "bg-white border-gray-100 text-gray-400 hover:text-gray-900 hover:border-gray-300 shadow-sm"
+                                )}
+                            >
+                                {shape}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Avatar Specific Settings (Soft Edges) */}
             {overlay.type === 'avatar' && (
                 <div className="space-y-10 pt-4 border-t border-gray-100">
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-3">
-                            <Maximize2 className="text-blue-600" size={14} />
-                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Frame Geometry</h4>
-                        </div>
-                        <div className="grid grid-cols-3 gap-3">
-                            {['round', 'square', 'rectangle'].map((shape) => (
-                                <button
-                                    key={shape}
-                                    onClick={() => handleChange('shape', shape)}
-                                    className={clsx(
-                                        "py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all",
-                                        (overlay.shape || 'round') === shape
-                                            ? "bg-gray-900 text-white border-gray-900 shadow-xl scale-105"
-                                            : "bg-white border-gray-100 text-gray-400 hover:text-gray-900 hover:border-gray-300 shadow-sm"
-                                    )}
-                                >
-                                    {shape}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
 
                     {/* SOFT EDGES / FEATHER MODE */}
                     <div className="p-8 bg-gray-50 rounded-[2.5rem] border border-gray-100 space-y-8 shadow-sm">
@@ -248,6 +253,38 @@ const OverlayControls = React.memo(({ overlay, onUpdate }) => {
                                 </p>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Calendar Specific Settings */}
+            {overlay.type === 'calendar' && (
+                <div className="space-y-6 pt-4 border-t border-gray-100">
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Header Color</label>
+                    <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
+                        <div
+                            className="w-12 h-12 rounded-xl border border-gray-100 shadow-inner shrink-0"
+                            style={{ backgroundColor: overlay.calendarConfig?.headerColor || '#E54B35' }}
+                        />
+                        <input
+                            type="color"
+                            value={overlay.calendarConfig?.headerColor || '#E54B35'}
+                            onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, headerColor: e.target.value })}
+                            className="flex-1 bg-transparent h-10 cursor-pointer outline-none border-none p-0"
+                        />
+                    </div>
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Body Color</label>
+                    <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
+                        <div
+                            className="w-12 h-12 rounded-xl border border-gray-100 shadow-inner shrink-0"
+                            style={{ backgroundColor: overlay.calendarConfig?.bodyColor || '#F9F9F9' }}
+                        />
+                        <input
+                            type="color"
+                            value={overlay.calendarConfig?.bodyColor || '#F9F9F9'}
+                            onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, bodyColor: e.target.value })}
+                            className="flex-1 bg-transparent h-10 cursor-pointer outline-none border-none p-0"
+                        />
                     </div>
                 </div>
             )}

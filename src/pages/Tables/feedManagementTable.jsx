@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, Trash, Calendar, Play, X, Edit } from "lucide-react";
+import { Eye, Trash, Calendar, Play, X, Edit, Image } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { fetchFeeds, deleteFeed, removeFeedCategory, fetchCategories, updateFeedSchedule } from "../../Services/FeedServices/feedServices";
@@ -17,10 +17,12 @@ export default function FeedManagement() {
   const [editingFeed, setEditingFeed] = useState(null);
 
   // Fetch feeds
-  const { data: feeds = [], isLoading: feedsLoading, isError: feedsError, error: feedsErr } = useQuery({
-    queryKey: ["feeds"],
-    queryFn: fetchFeeds,
+  const { data: feedData = { feeds: [], totalFeeds: 0, totalImages: 0, totalVideos: 0 }, isLoading: feedsLoading, isError: feedsError, error: feedsErr } = useQuery({
+    queryKey: ["feeds", filters.startDate, filters.endDate],
+    queryFn: () => fetchFeeds({ fromDate: filters.startDate || undefined, toDate: filters.endDate || undefined }),
   });
+
+  const feeds = feedData.feeds || [];
 
   // Fetch categories
   const { data: categories = [] } = useQuery({
@@ -79,6 +81,41 @@ export default function FeedManagement() {
   return (
     <div className="max-w-7xl mx-auto mt-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
       <h2 className="text-lg font-semibold mb-4 dark:text-white/90">Feed Management</h2>
+
+      {/* ============================================
+          STATISTICS CARDS
+      ============================================ */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/30 flex items-center gap-4">
+          <div className="bg-blue-100 dark:bg-blue-800/50 p-3 rounded-lg">
+            <Eye className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Feeds</p>
+            <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{feedData.totalFeeds || 0}</p>
+          </div>
+        </div>
+
+        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl border border-green-100 dark:border-green-800/30 flex items-center gap-4">
+          <div className="bg-green-100 dark:bg-green-800/50 p-3 rounded-lg">
+            <Image className="h-6 w-6 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Images</p>
+            <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{feedData.totalImages || 0}</p>
+          </div>
+        </div>
+
+        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl border border-purple-100 dark:border-purple-800/30 flex items-center gap-4">
+          <div className="bg-purple-100 dark:bg-purple-800/50 p-3 rounded-lg">
+            <Play className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Videos</p>
+            <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{feedData.totalVideos || 0}</p>
+          </div>
+        </div>
+      </div>
 
       {/* ============================================
           FILTER SECTION

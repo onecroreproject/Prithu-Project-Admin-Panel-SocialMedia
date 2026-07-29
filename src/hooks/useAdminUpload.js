@@ -256,25 +256,54 @@ export const useAdminUpload = () => {
         setFiles(prev => prev.map(f => f.id === id ? { ...f, [field]: value, isEdited: true } : f));
     }, []);
 
-    const updateGlobalSettings = (field, value) => {
+    const updateGlobalSettings = (fieldOrObject, value) => {
         setGlobalSettings(prev => {
-            const next = { ...prev, [field]: value };
+            const updates = typeof fieldOrObject === 'object' ? fieldOrObject : { [fieldOrObject]: value };
+            const next = { ...prev, ...updates };
 
-            // Auto-apply logic
-            if (field === 'categoryId' && next.applyCategoryToAll) {
-                setFiles(f => f.map(file => ({ ...file, categoryId: value, isEdited: true })));
+            // Auto-apply logic for categories
+            if (next.applyCategoryToAll) {
+                const hasCategoryUpdate = updates.categoryId !== undefined || updates.categoryIds !== undefined;
+                if (hasCategoryUpdate) {
+                    setFiles(f => f.map(file => ({ 
+                        ...file, 
+                        categoryId: next.categoryId, 
+                        categoryIds: next.categoryIds, 
+                        isEdited: true 
+                    })));
+                }
             }
-            if (field === 'categoryIds' && next.applyCategoryToAll) {
-                setFiles(f => f.map(file => ({ ...file, categoryIds: value, isEdited: true })));
+            
+            // Trigger auto-apply when toggling the 'apply' checkbox
+            if (updates.applyCategoryToAll === true) {
+                setFiles(f => f.map(file => ({ 
+                    ...file, 
+                    categoryId: next.categoryId, 
+                    categoryIds: next.categoryIds, 
+                    isEdited: true 
+                })));
             }
-            if (field === 'applyCategoryToAll' && value) {
-                setFiles(f => f.map(file => ({ ...file, categoryId: next.categoryId, categoryIds: next.categoryIds, isEdited: true })));
+
+            // Auto-apply logic for scheduling
+            if (next.applyScheduleToAll) {
+                const hasScheduleUpdate = updates.scheduleDate !== undefined || updates.isScheduled !== undefined;
+                if (hasScheduleUpdate) {
+                    setFiles(f => f.map(file => ({ 
+                        ...file, 
+                        scheduleDate: next.scheduleDate, 
+                        isScheduled: next.isScheduled, 
+                        isEdited: true 
+                    })));
+                }
             }
-            if ((field === 'scheduleDate' || field === 'isScheduled') && next.applyScheduleToAll) {
-                setFiles(f => f.map(file => ({ ...file, [field]: value, isEdited: true })));
-            }
-            if (field === 'applyScheduleToAll' && value) {
-                setFiles(f => f.map(file => ({ ...file, scheduleDate: next.scheduleDate, isScheduled: next.isScheduled, isEdited: true })));
+
+            if (updates.applyScheduleToAll === true) {
+                setFiles(f => f.map(file => ({ 
+                    ...file, 
+                    scheduleDate: next.scheduleDate, 
+                    isScheduled: next.isScheduled, 
+                    isEdited: true 
+                })));
             }
 
             return next;

@@ -41,11 +41,18 @@ const mainNavItems = [
     permission: "canManageSalesDashboard"
   },
   {
+    icon: <Database className="w-5 h-5" />,
+    name: "Reco Analytics",
+    path: "/social/recommendation-dashboard",
+    permission: "canManageSalesDashboard"
+  },
+  {
     icon: <User className="w-5 h-5" />,
     name: "User Profile",
     permission: "canManageUsers",
     subItems: [
       { name: "User Detail", path: "/social/profile", permission: "canManageUsersDetail" },
+      { name: "Deletion Logs", path: "/social/user/deletion-logs", permission: "canManageUsers" },
     ],
   },
   {
@@ -53,10 +60,13 @@ const mainNavItems = [
     name: "Feed Management",
     permission: "canManageFeeds",
     subItems: [
-      { name: "Treanding Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
+      { name: "Trending Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
+      { name: "Video Dashboard", path: "/settings/video-compression", permission: "canManageFeeds" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
       { name: "Party Management", path: "/social/party/management", permission: "canManageParties" },
+      { name: "Prompt Management", path: "/social/prompts", permission: "canManageFeeds" },
+      { name: "aiCategories", path: "/social/ai-categories", permission: "canManageFeeds" },
     ],
   },
   {
@@ -130,6 +140,18 @@ const mainNavItems = [
     subItems: [
       { name: "Email Dashboard", path: "/settings/email/dashboard", permission: null },
       { name: "Template Editor", path: "/settings/email/templates", permission: null },
+    ],
+  },
+  {
+    icon: <DollarSign className="w-5 h-5" />,
+    name: "AI Monetization",
+    permission: null,
+    subItems: [
+      { name: "Dashboard", path: "/social/monetization/dashboard", permission: null },
+      { name: "Credit Packages", path: "/social/monetization/packages", permission: null },
+      { name: "Transactions", path: "/social/monetization/transactions", permission: null },
+      { name: "Revenue Analytics", path: "/social/monetization/revenue", permission: null },
+      { name: "Credit Usage", path: "/social/monetization/usage", permission: null },
     ],
   },
   {

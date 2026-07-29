@@ -26,6 +26,8 @@ const SalesDashboard = lazy(() => import("./pages/SalesDashboard/salesdashBoardP
 const SEODashboard = lazy(() => import("./pages/AdminPages/SEODashboard"));
 const EmailManagementDashboard = lazy(() => import("./pages/EmailManagement/EmailManagementDashboard"));
 const GoogleDriveDashboard = lazy(() => import("./DriverDashboard/googleDashboard"));
+const RecommendationDashboard = lazy(() => import("./pages/RecommendationDashboard"));
+const VideoCompressionDashboard = lazy(() => import("./pages/AdminPages/VideoCompressionDashboard"));
 
 // Social Media Module
 const UploadPage = lazy(() => import("./pages/uploadPage"));
@@ -44,6 +46,16 @@ const CategoryManagementPage = lazy(() => import("./pages/CategoryManagementPage
 const PartyManagement = lazy(() => import("./pages/PartyManagement/PartyManagement"));
 const TrendingFeedsTable = lazy(() => import("./pages/treandingFeed"));
 const UsersWillingToPost = lazy(() => import("./pages/socialMedia/Feed/userFeedRequestPage"));
+const UserDeletionLogsPage = lazy(() => import("./pages/UserProfile/UserDeletionLogsPage"));
+const PromptManagementPage = lazy(() => import("./pages/PromptManagementPage"));
+const AICategoryManagementPage = lazy(() => import("./pages/AICategoryManagementPage"));
+
+// Monetization Module
+const MonetizationDashboard = lazy(() => import("./pages/Monetization/MonetizationDashboard"));
+const CreditPackagesPage = lazy(() => import("./pages/Monetization/CreditPackagesPage"));
+const TransactionsPage = lazy(() => import("./pages/Monetization/TransactionsPage"));
+const CreditUsagePage = lazy(() => import("./pages/Monetization/CreditUsagePage"));
+const RevenueAnalyticsPage = lazy(() => import("./pages/Monetization/RevenueAnalyticsPage"));
 
 // Settings & Admin
 const ChildAdminPage = lazy(() => import("./pages/ChildAdminRegister/childAdminPage"));
@@ -69,6 +81,11 @@ const PageSEOMatagement = lazy(() => import("./pages/AdminPages/PageSEOMatagemen
 const FeedSEOMatagement = lazy(() => import("./pages/AdminPages/FeedSEOMatagement"));
 const MediaSEOMatagement = lazy(() => import("./pages/AdminPages/MediaSEOMatagement"));
 const TemplateEditor = lazy(() => import("./pages/EmailManagement/TemplateEditor"));
+
+// Chat Admin
+const ChatAnalytics = lazy(() => import("./pages/Chat/ChatAnalytics"));
+const UnansweredQuestions = lazy(() => import("./pages/Chat/UnansweredQuestions"));
+const ChatLeads = lazy(() => import("./pages/Chat/ChatLeads"));
 
 // Other
 const NotFound = lazy(() => import("./pages/OtherPage/NotFound"));
@@ -117,6 +134,8 @@ function AnimatedRoutes() {
             <Route path="/settings/email/dashboard" element={<EmailManagementDashboard />} />
             <Route path="/drive/dashboard" element={<GoogleDriveDashboard />} />
             <Route path="/analytics/dashboard" element={<SocialMediaDashboard />} />
+            <Route path="/social/recommendation-dashboard" element={<RecommendationDashboard />} />
+            <Route path="/settings/video-compression" element={<VideoCompressionDashboard />} />
 
             {/* Social Media Module */}
             <Route path="/social/creator/trending/table" element={<CreatorTable />} />
@@ -129,13 +148,23 @@ function AnimatedRoutes() {
             <Route path="/social/tree" element={<ReferralTreePage />} />
             <Route path="/social/trending/feed" element={<TrendingFeedsTable />} />
             <Route path="/social/post/request/approval" element={<UsersWillingToPost />} />
+            <Route path="/social/user/deletion-logs" element={<UserDeletionLogsPage />} />
             <Route path="/social/admin/upload/page" element={<UploadPage />} />
             <Route path="/social/category/management" element={<CategoryManagementPage />} />
             <Route path="/social/party/management" element={<PartyManagement />} />
+            <Route path="/social/prompts" element={<PromptManagementPage />} />
+            <Route path="/social/ai-categories" element={<AICategoryManagementPage />} />
             <Route path="/social/blog/list" element={<BlogListPage />} />
             <Route path="/social/blog/add" element={<AddBlogPage />} />
             <Route path="/social/blog/edit/:id" element={<AddBlogPage />} />
             <Route path="/social/whats-new" element={<WhatsNew />} />
+
+            {/* Monetization Module */}
+            <Route path="/social/monetization/dashboard" element={<MonetizationDashboard />} />
+            <Route path="/social/monetization/packages" element={<CreditPackagesPage />} />
+            <Route path="/social/monetization/transactions" element={<TransactionsPage />} />
+            <Route path="/social/monetization/revenue" element={<RevenueAnalyticsPage />} />
+            <Route path="/social/monetization/usage" element={<CreditUsagePage />} />
 
             {/* Settings & Admin (RBAC Applied) */}
             <Route path="/settings/child/admin/page" element={<AdminProtectedRoute requiredRoles={["Admin"]}><ChildAdminPage /></AdminProtectedRoute>} />
@@ -165,6 +194,11 @@ function AnimatedRoutes() {
 
             {/* Email Management */}
             <Route path="/settings/email/templates" element={<TemplateEditor />} />
+
+            {/* Chatbot Admin */}
+            <Route path="/chat/analytics" element={<ChatAnalytics />} />
+            <Route path="/chat/unanswered" element={<UnansweredQuestions />} />
+            <Route path="/chat/leads" element={<ChatLeads />} />
           </Route>
 
           {/* ====== FALLBACK ROUTE ====== */}

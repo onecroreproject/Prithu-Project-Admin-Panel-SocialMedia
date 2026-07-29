@@ -29,9 +29,22 @@ const OverlayItem = React.memo(({
     brushPos,
     onMouseDown,
     onUpdateOverlay,
-    isPainting
+    isPainting,
+    footerColor
 }) => {
     const isActive = activeOverlayId === overlay.id;
+
+    const [calendarWidth, setCalendarWidth] = useState(100);
+    const wrapperRef = useRef(null);
+
+    useEffect(() => {
+        if (!wrapperRef.current || overlay.type !== 'calendar') return;
+        const observer = new ResizeObserver(entries => {
+            if (entries[0]) setCalendarWidth(entries[0].contentRect.width);
+        });
+        observer.observe(wrapperRef.current);
+        return () => observer.disconnect();
+    }, [overlay.type]);
 
     const getInitialOffset = (overlay, containerW, containerH) => {
         if (!overlay.animation?.enabled) return { x: 0, y: 0 };
@@ -137,6 +150,7 @@ const OverlayItem = React.memo(({
 
     return (
         <div
+            ref={wrapperRef}
             id={`overlay-${overlay.id}`}
             className={clsx(
                 "absolute pointer-events-auto transition-all",
@@ -192,6 +206,35 @@ const OverlayItem = React.memo(({
                 {overlay.type === 'username' && (
                     <div className="w-full h-full flex items-center justify-center bg-black/20 backdrop-blur-sm rounded-lg px-2">
                         <span className="text-white font-black drop-shadow-2xl truncate text-center uppercase tracking-wider" style={{ fontSize: '12px' }}>{overlay.text || 'User Name'}</span>
+                    </div>
+                )}
+                {overlay.type === 'calendar' && (
+                    <div 
+                        className={clsx(
+                            "w-full h-full flex flex-col bg-white shadow-2xl overflow-hidden relative border border-gray-200",
+                            overlay.shape === 'round' ? 'rounded-full' : overlay.shape === 'square' ? 'rounded-3xl' : 'rounded-lg'
+                        )}
+                    >
+                        <div className="absolute top-0 w-full flex justify-evenly z-10" style={{ height: calendarWidth * 0.1, marginTop: -calendarWidth * 0.02 }}>
+                            {[1,2,3,4].map(i => (
+                                <div key={i} className="bg-gray-800 shadow-sm" style={{ width: calendarWidth * 0.03, height: calendarWidth * 0.1, borderRadius: calendarWidth }} />
+                            ))}
+                        </div>
+                        <div className="w-full flex items-center justify-center" style={{ 
+                            paddingTop: calendarWidth * 0.12, 
+                            paddingBottom: calendarWidth * 0.04,
+                            backgroundColor: overlay.calendarConfig?.headerColor || footerColor || '#E54B35' 
+                        }}>
+                            <span className="text-white font-black uppercase tracking-widest" style={{ fontSize: calendarWidth * 0.15 }}>{new Date().toLocaleString('default', { month: 'short' })}</span>
+                        </div>
+                        <div className="flex-1 flex flex-col items-center justify-center" style={{ 
+                            paddingLeft: calendarWidth * 0.05, paddingRight: calendarWidth * 0.05, paddingTop: calendarWidth * 0.02, paddingBottom: calendarWidth * 0.02,
+                            backgroundColor: overlay.calendarConfig?.bodyColor || '#F9F9F9' 
+                        }}>
+                            <span className="font-semibold text-gray-500 uppercase tracking-widest" style={{ fontSize: calendarWidth * 0.12, marginBottom: -calendarWidth * 0.05 }}>{new Date().toLocaleString('default', { weekday: 'short' })}</span>
+                            <span className="font-black text-[#2B3544] tracking-tighter leading-none" style={{ fontSize: calendarWidth * 0.45 }}>{new Date().getDate()}</span>
+                            <span className="font-bold text-gray-400" style={{ fontSize: calendarWidth * 0.10, marginTop: calendarWidth * 0.02 }}>{new Date().getFullYear()}</span>
+                        </div>
                     </div>
                 )}
             </div>
@@ -440,6 +483,7 @@ const CanvasPreview = ({
 
             <div className="flex justify-center items-center bg-gray-950/40 h-full p-1 rounded-[2.5rem] w-full overflow-hidden border border-white/5 shadow-inner backdrop-blur-3xl">
                 <div
+                    id="download-canvas-container"
                     ref={containerRef}
                     className="relative shadow-2xl overflow-hidden bg-black rounded-xl border border-white/5"
                     style={{
@@ -469,7 +513,7 @@ const CanvasPreview = ({
                                     className="absolute inset-0 w-full h-full object-contain z-10"
                                     style={{
                                         filter: FILTER_STYLES[editMetadata?.filters?.preset || 'original'],
-                                        transform: `scale(${editMetadata?.crop?.zoomLevel || 1})`
+                                        transform: `scale(${editMetadata?.crop?.zoomLevel || 1}) translate(${editMetadata?.crop?.position?.x || 0}%, ${editMetadata?.crop?.position?.y || 0}%)`
                                     }}
                                     muted={audioConfig?.muteOriginalAudio || false}
                                     playsInline
@@ -483,7 +527,7 @@ const CanvasPreview = ({
                                     className="absolute inset-0 w-full h-full object-contain z-10"
                                     style={{
                                         filter: FILTER_STYLES[editMetadata?.filters?.preset || 'original'],
-                                        transform: `scale(${editMetadata?.crop?.zoomLevel || 1})`
+                                        transform: `scale(${editMetadata?.crop?.zoomLevel || 1}) translate(${editMetadata?.crop?.position?.x || 0}%, ${editMetadata?.crop?.position?.y || 0}%)`
                                     }}
                                     onLoad={extractDominantColor}
                                 />
@@ -506,6 +550,7 @@ const CanvasPreview = ({
                                         onMouseDown={handleMouseDown}
                                         onUpdateOverlay={onUpdateOverlay}
                                         isPainting={isPainting}
+                                        footerColor={metadata.footerConfig?.backgroundColor || dominantColor || '#000000'}
                                     />
                                 ))}
                             </div>

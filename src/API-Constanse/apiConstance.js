@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   USER_ANALYTICS_DOWNLOADED: "/api/downloaded",
   USER_ANALYTICS_NON_INTERESTED: "/api/nonInterested",
   ADMIN_DELETE_USER: "/api/admin/delete/user",
+  USER_DELETE_LOGS: "/api/admin/user/delete-logs",
 
 
   DASHBOARD_METRICKS: "/api/admin/dashboard/metricks/counts",
@@ -97,4 +98,16 @@ export const API_ENDPOINTS = {
   SEO_SITEMAP: "/api/admin/seo/sitemap",
   SEO_ROBOTS: "/api/admin/seo/robots",
   UPDATE_PAGE_SEO: "/api/admin/static-page",
+  
+  // Video Compression Endpoints
+  VIDEO_COMPRESSION_STATS: "/api/admin/video-compression/stats",
+  VIDEO_COMPRESSION_BULK_START: "/api/admin/video-compression/bulk-start",
+  VIDEO_COMPRESSION_TOGGLE_QUEUE: "/api/admin/video-compression/toggle-queue",
+  VIDEO_COMPRESSION_STOP_ALL: "/api/admin/video-compression/stop-all",
+  VIDEO_COMPRESSION_RETRY: "/api/admin/video-compression/retry",
+
+  // ML Metadata & Cron Endpoints
+  ML_METADATA_STATS: "/api/admin/ml-metadata/stats",
+  ML_METADATA_TOGGLE: "/api/admin/ml-metadata/toggle",
+  CRON_TRIGGER: "/api/admin/cron/trigger",
 };
