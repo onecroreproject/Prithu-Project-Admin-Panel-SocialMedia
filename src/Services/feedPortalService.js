@@ -28,11 +28,7 @@ export const feedPortalService = {
     },
 
     exportFeedInteractionsCSV: async () => {
-<<<<<<< HEAD
         const response = await api.get(`/api/export/csv`, {
-=======
-        const response = await api.get(`${API_URL}/api/export/csv`, {
->>>>>>> 7216d7b6b869dca667861cc592af9d995cccbf27
             responseType: 'blob'
         });
         return response;
