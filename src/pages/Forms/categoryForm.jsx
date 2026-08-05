@@ -33,7 +33,7 @@ export default function CategoryUploadForm() {
         <textarea
           value={names}
           onChange={(e) => setNames(e.target.value)}
-          placeholder="Enter categories separated by commas (e.g. Men, Women, Kids)"
+          placeholder="Enter categories separated by commas (e.g. Men, Women, Kids Boy)"
           className="w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
           rows="3"
         />
