@@ -1,395 +1,482 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminUpload } from '../../hooks/useAdminUpload';
-import FileSelect from './FileSelect';
-import MediaCard from './MediaCard';
+import { Info, CloudUpload, Play, Pencil, CheckCircle } from 'lucide-react';
+import { clsx } from 'clsx';
 import TemplateEditor from './template/TemplateEditor';
-import PostEditor from './PostEditor';
-import LivePreview from './LivePreview';
 import CategorySelector from '../common/CategorySelector';
-import {
-    Loader2, Upload, Calendar, ChevronRight, ChevronLeft,
-    Check, Film, Settings, Edit3, Send, Layout
-} from 'lucide-react';
-
-const STEPS = [
-    { id: 1, title: 'Upload Media', icon: Film },
-    { id: 2, title: 'Configure Defaults', icon: Settings },
-    { id: 3, title: 'Refine Details', icon: Edit3 },
-    { id: 4, title: 'Publish', icon: Send },
-];
 
 const FeedUploadPage = () => {
     const {
         files,
         categories,
-        isUploading,
-        overallProgress,
-        globalSettings,
-        updateGlobalSettings,
         handleSelectFiles,
-        handleRemoveFile,
-        handleToggleMode,
-        handleUpdateMetadata,
         handleUpdateEditMetadata,
-        handleUpdateFileField,
-        upload
+        handleUpdateMetadata,
+        upload,
+        setFiles
     } = useAdminUpload();
 
-    const [currentStep, setCurrentStep] = useState(1);
-    const [viewMode, setViewMode] = useState('list'); // 'grid' or 'list'
     const [editingFileId, setEditingFileId] = useState(null);
-    const [editingPostId, setEditingPostId] = useState(null);
-    const [previewFileId, setPreviewFileId] = useState(null);
 
-    useEffect(() => {
-        if (isUploading) {
-            setCurrentStep(4);
-        }
-    }, [isUploading]);
-
-    const editingFile = files.find(f => f.id === editingFileId);
-    const editingPost = files.find(f => f.id === editingPostId);
-    const previewFile = files.find(f => f.id === previewFileId);
-
-    const handleNext = () => {
-        if (currentStep < 4) setCurrentStep(prev => prev + 1);
+    const defaultFormState = {
+        title: '',
+        contentType: 'Image',
+        category: [],
+        language: 'Both',
+        tags: '',
+        description: '',
+        session: '',
+        day: '',
+        god: '',
+        specialDay: '',
+        publishDate: '',
+        expiryDate: '',
+        startTime: '',
+        endTime: '',
+        priority: 'Normal',
+        featured: false,
+        downloadAllowed: true,
+        shareAllowed: true,
+        active: true
     };
 
-    const handleBack = () => {
-        if (currentStep > 1) setCurrentStep(prev => prev - 1);
+    const [fileForms, setFileForms] = useState({});
+
+    const [previewType, setPreviewType] = useState('Image');
+    const [activeImageId, setActiveImageId] = useState(null);
+    const [activeVideoId, setActiveVideoId] = useState(null);
+
+    const imageFiles = files.filter(f => !f.file.type.startsWith('video'));
+    const videoFiles = files.filter(f => f.file.type.startsWith('video'));
+
+    useEffect(() => {
+        if (imageFiles.length > 0 && !imageFiles.find(f => f.id === activeImageId)) {
+            setActiveImageId(imageFiles[0].id);
+        } else if (imageFiles.length === 0) {
+            setActiveImageId(null);
+        }
+    }, [imageFiles, activeImageId]);
+
+    useEffect(() => {
+        if (videoFiles.length > 0 && !videoFiles.find(f => f.id === activeVideoId)) {
+            setActiveVideoId(videoFiles[0].id);
+        } else if (videoFiles.length === 0) {
+            setActiveVideoId(null);
+        }
+    }, [videoFiles, activeVideoId]);
+
+    const activeFileId = previewType === 'Image' ? activeImageId : activeVideoId;
+    const currentFiles = previewType === 'Image' ? imageFiles : videoFiles;
+    const selectedFile = currentFiles.find(f => f.id === activeFileId) || (currentFiles.length > 0 ? currentFiles[0] : null);
+    
+    const formState = (activeFileId && fileForms[activeFileId]) 
+        ? fileForms[activeFileId] 
+        : (fileForms['default'] || {
+            ...defaultFormState,
+            contentType: selectedFile?.file?.type?.startsWith('video') ? 'Video' : 'Image'
+        });
+
+    const handleChange = (field, value) => {
+        const targetId = activeFileId || 'default';
+        setFileForms(prev => ({
+            ...prev,
+            [targetId]: {
+                ...(prev[targetId] || {
+                    ...defaultFormState,
+                    contentType: selectedFile?.file?.type?.startsWith('video') ? 'Video' : 'Image'
+                }),
+                [field]: value
+            }
+        }));
+    };
+
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length > 0) {
+            handleSelectFiles(selectedFiles);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        if (droppedFiles.length > 0) {
+            handleSelectFiles(droppedFiles);
+        }
+    };
+
+    const handleReset = () => {
+        setFileForms({});
+        setFiles([]);
+    };
+
+    const handleCancel = () => {
+        // Simple reload to reset the page
+        window.location.reload();
+    };
+
+    const formatBytes = (bytes) => {
+        if (!bytes) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
     return (
-        <div className="p-4 md:p-6 max-w-7xl mx-auto min-h-screen text-white">
-            {/* Minimal Step Tracker */}
-            <div className="mb-8 mt-0 sticky top-0 z-50 py-4">
-                <div className="relative max-w-3xl mx-auto">
-                    <div className="flex justify-between items-center relative z-10">
-                        {STEPS.map((step, index) => {
-                            const Icon = step.icon;
-                            const isActive = currentStep === step.id;
-                            const isCompleted = currentStep > step.id;
-
-                            return (
-                                <div key={step.id} className="flex flex-col items-center gap-2 relative z-10 flex-1">
-                                    <div
-                                        className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all duration-700 border-2 relative group cursor-pointer ${isActive ? 'bg-blue-600 border-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.3)] scale-110' :
-                                                isCompleted ? 'bg-emerald-600 border-emerald-400' :
-                                                    'bg-gray-800/50 border-gray-700/30 text-gray-500 hover:border-gray-600'
-                                            }`}
-                                        onClick={() => !isUploading && isCompleted && setCurrentStep(step.id)}
-                                    >
-                                        {isCompleted ? <Check size={18} className="animate-in zoom-in duration-300" /> : <Icon size={18} />}
-
-                                        {isActive && (
-                                            <div className="absolute -inset-1 rounded-xl bg-blue-500/10 animate-pulse" />
-                                        )}
-                                    </div>
-                                    <div className="hidden md:flex flex-col items-center">
-                                        <span className={`text-[8px] font-black uppercase tracking-[0.2em] transition-colors duration-500 ${isActive ? 'text-blue-400' : isCompleted ? 'text-emerald-400' : 'text-gray-500'}`}>
-                                            0{step.id}
-                                        </span>
-                                        <span className={`text-[10px] font-bold transition-colors duration-500 ${isActive ? 'text-white' : 'text-gray-500'}`}>
-                                            {step.title}
-                                        </span>
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        {/* Minimal Progress Line */}
-                        <div className="absolute top-5 md:top-6 left-[12.5%] right-[12.5%] h-0.5 bg-gray-800/50 rounded-full -z-0">
-                            <div
-                                className="h-full bg-gradient-to-r from-blue-600 to-emerald-500 transition-all duration-1000 ease-in-out rounded-full shadow-[0_0_8px_rgba(37,99,235,0.3)]"
-                                style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                {/* STEP 1: FILE SELECTION */}
-                {currentStep === 1 && (
-                    <div className="max-w-4xl mx-auto py-4">
-                        <div className="text-center mb-6">
-                            <h2 className="text-3xl font-black mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                                Select Your Media
-                            </h2>
-                            <p className="text-gray-400 text-lg">Upload high-quality videos to start your creative process</p>
-                        </div>
-
-                        <div className="relative group">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
-                            <FileSelect
-                                onSelect={(newFiles) => {
-                                    handleSelectFiles(newFiles);
-                                    setCurrentStep(2);
-                                }}
-                                className={`relative bg-gray-900/40 border-2 border-dashed border-gray-800 group-hover:border-blue-500/50 transition-all rounded-3xl ${files.length > 0 ? "py-16" : "py-32"}`}
-                                isActive={true}
-                            />
-                        </div>
-
-                        {files.length > 0 && (
-                            <div className="flex justify-center mt-12">
-                                <button
-                                    onClick={handleNext}
-                                    className="group flex items-center gap-3 px-10 py-4 bg-white text-black hover:bg-blue-50 rounded-2xl font-black transition-all shadow-xl shadow-white/5"
-                                >
-                                    Continue with {files.length} {files.length === 1 ? 'file' : 'files'}
-                                    <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* STEP 2: GLOBAL CONFIG */}
-                {currentStep === 2 && (
-                    <div className="max-w-3xl mx-auto py-4">
-                        <div className="text-center mb-6">
-                            <h2 className="text-3xl font-black mb-2">Global Configuration</h2>
-                            <p className="text-gray-400 text-sm">Set the foundation for your entire batch</p>
-                        </div>
-
-                        <div className="p-8 md:p-12 bg-gray-900/40 backdrop-blur-xl border border-gray-800 rounded-[2.5rem] space-y-12 shadow-2xl">
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-xl font-bold text-gray-100 flex items-center gap-2">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                                        Primary Categories
-                                    </label>
-                                    <label className="flex items-center gap-2 cursor-pointer py-2 px-4 bg-gray-800/50 rounded-full border border-gray-700/50 hover:bg-gray-800 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            checked={globalSettings.applyCategoryToAll}
-                                            onChange={(e) => updateGlobalSettings('applyCategoryToAll', e.target.checked)}
-                                            className="w-4 h-4 rounded-sm border-gray-700 bg-gray-900 text-blue-600 focus:ring-0 focus:ring-offset-0"
-                                        />
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Apply to all</span>
-                                    </label>
-                                </div>
-                                <CategorySelector
-                                    className="w-full"
-                                    categories={categories}
-                                    selectedIds={globalSettings.categoryIds || (globalSettings.categoryId ? [globalSettings.categoryId] : [])}
-                                    onChange={(ids) => {
-                                        updateGlobalSettings('categoryIds', ids);
-                                        if (ids.length > 0) updateGlobalSettings('categoryId', ids[0]);
-                                        else updateGlobalSettings('categoryId', '');
-                                    }}
-                                    placeholder="Select Categories for this batch"
+        <div className="p-4 md:p-8 bg-[#F8FAFC] min-h-screen text-gray-800">
+            <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Left Column - Form Details */}
+                <div className="lg:col-span-2 space-y-8">
+                    
+                    {/* 1. Content Details */}
+                    <div>
+                        <h2 className="text-blue-600 font-bold text-lg mb-4 flex items-center gap-2">
+                            1. Content Details
+                        </h2>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                            {/* Title */}
+                            <div>
+                                <label className="block text-sm font-semibold mb-2">Title <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter title"
+                                    value={formState.title}
+                                    onChange={(e) => handleChange('title', e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-sm"
                                 />
                             </div>
 
-                            <div className="h-px bg-gradient-to-r from-transparent via-gray-800 to-transparent" />
 
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-xl font-bold text-gray-100 flex items-center gap-2">
-                                        <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                                        Batch Scheduling
-                                    </label>
-                                    <label className="flex items-center gap-2 cursor-pointer py-2 px-4 bg-gray-800/50 rounded-full border border-gray-700/50 hover:bg-gray-800 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            checked={globalSettings.applyScheduleToAll}
-                                            onChange={(e) => updateGlobalSettings('applyScheduleToAll', e.target.checked)}
-                                            className="w-4 h-4 rounded-sm border-gray-700 bg-gray-900 text-blue-600 focus:ring-0 focus:ring-offset-0"
-                                        />
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Apply to all</span>
-                                    </label>
-                                </div>
 
-                                <div className="flex flex-col gap-6">
-                                    <button
-                                        onClick={() => globalSettings.applyScheduleToAll && updateGlobalSettings('isScheduled', !globalSettings.isScheduled)}
-                                        className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${!globalSettings.applyScheduleToAll ? 'opacity-50 cursor-not-allowed grayscale' :
-                                                globalSettings.isScheduled ? 'bg-blue-600/10 border-blue-500/50' : 'bg-gray-800/20 border-gray-800 hover:border-gray-700'
-                                            }`}
-                                    >
-                                        <div className={`w-12 h-6 rounded-full relative transition-colors ${globalSettings.isScheduled ? 'bg-blue-600' : 'bg-gray-700'}`}>
-                                            <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${globalSettings.isScheduled ? 'translate-x-6' : ''}`} />
-                                        </div>
-                                        <span className={`font-bold ${globalSettings.isScheduled ? 'text-white' : 'text-gray-400'}`}>
-                                            {globalSettings.isScheduled ? 'Scheduling Enabled' : 'Click to Enable Schedule'}
-                                        </span>
-                                    </button>
-
-                                    {globalSettings.isScheduled && (
-                                        <div className="relative animate-in slide-in-from-top-4 duration-500">
-                                            <div className="absolute left-5 top-1/2 -translate-y-1/2 p-2 bg-gray-800 rounded-lg text-blue-400">
-                                                <Calendar size={18} />
-                                            </div>
-                                            <input
-                                                type="datetime-local"
-                                                disabled={!globalSettings.applyScheduleToAll}
-                                                value={globalSettings.scheduleDate}
-                                                onChange={(e) => updateGlobalSettings('scheduleDate', e.target.value)}
-                                                className="w-full pl-16 bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                            {/* Category */}
+                            <div className="relative z-50">
+                                <label className="block text-sm font-semibold mb-2">Category <span className="text-red-500">*</span></label>
+                                <CategorySelector
+                                    categories={categories}
+                                    selectedIds={formState.category || []}
+                                    onChange={(ids) => handleChange('category', ids)}
+                                    placeholder="Select Categories"
+                                    variant="light"
+                                />
                             </div>
-                        </div>
 
-                        <div className="flex justify-between items-center pt-12">
-                            <button onClick={handleBack} className="px-8 py-4 text-gray-500 hover:text-white transition-colors font-bold flex items-center gap-2">
-                                <ChevronLeft size={20} /> Go Back
-                            </button>
-                            <button onClick={handleNext} className="px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-2xl font-black shadow-xl shadow-blue-900/20 flex items-center gap-3 transform hover:scale-[1.02] active:scale-[0.98] transition-all">
-                                Review & Refine <ChevronRight size={20} />
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* STEP 3: REFINE DETAILS */}
-                {currentStep === 3 && (
-                    <div className="space-y-8 pb-10">
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            {/* Language */}
                             <div>
-                                <h2 className="text-3xl font-black mb-1">Individual Refinement</h2>
-                                <p className="text-gray-400 text-sm">Perfect each post before it goes live</p>
-                            </div>
-                            <div className="flex gap-4 w-full md:w-auto">
-                                <button onClick={handleBack} className="flex-1 md:flex-none px-8 py-4 bg-gray-900 border border-gray-800 hover:bg-gray-800 rounded-2xl font-bold transition-all">
-                                    Back
-                                </button>
-                                <button onClick={handleNext} className="flex-1 md:flex-none px-10 py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-black shadow-xl shadow-emerald-900/20 transform hover:scale-[1.02] transition-all">
-                                    Ready to Publish
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* View Toggle */}
-                        <div className="flex items-center gap-4 self-end">
-                            <button 
-                                onClick={() => setViewMode('list')}
-                                className={`p-1 transition-all ${viewMode === 'list' ? 'text-blue-500 scale-110' : 'text-gray-500 hover:text-gray-300'}`}
-                                title="List View"
-                            >
-                                <Layout size={20} />
-                            </button>
-                            <button 
-                                onClick={() => setViewMode('grid')}
-                                className={`p-1 transition-all ${viewMode === 'grid' ? 'text-blue-500 scale-110' : 'text-gray-500 hover:text-gray-300'}`}
-                                title="Grid View"
-                            >
-                                <Film size={20} />
-                            </button>
-                        </div>
-
-                        <div className={viewMode === 'grid' 
-                            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" 
-                            : "flex flex-col gap-4"
-                        }>
-                            {files.map((fileData, index) => (
-                                <div key={fileData.id} className="animate-in fade-in zoom-in-95 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
-                                    <MediaCard
-                                        fileData={fileData}
-                                        categories={categories}
-                                        isUploading={isUploading}
-                                        viewMode={viewMode}
-                                        onRemove={handleRemoveFile}
-                                        onToggleMode={handleToggleMode}
-                                        onEdit={setEditingFileId}
-                                        onEditPost={setEditingPostId}
-                                        onLivePreview={setPreviewFileId}
-                                        onUpdateField={(field, value) => handleUpdateFileField(fileData.id, field, value)}
-                                    />
+                                <label className="block text-sm font-semibold mb-2">Language</label>
+                                <div className="flex items-center gap-6 mt-3">
+                                    {['Tamil', 'English', 'Both'].map(lang => (
+                                        <label key={lang} className="flex items-center gap-2 cursor-pointer text-sm">
+                                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formState.language === lang ? 'border-blue-600' : 'border-gray-300'}`}>
+                                                {formState.language === lang && <div className="w-2 h-2 rounded-full bg-blue-600" />}
+                                            </div>
+                                            <input type="radio" className="hidden" checked={formState.language === lang} onChange={() => handleChange('language', lang)} />
+                                            {lang}
+                                        </label>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
+
+                            {/* Tags */}
+                            <div>
+                                <label className="block text-sm font-semibold mb-2">Tags</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter tags (comma separated)"
+                                    value={formState.tags}
+                                    onChange={(e) => handleChange('tags', e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-sm"
+                                />
+                            </div>
+
+                            {/* Description */}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-semibold mb-2">Description</label>
+                                <textarea
+                                    placeholder="Enter description (optional)"
+                                    value={formState.description}
+                                    onChange={(e) => handleChange('description', e.target.value)}
+                                    rows={3}
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-sm resize-none"
+                                />
+                                <div className="text-[10px] text-gray-400 mt-1">{formState.description.length} / 200</div>
+                            </div>
                         </div>
                     </div>
-                )}
 
-                {/* STEP 4: PUBLISHING */}
-                {currentStep === 4 && (
-                    <div className="max-w-2xl mx-auto py-20 text-center space-y-12">
-                        <div className="relative inline-block">
-                            <div className="absolute -inset-4 bg-blue-500/20 blur-2xl rounded-full animate-pulse"></div>
-                            <div className="w-32 h-32 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] flex items-center justify-center mx-auto relative z-10 shadow-2xl">
-                                <Upload className="text-white" size={56} />
-                            </div>
-                        </div>
-
-                        <div>
-                            <h2 className="text-5xl font-black mb-4 tracking-tight">Final Review</h2>
-                            <p className="text-gray-400 text-xl leading-relaxed">
-                                You are about to publish <span className="text-white font-bold">{files.length}</span> optimized feeds to your digital platform.
-                            </p>
-                        </div>
-
-                        {isUploading ? (
-                            <div className="space-y-8 p-10 bg-gray-900/40 backdrop-blur-xl rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-full h-1 bg-gray-800">
-                                    <div
-                                        className="h-full bg-blue-500 transition-all duration-300"
-                                        style={{ width: `${overallProgress}%` }}
-                                    />
-                                </div>
-
-                                <div className="flex justify-between items-end">
-                                    <div className="text-left">
-                                        <span className="text-6xl font-black text-white tabular-nums">{overallProgress}%</span>
-                                        <p className="text-blue-400 font-bold uppercase tracking-widest text-xs mt-2">Uploading Progress</p>
-                                    </div>
-                                    <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-2" />
-                                </div>
-
-                                <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden p-0.5 border border-gray-700/50">
-                                    <div
-                                        className="h-full bg-gradient-to-r from-blue-600 via-indigo-400 to-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(37,99,235,0.4)]"
-                                        style={{ width: `${overallProgress}%` }}
-                                    />
-                                </div>
-                                <p className="text-gray-500 font-medium">Please do not refresh or close this window...</p>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col gap-6">
-                                <button
-                                    onClick={upload}
-                                    className="w-full py-6 bg-white text-black hover:bg-blue-50 rounded-[2rem] font-black text-2xl shadow-2xl shadow-white/10 transform transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4"
+                    {/* 2. Scheduling */}
+                    <div>
+                        <h2 className="text-blue-600 font-bold text-lg mb-4 flex items-center gap-2">
+                            2. Scheduling
+                        </h2>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-5">
+                            <div>
+                                <label className="block text-sm font-semibold mb-2">Session</label>
+                                <select 
+                                    value={formState.session} 
+                                    onChange={(e) => handleChange('session', e.target.value)}
+                                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
                                 >
-                                    <Upload size={28} /> Publish Everything Now
-                                </button>
-                                <button onClick={handleBack} className="text-gray-500 hover:text-white transition-colors font-bold uppercase tracking-widest text-xs">
-                                    Wait, I need to make changes
-                                </button>
+                                    <option value="" disabled>Select Session</option>
+                                    <option value="Anytime">Anytime</option>
+                                </select>
                             </div>
-                        )}
+                            <div>
+                                <label className="block text-sm font-semibold mb-2">Day</label>
+                                <select 
+                                    value={formState.day} 
+                                    onChange={(e) => handleChange('day', e.target.value)}
+                                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
+                                >
+                                    <option value="" disabled>Select Day</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold mb-2">God (Day Wise)</label>
+                                <select 
+                                    value={formState.god} 
+                                    onChange={(e) => handleChange('god', e.target.value)}
+                                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
+                                >
+                                    <option value="" disabled>Select God (Optional)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold mb-2">Special Day</label>
+                                <select 
+                                    value={formState.specialDay} 
+                                    onChange={(e) => handleChange('specialDay', e.target.value)}
+                                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
+                                >
+                                    <option value="" disabled>Select Special Day (Optional)</option>
+                                </select>
+                            </div>
+
+                            <div className="relative">
+                                <label className="block text-sm font-semibold mb-2">Publish Date</label>
+                                <div className="relative">
+                                    <input
+                                        type="date"
+                                        value={formState.publishDate}
+                                        onChange={(e) => handleChange('publishDate', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-700"
+                                    />
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <label className="block text-sm font-semibold mb-2">Expiry Date</label>
+                                <div className="relative">
+                                    <input
+                                        type="date"
+                                        value={formState.expiryDate}
+                                        onChange={(e) => handleChange('expiryDate', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500"
+                                    />
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <label className="block text-sm font-semibold mb-2">Start Time</label>
+                                <div className="relative">
+                                    <input
+                                        type="time"
+                                        value={formState.startTime}
+                                        onChange={(e) => handleChange('startTime', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500"
+                                    />
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <label className="block text-sm font-semibold mb-2">End Time</label>
+                                <div className="relative">
+                                    <input
+                                        type="time"
+                                        value={formState.endTime}
+                                        onChange={(e) => handleChange('endTime', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-2">
+                            <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+                            <p className="text-xs text-blue-600 font-medium">If you select 'Anytime' session, Day and Time is optional.</p>
+                        </div>
                     </div>
-                )}
+
+                    {/* 3. Settings */}
+
+                    {/* Form Actions */}
+                    <div className="flex items-center justify-between border-t border-gray-200 pt-6">
+                        <button onClick={handleCancel} className="px-6 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                        <div className="flex items-center gap-3">
+                            <button onClick={() => upload(fileForms, 'draft')} className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm">
+                                Save as Draft
+                            </button>
+                            <button onClick={() => upload(fileForms)} className="px-6 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors shadow-sm">
+                                Save & Publish
+                            </button>
+                            <button onClick={handleReset} className="px-6 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* Right Column - Upload & Preview */}
+                <div className="lg:col-span-1 space-y-6">
+                    
+                    {/* 4. Upload Content */}
+                    <div>
+                        <h2 className="text-blue-600 font-bold text-lg mb-4">4. Upload Content</h2>
+                        <div 
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={handleDrop}
+                            onClick={() => document.getElementById('file-upload-input').click()}
+                            className="border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 transition-colors rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer min-h-[220px]"
+                        >
+                            <input 
+                                id="file-upload-input"
+                                type="file" 
+                                className="hidden" 
+                                accept="image/*,video/*"
+                                multiple
+                                onChange={handleFileChange}
+                            />
+                            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
+                                <CloudUpload size={32} />
+                            </div>
+                            <p className="text-gray-700 text-sm mb-1">
+                                <span className="font-bold text-gray-900">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-gray-500 mb-4">Image (JPG, PNG, WEBP) or Video (MP4)</p>
+                            <p className="text-xs text-gray-500">Max File Size: 100 MB</p>
+                        </div>
+                    </div>
+
+                    {/* Preview */}
+                    <div>
+                        <h3 className="font-bold text-blue-600 text-md mb-2">Preview</h3>
+                        <div className="flex border-b border-gray-200 mb-2">
+                            <button 
+                                onClick={() => setPreviewType('Image')}
+                                className={`flex-1 pb-2 text-sm font-semibold text-center border-b-2 transition-colors ${previewType === 'Image' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Image ({imageFiles.length})
+                            </button>
+                            <button 
+                                onClick={() => setPreviewType('Video')}
+                                className={`flex-1 pb-2 text-sm font-semibold text-center border-b-2 transition-colors ${previewType === 'Video' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Video ({videoFiles.length})
+                            </button>
+                        </div>
+                        
+                        <div className="max-h-[500px] overflow-y-auto custom-scrollbar flex flex-col gap-4 pr-1 mt-4">
+                            {currentFiles.length > 0 ? (
+                                currentFiles.map(file => (
+                                    <div key={file.id} className={`bg-white rounded-xl border-2 ${activeFileId === file.id ? 'border-blue-600' : 'border-transparent'} overflow-hidden aspect-[9/16] flex items-center justify-center relative shadow-sm group shrink-0 transition-colors`}>
+                                        {file.file.type.startsWith('video') ? (
+                                            <>
+                                                <video src={file.preview} className="w-full h-full object-cover" />
+                                                <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => previewType === 'Image' ? setActiveImageId(file.id) : setActiveVideoId(file.id)} className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-colors ${activeFileId === file.id ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`} title="Select">
+                                                        <CheckCircle size={18} />
+                                                    </button>
+                                                    <button onClick={(e) => { e.stopPropagation(); setEditingFileId(file.id); }} className="w-9 h-9 bg-white hover:bg-gray-50 rounded-full flex items-center justify-center text-blue-600 shadow-md transition-colors" title="Edit">
+                                                        <Pencil size={18} />
+                                                    </button>
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const video = e.currentTarget.closest('.group').querySelector('video');
+                                                        if (video) {
+                                                            if (video.paused) {
+                                                                video.play();
+                                                            } else {
+                                                                video.pause();
+                                                            }
+                                                        }
+                                                    }} className="w-9 h-9 bg-white hover:bg-gray-50 rounded-full flex items-center justify-center text-green-600 shadow-md transition-colors" title="Play/Pause">
+                                                        <Play size={18} className="ml-0.5" />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <img src={file.preview} className="w-full h-full object-cover" alt="Preview" />
+                                                <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => previewType === 'Image' ? setActiveImageId(file.id) : setActiveVideoId(file.id)} className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-colors ${activeFileId === file.id ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`} title="Select">
+                                                        <CheckCircle size={18} />
+                                                    </button>
+                                                    <button onClick={(e) => { e.stopPropagation(); setEditingFileId(file.id); }} className="w-9 h-9 bg-white hover:bg-gray-50 rounded-full flex items-center justify-center text-blue-600 shadow-md transition-colors" title="Edit">
+                                                        <Pencil size={18} />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden aspect-[4/3] flex items-center justify-center relative shadow-sm">
+                                    <p className="text-gray-400 text-sm">No {previewType.toLowerCase()} selected</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* File Information */}
+                    <div>
+                        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                                <h3 className="font-bold text-blue-600 text-sm">File Information</h3>
+                            </div>
+                            <div className="p-4 space-y-4">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">File Name</span>
+                                    <span className="text-gray-900 font-medium truncate max-w-[150px]" title={selectedFile?.file.name || '-'}>
+                                        {selectedFile?.file.name || '-'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">File Size</span>
+                                    <span className="text-gray-900 font-medium">{selectedFile ? formatBytes(selectedFile.file.size) : '-'}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Dimensions</span>
+                                    <span className="text-gray-900 font-medium">{selectedFile?.dimensions ? `${selectedFile.dimensions.width} x ${selectedFile.dimensions.height}` : '-'}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Format</span>
+                                    <span className="text-gray-900 font-medium uppercase">{selectedFile ? selectedFile.file.name.split('.').pop() : '-'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            {/* Premium Modals */}
-            {editingFile && (
+            {/* Bottom Note */}
+            <div className="max-w-[1400px] mx-auto mt-6 bg-indigo-50 border border-indigo-100 rounded-lg p-3 flex items-start gap-2">
+                <Info className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+                <p className="text-xs text-indigo-600 font-medium leading-relaxed">
+                    <span className="font-bold">Note:</span> Content will be displayed based on Priority. Special Day content has highest priority, followed by Session, Day Wise God and then other content.
+                </p>
+            </div>
+
+            {editingFileId && (
                 <div className="fixed inset-0 z-[100] animate-in fade-in duration-300">
-                    <TemplateEditor
-                        fileData={editingFile}
-                        onClose={() => setEditingFileId(null)}
+                    <TemplateEditor 
+                        fileData={files.find(f => f.id === editingFileId)} 
+                        onClose={() => setEditingFileId(null)} 
                         onSave={handleUpdateMetadata}
                         onUpdateEditMetadata={handleUpdateEditMetadata}
-                    />
-                </div>
-            )}
-            {editingPost && (
-                <div className="fixed inset-0 z-[100] animate-in fade-in duration-300">
-                    <PostEditor
-                        fileData={editingPost}
-                        onClose={() => setEditingPostId(null)}
-                        onSave={handleUpdateEditMetadata}
-                    />
-                </div>
-            )}
-            {previewFile && (
-                <div className="fixed inset-0 z-[100] animate-in fade-in duration-300">
-                    <LivePreview
-                        fileData={previewFile}
-                        onClose={() => setLivePreviewId(null)}
                     />
                 </div>
             )}

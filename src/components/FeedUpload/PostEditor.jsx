@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Crop, Sliders, Check } from 'lucide-react';
+import { clsx } from 'clsx';
 
 const CROP_RATIOS = ["original", "1:1", "4:5", "16:9", "9:16"];
 const FILTER_PRESETS = [

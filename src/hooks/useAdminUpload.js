@@ -355,7 +355,7 @@ export const useAdminUpload = () => {
         }));
     }, []);
 
-    const upload = async () => {
+    const upload = async (fileForms = {}, statusOverride = null) => {
         if (files.length === 0) return alert("Select files first");
 
         const missingCategory = files.find(f => !f.categoryId && (!f.categoryIds || !f.categoryIds.length));
@@ -376,10 +376,27 @@ export const useAdminUpload = () => {
                     postType = 'image+audio';
                 }
 
+                const formState = fileForms[f.id] || fileForms['default'] || {};
+
                 perFileMetadata[f.file.name] = {
+                    title: formState.title || '',
+                    language: formState.language || 'Both',
+                    tags: formState.tags || '',
+                    description: formState.description || '',
                     categoryIds: f.categoryIds && f.categoryIds.length > 0 ? f.categoryIds : [f.categoryId],
                     caption: f.caption,
                     scheduleTime: f.isScheduled ? f.scheduleDate : null,
+                    scheduling: {
+                        session: formState.session || '',
+                        day: formState.day || '',
+                        god: formState.god || '',
+                        specialDay: formState.specialDay || '',
+                        publishDate: formState.publishDate || '',
+                        expiryDate: formState.expiryDate || '',
+                        startTime: formState.startTime || '',
+                        endTime: formState.endTime || ''
+                    },
+                    statusOverride,
                     designData: {
                         ...f.metadata,
                         isTemplate,
@@ -425,6 +442,7 @@ export const useAdminUpload = () => {
         handleUpdateMetadata,
         handleUpdateEditMetadata,
         fetchCategories,
-        upload
+        upload,
+        setFiles
     };
 };

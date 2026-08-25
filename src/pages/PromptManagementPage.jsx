@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Cropper from "react-easy-crop";
 import { 
   Plus, Search, Edit2, Trash2, Check, X, Sparkles, Filter, RefreshCw, Eye, Image as ImageIcon,
-  Clipboard, Hash, FileText
+  Clipboard, Hash, FileText, Box, Crop, Tag, Info
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import api from "../Utils/axiosApi";
@@ -753,173 +753,201 @@ export default function PromptManagementPage() {
               initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl max-w-xl w-full flex flex-col max-h-[90vh]"
+              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-5xl w-full flex flex-col md:flex-row max-h-[95vh] overflow-hidden"
             >
-              <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-blue-600" />
-                  {editingPrompt ? "Edit Prompt Code" : "Register New AI Prompt"}
-                </h3>
-                <button
-                  onClick={() => setIsFormOpen(false)}
-                  className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1 flex-1">
-                {/* Title */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                    Prompt Title *
+              <form onSubmit={handleSubmit} className="flex flex-col md:flex-row w-full h-full overflow-hidden">
+                
+                {/* Left Column: Image Upload */}
+                <div className="w-full md:w-[45%] p-6 md:p-8 bg-white dark:bg-gray-900 flex flex-col shrink-0">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white mb-4">
+                    <ImageIcon className="w-4 h-4 text-indigo-600" />
+                    Prompt Image <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g., Autumn Forest Couple Embrace"
-                    value={formTitle}
-                    onChange={(e) => setFormTitle(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
-                  />
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Category select */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                      Category
-                    </label>
-                    <select
-                      value={formCategory}
-                      onChange={(e) => setFormCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
-                    >
-                      {(categories.length > 0 ? categories : CATEGORIES_LIST.map(name => ({ _id: name, name }))).map((cat) => (
-                        <option key={cat._id || cat.name} value={cat.name}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Aspect Ratio select */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                      Aspect Ratio
-                    </label>
-                    <select
-                      value={formAspectRatio}
-                      onChange={(e) => setFormAspectRatio(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
-                    >
-                      <option value="1:1">Square (1:1)</option>
-                      <option value="9:16">Portrait (9:16)</option>
-                      <option value="16:9">Landscape (16:9)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Prompt Code block text */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                    Prompt Text *
-                  </label>
-                  <textarea
-                    required
-                    rows={4}
-                    placeholder="Enter the full AI generator prompt code exactly..."
-                    value={formPrompt}
-                    onChange={(e) => setFormPrompt(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm font-mono leading-relaxed"
-                  />
-                </div>
-
-                {/* Image mockup upload & preview */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                    Prompt Image *
-                  </label>
-                  
-                  {uploadingImage ? (
-                    <div className="mt-1.5 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-6 transition-all text-center bg-gray-50/50 dark:bg-white/[0.01] flex flex-col items-center justify-center min-h-[140px]">
-                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Uploading Image...</span>
-                    </div>
-                  ) : formImageUrl ? (
-                    <div className="flex flex-col gap-3 mt-1.5">
-                      <div className={`relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-850 flex items-center justify-center ${
-                        formAspectRatio === "9:16" ? "w-28 h-48" : formAspectRatio === "16:9" ? "w-56 h-32" : "w-36 h-36"
-                      }`}>
-                        <img
-                          src={getFullImageUrl(formImageUrl)}
-                          alt="Cropped Preview"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.src = "https://images.unsplash.com/photo-1547592180-85f173990554?w=100";
-                          }}
-                        />
+                  <div className="flex-1 flex flex-col">
+                    {uploadingImage ? (
+                      <div className="flex-1 border-2 border-dashed border-indigo-200 dark:border-indigo-800 bg-transparent rounded-[2rem] p-6 flex flex-col items-center justify-center min-h-[250px]">
+                        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Uploading Image...</span>
                       </div>
-                      <button
-                        type="button"
+                    ) : formImageUrl ? (
+                      <div className="flex-1 flex flex-col gap-4">
+                        <div className={`relative rounded-[2rem] overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 flex items-center justify-center w-full flex-1 min-h-[250px]`}>
+                          <img
+                            src={getFullImageUrl(formImageUrl)}
+                            alt="Preview"
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              e.target.src = "https://images.unsplash.com/photo-1547592180-85f173990554?w=100";
+                            }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById("prompt-image-file").click()}
+                          className="w-full py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                        >
+                          <ImageIcon className="w-4 h-4" />
+                          Change Image
+                        </button>
+                      </div>
+                    ) : (
+                      <div 
                         onClick={() => document.getElementById("prompt-image-file").click()}
-                        className="self-start px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5"
+                        className="flex-1 border-2 border-dashed border-indigo-200 dark:border-indigo-800/50 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-[2rem] p-6 transition-all text-center cursor-pointer bg-transparent hover:bg-indigo-50/30 group flex flex-col items-center justify-center min-h-[250px]"
                       >
-                        <ImageIcon className="w-3.5 h-3.5" />
-                        Change Image
-                      </button>
-                    </div>
-                  ) : (
-                    <div 
-                      onClick={() => document.getElementById("prompt-image-file").click()}
-                      className="mt-1.5 border-2 border-dashed border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500/50 rounded-2xl p-6 transition-all text-center cursor-pointer bg-gray-50/50 dark:bg-white/[0.01] hover:bg-blue-50/10 group flex flex-col items-center justify-center min-h-[140px]"
-                    >
-                      <div className="p-3 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 rounded-xl mb-2 group-hover:scale-110 transition-transform">
-                        <ImageIcon className="w-6 h-6" />
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-indigo-500/30">
+                          <ImageIcon className="w-7 h-7" />
+                        </div>
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Choose Prompt Image</h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                          Drag & drop an image here<br/>or <span className="text-indigo-600 font-semibold">click to browse</span>
+                        </p>
+                        <div className="flex items-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-semibold">
+                          <Info className="w-4 h-4" />
+                          Aspect ratio matches: <span className="font-bold">{formAspectRatio}</span>
+                        </div>
                       </div>
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Choose Prompt Image</span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">Aspect ratio matches: <strong className="text-blue-500">{formAspectRatio}</strong></span>
+                    )}
+                    <input
+                      id="prompt-image-file"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column: Form Inputs */}
+                <div className="w-full md:w-[55%] p-6 md:p-8 flex flex-col overflow-y-auto">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                          {editingPrompt ? "Edit AI Prompt" : "Register New AI Prompt"}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                          Create and save a reusable AI prompt template.
+                        </p>
+                      </div>
                     </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => setIsFormOpen(false)}
+                      className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 transition-colors shadow-sm shrink-0"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
 
-                  <input
-                    id="prompt-image-file"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </div>
+                  <div className="space-y-4 flex-1 pr-2">
+                    {/* Title */}
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        <Edit2 className="w-4 h-4 text-indigo-600" />
+                        Prompt Title <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g., Autumn Forest Couple Embrace"
+                        value={formTitle}
+                        onChange={(e) => setFormTitle(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition-shadow"
+                      />
+                    </div>
 
-                {/* Tags input */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                    Search Tags (Comma separated)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g., couple, romatic, forest, sunset"
-                    value={formTags}
-                    onChange={(e) => setFormTags(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
-                  />
-                </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Category select */}
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                          <Box className="w-4 h-4 text-indigo-600" />
+                          Category <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={formCategory}
+                          onChange={(e) => setFormCategory(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition-shadow appearance-none"
+                        >
+                          {(categories.length > 0 ? categories : CATEGORIES_LIST.map(name => ({ _id: name, name }))).map((cat) => (
+                            <option key={cat._id || cat.name} value={cat.name}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                {/* Actions */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800 mt-6 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setIsFormOpen(false)}
-                    className="px-4.5 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-blue-600/10 active:scale-95"
-                  >
-                    {editingPrompt ? "Save Changes" : "Create Prompt"}
-                  </button>
+                      {/* Aspect Ratio select */}
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                          <Crop className="w-4 h-4 text-indigo-600" />
+                          Aspect Ratio <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={formAspectRatio}
+                          onChange={(e) => setFormAspectRatio(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition-shadow appearance-none"
+                        >
+                          <option value="1:1">Square (1:1)</option>
+                          <option value="9:16">Portrait (9:16)</option>
+                          <option value="16:9">Landscape (16:9)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Prompt Text */}
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        <ImageIcon className="w-4 h-4 text-indigo-600" />
+                        Prompt Text <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        required
+                        rows={3}
+                        placeholder="Enter the full AI generator prompt code exactly..."
+                        value={formPrompt}
+                        onChange={(e) => setFormPrompt(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm leading-relaxed transition-shadow resize-none"
+                      />
+                    </div>
+
+                    {/* Tags input */}
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        <Tag className="w-4 h-4 text-indigo-600" />
+                        Search Tags (Comma Separated)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g., couple, romantic, forest, sunset"
+                        value={formTags}
+                        onChange={(e) => setFormTags(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition-shadow"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex justify-end gap-3 pt-4 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setIsFormOpen(false)}
+                      className="px-6 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-95 flex items-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      {editingPrompt ? "Save Changes" : "Create Prompt"}
+                    </button>
+                  </div>
                 </div>
               </form>
             </motion.div>
