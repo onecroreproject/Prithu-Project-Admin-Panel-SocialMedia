@@ -358,7 +358,11 @@ export const useAdminUpload = () => {
     const upload = async (fileForms = {}, statusOverride = null) => {
         if (files.length === 0) return alert("Select files first");
 
-        const missingCategory = files.find(f => !f.categoryId && (!f.categoryIds || !f.categoryIds.length));
+        const missingCategory = files.find(f => {
+            const formState = fileForms[f.id] || fileForms['default'] || {};
+            const categories = formState.category || [];
+            return categories.length === 0;
+        });
         if (missingCategory) return alert(`Please select at least one category for ${missingCategory.file.name}`);
 
         setIsUploading(true);
@@ -383,7 +387,7 @@ export const useAdminUpload = () => {
                     language: formState.language || 'Both',
                     tags: formState.tags || '',
                     description: formState.description || '',
-                    categoryIds: f.categoryIds && f.categoryIds.length > 0 ? f.categoryIds : [f.categoryId],
+                    categoryIds: formState.category && formState.category.length > 0 ? formState.category : [],
                     caption: f.caption,
                     scheduleTime: f.isScheduled ? f.scheduleDate : null,
                     scheduling: {

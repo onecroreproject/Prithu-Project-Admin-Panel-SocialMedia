@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminUpload } from '../../hooks/useAdminUpload';
-import { Info, CloudUpload, Play, Pencil, CheckCircle } from 'lucide-react';
+import { Info, CloudUpload, Play, Pencil, CheckCircle, Calendar, Clock } from 'lucide-react';
 import { clsx } from 'clsx';
 import TemplateEditor from './template/TemplateEditor';
 import CategorySelector from '../common/CategorySelector';
@@ -13,7 +13,10 @@ const FeedUploadPage = () => {
         handleUpdateEditMetadata,
         handleUpdateMetadata,
         upload,
-        setFiles
+        setFiles,
+        isUploading,
+        overallProgress,
+        uploadError
     } = useAdminUpload();
 
     const [editingFileId, setEditingFileId] = useState(null);
@@ -222,6 +225,9 @@ const FeedUploadPage = () => {
                                 >
                                     <option value="" disabled>Select Session</option>
                                     <option value="Anytime">Anytime</option>
+                                    <option value="Morning">🌅 Morning (5:00 AM – 11:00 AM)</option>
+                                    <option value="Afternoon">☀️ Afternoon (11:00 AM – 5:00 PM)</option>
+                                    <option value="Evening">🌙 Evening/Night (5:00 PM – 11:00 PM)</option>
                                 </select>
                             </div>
                             <div>
@@ -232,6 +238,14 @@ const FeedUploadPage = () => {
                                     className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
                                 >
                                     <option value="" disabled>Select Day</option>
+                                    <option value="Everyday">Everyday</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
                                 </select>
                             </div>
                             <div>
@@ -242,6 +256,20 @@ const FeedUploadPage = () => {
                                     className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
                                 >
                                     <option value="" disabled>Select God (Optional)</option>
+                                    <option value="Shiva">Shiva</option>
+                                    <option value="Vishnu">Vishnu</option>
+                                    <option value="Ganesha">Ganesha</option>
+                                    <option value="Murugan">Murugan</option>
+                                    <option value="Hanuman">Hanuman</option>
+                                    <option value="Devi / Amman">Devi / Amman</option>
+                                    <option value="Lakshmi">Lakshmi</option>
+                                    <option value="Saraswati">Saraswati</option>
+                                    <option value="Sai Baba">Sai Baba</option>
+                                    <option value="Krishna">Krishna</option>
+                                    <option value="Rama">Rama</option>
+                                    <option value="Surya">Surya</option>
+                                    <option value="Navagraha">Navagraha</option>
+                                    <option value="Ayyappan">Ayyappan</option>
                                 </select>
                             </div>
                             <div>
@@ -252,51 +280,74 @@ const FeedUploadPage = () => {
                                     className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
                                 >
                                     <option value="" disabled>Select Special Day (Optional)</option>
+                                    <option value="Amavasya">Amavasya</option>
+                                    <option value="Purnima">Purnima</option>
+                                    <option value="Ekadashi">Ekadashi</option>
+                                    <option value="Pradosham">Pradosham</option>
+                                    <option value="Chaturthi">Chaturthi</option>
+                                    <option value="Sashti">Sashti</option>
+                                    <option value="Sankashti">Sankashti</option>
+                                    <option value="Shivaratri">Shivaratri</option>
+                                    <option value="Navratri">Navratri</option>
+                                    <option value="Diwali">Diwali</option>
+                                    <option value="Pongal / Makar Sankranti">Pongal / Makar Sankranti</option>
+                                    <option value="Tamil New Year">Tamil New Year</option>
+                                    <option value="Krishna Janmashtami">Krishna Janmashtami</option>
+                                    <option value="Ganesh Chaturthi">Ganesh Chaturthi</option>
+                                    <option value="Maha Shivaratri">Maha Shivaratri</option>
                                 </select>
                             </div>
 
                             <div className="relative">
                                 <label className="block text-sm font-semibold mb-2">Publish Date</label>
-                                <div className="relative">
+                                <div className="relative" onClick={() => document.getElementById('publishDateInput')?.showPicker()}>
                                     <input
+                                        id="publishDateInput"
                                         type="date"
                                         value={formState.publishDate}
                                         onChange={(e) => handleChange('publishDate', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-700"
+                                        className="w-full pl-3 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-700 cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden"
                                     />
+                                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                 </div>
                             </div>
                             <div className="relative">
                                 <label className="block text-sm font-semibold mb-2">Expiry Date</label>
-                                <div className="relative">
+                                <div className="relative" onClick={() => document.getElementById('expiryDateInput')?.showPicker()}>
                                     <input
+                                        id="expiryDateInput"
                                         type="date"
                                         value={formState.expiryDate}
                                         onChange={(e) => handleChange('expiryDate', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500"
+                                        className="w-full pl-3 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500 cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden"
                                     />
+                                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                 </div>
                             </div>
                             <div className="relative">
                                 <label className="block text-sm font-semibold mb-2">Start Time</label>
-                                <div className="relative">
+                                <div className="relative" onClick={() => document.getElementById('startTimeInput')?.showPicker()}>
                                     <input
+                                        id="startTimeInput"
                                         type="time"
                                         value={formState.startTime}
                                         onChange={(e) => handleChange('startTime', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500"
+                                        className="w-full pl-3 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500 cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden"
                                     />
+                                    <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                 </div>
                             </div>
                             <div className="relative">
                                 <label className="block text-sm font-semibold mb-2">End Time</label>
-                                <div className="relative">
+                                <div className="relative" onClick={() => document.getElementById('endTimeInput')?.showPicker()}>
                                     <input
+                                        id="endTimeInput"
                                         type="time"
                                         value={formState.endTime}
                                         onChange={(e) => handleChange('endTime', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500"
+                                        className="w-full pl-3 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm text-gray-500 cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden"
                                     />
+                                    <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                 </div>
                             </div>
                         </div>
@@ -311,21 +362,50 @@ const FeedUploadPage = () => {
 
                     {/* Form Actions */}
                     <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-                        <button onClick={handleCancel} className="px-6 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                        <button onClick={handleCancel} disabled={isUploading} className="px-6 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             Cancel
                         </button>
                         <div className="flex items-center gap-3">
-                            <button onClick={() => upload(fileForms, 'draft')} className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm">
+                            <button onClick={() => upload(fileForms, 'draft')} disabled={isUploading} className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                 Save as Draft
                             </button>
-                            <button onClick={() => upload(fileForms)} className="px-6 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors shadow-sm">
-                                Save & Publish
+                            <button onClick={() => upload(fileForms)} disabled={isUploading} className="flex items-center gap-2 px-6 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors shadow-sm disabled:opacity-75 disabled:cursor-wait">
+                                {isUploading && <CloudUpload className="w-4 h-4 animate-bounce" />}
+                                {isUploading ? 'Publishing...' : 'Save & Publish'}
                             </button>
-                            <button onClick={handleReset} className="px-6 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                            <button onClick={handleReset} disabled={isUploading} className="px-6 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                 Reset
                             </button>
                         </div>
                     </div>
+
+                    {/* Progress Bar & Error */}
+                    {(isUploading || uploadError) && (
+                        <div className="mt-4 border-t border-gray-200 pt-4">
+                            {uploadError ? (
+                                <div className="text-red-500 text-sm font-medium text-center bg-red-50 py-2 rounded-lg border border-red-100">
+                                    {uploadError}
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm font-semibold text-gray-700">
+                                        <span>Uploading {files.length} file{files.length > 1 ? 's' : ''}...</span>
+                                        <span>{Math.round(overallProgress)}%</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-blue-600 rounded-full transition-all duration-300 ease-out relative"
+                                            style={{ width: `${overallProgress}%` }}
+                                        >
+                                            <div className="absolute top-0 left-0 bottom-0 right-0 overflow-hidden">
+                                                <div className="w-full h-full bg-white/20 animate-[shimmer_1s_infinite] translate-x-[-100%]" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                 </div>
 
