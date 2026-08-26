@@ -5,9 +5,10 @@ const CategorySelector = ({
     categories = [],
     selectedIds = [],
     onChange,
-    placeholder = "Select categories...",
+    placeholder = "Select category...",
     className = "",
-    variant = "dark" // "dark" for upload, "light" for FeedUpload
+    variant = "dark", // "dark" for upload, "light" for FeedUpload
+    singleSelect = true // default to true based on user request
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,10 +38,20 @@ const CategorySelector = ({
     }, []);
 
     const toggleCategory = (id) => {
-        const newIds = selectedIds.includes(id)
-            ? selectedIds.filter(i => i !== id)
-            : [...selectedIds, id];
-        onChange(newIds);
+        if (singleSelect) {
+            // If already selected, maybe toggle off? Or just select it.
+            if (selectedIds.includes(id)) {
+                onChange([]); // Deselect if clicking the same one
+            } else {
+                onChange([id]);
+            }
+            setIsOpen(false); // Close dropdown after selection for single select
+        } else {
+            const newIds = selectedIds.includes(id)
+                ? selectedIds.filter(i => i !== id)
+                : [...selectedIds, id];
+            onChange(newIds);
+        }
     };
 
     const isLight = variant === "light";
@@ -65,15 +76,17 @@ const CategorySelector = ({
                         className="bg-blue-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1.5 animate-in zoom-in-95 duration-200"
                     >
                         {cat.name}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                toggleCategory(cat.id);
-                            }}
-                            className="hover:text-blue-200 transition-colors"
-                        >
-                            <X size={10} strokeWidth={4} />
-                        </button>
+                        {!singleSelect && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleCategory(cat.id);
+                                }}
+                                className="hover:text-blue-200 transition-colors"
+                            >
+                                <X size={10} strokeWidth={4} />
+                            </button>
+                        )}
                     </span>
                 ))}
 

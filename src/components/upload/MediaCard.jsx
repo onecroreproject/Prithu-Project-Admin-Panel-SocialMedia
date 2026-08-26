@@ -177,17 +177,22 @@ const MediaCard = ({
                                     <option value="Night">Night</option>
                                 </select>
                                 <select
+                                    disabled={!fileData.categoryId}
                                     value={fileData.god || ''}
                                     onChange={(e) => onUpdateField('god', e.target.value)}
-                                    className="bg-gray-900 border border-gray-700 rounded text-white text-[10px] outline-none px-2 py-1 w-full"
+                                    className="bg-gray-900 border border-gray-700 rounded text-white text-[10px] outline-none px-2 py-1 w-full disabled:opacity-50"
                                 >
-                                    <option value="">God</option>
-                                    <option value="Shiva">Shiva</option>
-                                    <option value="Murugan">Murugan</option>
-                                    <option value="Perumal">Perumal</option>
-                                    <option value="Sai Baba">Sai Baba</option>
-                                    <option value="Amman">Amman</option>
-                                    <option value="Vinayagar">Vinayagar</option>
+                                    <option value="">Subcategory (Optional)</option>
+                                    {(() => {
+                                        const selectedCat = categories?.find(c => String(c.categoryId) === String(fileData.categoryId));
+                                        const subs = selectedCat?.subcategories || [];
+                                        if (subs.length > 0) {
+                                            return subs.map(sub => (
+                                                <option key={sub} value={sub}>{sub}</option>
+                                            ));
+                                        }
+                                        return null;
+                                    })()}
                                 </select>
                                 <input
                                     type="text"

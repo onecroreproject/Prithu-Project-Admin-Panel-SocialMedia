@@ -259,18 +259,22 @@ const UploadFeedsPage = () => {
                                             </div>
                                             <div className="relative">
                                                 <select
-                                                    disabled={!globalSettings.applyScheduleToAll}
+                                                    disabled={!globalSettings.applyScheduleToAll || !globalSettings.categoryId}
                                                     value={globalSettings.god}
                                                     onChange={(e) => updateGlobalSettings('god', e.target.value)}
                                                     className="w-full bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
                                                 >
-                                                    <option value="">Select God (Optional)</option>
-                                                    <option value="Shiva">Shiva</option>
-                                                    <option value="Murugan">Murugan</option>
-                                                    <option value="Perumal">Perumal</option>
-                                                    <option value="Sai Baba">Sai Baba</option>
-                                                    <option value="Amman">Amman</option>
-                                                    <option value="Vinayagar">Vinayagar</option>
+                                                    <option value="">Select Subcategory (Optional)</option>
+                                                    {(() => {
+                                                        const selectedCat = categories?.find(c => String(c.categoryId) === String(globalSettings.categoryId));
+                                                        const subs = selectedCat?.subcategories || [];
+                                                        if (subs.length > 0) {
+                                                            return subs.map(sub => (
+                                                                <option key={sub} value={sub}>{sub}</option>
+                                                            ));
+                                                        }
+                                                        return null;
+                                                    })()}
                                                 </select>
                                             </div>
                                             <div className="relative md:col-span-2">

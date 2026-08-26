@@ -21,6 +21,17 @@ const FeedUploadPage = () => {
 
     const [editingFileId, setEditingFileId] = useState(null);
 
+    const [customInputModes, setCustomInputModes] = useState({
+        session: false,
+        day: false,
+        god: false,
+        specialDay: false
+    });
+
+    const toggleCustomMode = (field) => {
+        setCustomInputModes(prev => ({ ...prev, [field]: !prev[field] }));
+    };
+
     const defaultFormState = {
         title: '',
         contentType: 'Image',
@@ -217,85 +228,162 @@ const FeedUploadPage = () => {
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-5">
                             <div>
-                                <label className="block text-sm font-semibold mb-2">Session</label>
-                                <select 
-                                    value={formState.session} 
-                                    onChange={(e) => handleChange('session', e.target.value)}
-                                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
-                                >
-                                    <option value="" disabled>Select Session</option>
-                                    <option value="Anytime">Anytime</option>
-                                    <option value="Morning">🌅 Morning (5:00 AM – 11:00 AM)</option>
-                                    <option value="Afternoon">☀️ Afternoon (11:00 AM – 5:00 PM)</option>
-                                    <option value="Evening">🌙 Evening/Night (5:00 PM – 11:00 PM)</option>
-                                </select>
+                                <label className="text-sm font-semibold mb-2 flex justify-between items-center text-gray-700">
+                                    Session
+                                    <button type="button" onClick={() => toggleCustomMode('session')} className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold hover:bg-blue-200 transition-colors">
+                                        {customInputModes.session ? 'Cancel' : '+ Add'}
+                                    </button>
+                                </label>
+                                {customInputModes.session ? (
+                                    <input 
+                                        type="text"
+                                        placeholder="Type custom session..."
+                                        value={formState.session || ''}
+                                        onChange={(e) => handleChange('session', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-blue-200 bg-white focus:border-blue-500 outline-none text-sm"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <select 
+                                        value={formState.session || ''} 
+                                        onChange={(e) => handleChange('session', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
+                                    >
+                                        <option value="" disabled>Select Session</option>
+                                        {formState.session && !['Anytime', 'Morning', 'Afternoon', 'Evening'].includes(formState.session) && (
+                                            <option value={formState.session}>{formState.session}</option>
+                                        )}
+                                        <option value="Anytime">Anytime</option>
+                                        <option value="Morning">🌅 Morning (5:00 AM – 11:00 AM)</option>
+                                        <option value="Afternoon">☀️ Afternoon (11:00 AM – 5:00 PM)</option>
+                                        <option value="Evening">🌙 Evening/Night (5:00 PM – 11:00 PM)</option>
+                                    </select>
+                                )}
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold mb-2">Day</label>
-                                <select 
-                                    value={formState.day} 
-                                    onChange={(e) => handleChange('day', e.target.value)}
-                                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
-                                >
-                                    <option value="" disabled>Select Day</option>
-                                    <option value="Everyday">Everyday</option>
-                                    <option value="Monday">Monday</option>
-                                    <option value="Tuesday">Tuesday</option>
-                                    <option value="Wednesday">Wednesday</option>
-                                    <option value="Thursday">Thursday</option>
-                                    <option value="Friday">Friday</option>
-                                    <option value="Saturday">Saturday</option>
-                                    <option value="Sunday">Sunday</option>
-                                </select>
+                                <label className="text-sm font-semibold mb-2 flex justify-between items-center text-gray-700">
+                                    Day
+                                    <button type="button" onClick={() => toggleCustomMode('day')} className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold hover:bg-blue-200 transition-colors">
+                                        {customInputModes.day ? 'Cancel' : '+ Add'}
+                                    </button>
+                                </label>
+                                {customInputModes.day ? (
+                                    <input 
+                                        type="text"
+                                        placeholder="Type custom day..."
+                                        value={formState.day || ''}
+                                        onChange={(e) => handleChange('day', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-blue-200 bg-white focus:border-blue-500 outline-none text-sm"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <select 
+                                        value={formState.day || ''} 
+                                        onChange={(e) => handleChange('day', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
+                                    >
+                                        <option value="" disabled>Select Day</option>
+                                        {formState.day && !['Everyday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].includes(formState.day) && (
+                                            <option value={formState.day}>{formState.day}</option>
+                                        )}
+                                        <option value="Everyday">Everyday</option>
+                                        <option value="Monday">Monday</option>
+                                        <option value="Tuesday">Tuesday</option>
+                                        <option value="Wednesday">Wednesday</option>
+                                        <option value="Thursday">Thursday</option>
+                                        <option value="Friday">Friday</option>
+                                        <option value="Saturday">Saturday</option>
+                                        <option value="Sunday">Sunday</option>
+                                    </select>
+                                )}
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold mb-2">God (Day Wise)</label>
-                                <select 
-                                    value={formState.god} 
-                                    onChange={(e) => handleChange('god', e.target.value)}
-                                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
-                                >
-                                    <option value="" disabled>Select God (Optional)</option>
-                                    <option value="Shiva">Shiva</option>
-                                    <option value="Vishnu">Vishnu</option>
-                                    <option value="Ganesha">Ganesha</option>
-                                    <option value="Murugan">Murugan</option>
-                                    <option value="Hanuman">Hanuman</option>
-                                    <option value="Devi / Amman">Devi / Amman</option>
-                                    <option value="Lakshmi">Lakshmi</option>
-                                    <option value="Saraswati">Saraswati</option>
-                                    <option value="Sai Baba">Sai Baba</option>
-                                    <option value="Krishna">Krishna</option>
-                                    <option value="Rama">Rama</option>
-                                    <option value="Surya">Surya</option>
-                                    <option value="Navagraha">Navagraha</option>
-                                    <option value="Ayyappan">Ayyappan</option>
-                                </select>
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700 flex justify-between items-center">
+                                    Subcategory
+                                    <button type="button" onClick={() => toggleCustomMode('god')} className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold hover:bg-blue-200 transition-colors">
+                                        {customInputModes.god ? 'Cancel' : '+ Add'}
+                                    </button>
+                                </label>
+                                {customInputModes.god ? (
+                                    <input 
+                                        type="text"
+                                        placeholder="Type custom subcategory..."
+                                        value={formState.god || ''}
+                                        onChange={(e) => handleChange('god', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-blue-200 bg-white focus:border-blue-500 outline-none text-sm"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <select
+                                        disabled={!formState.category || formState.category.length === 0}
+                                        value={formState.god || ''}
+                                        onChange={(e) => handleChange('god', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500 disabled:opacity-50 disabled:bg-gray-50"
+                                    >
+                                        <option value="">Select Subcategory (Optional)</option>
+                                        {(() => {
+                                            const primaryCatId = formState.category?.[0];
+                                            const selectedCat = categories?.find(c => String(c.categoryId) === String(primaryCatId));
+                                            const subs = selectedCat?.subcategories || [];
+                                            
+                                            // Ensure custom value shows up if not in standard subcategories
+                                            const hasCustomVal = formState.god && !subs.includes(formState.god);
+                                            
+                                            return (
+                                                <>
+                                                    {hasCustomVal && <option value={formState.god}>{formState.god}</option>}
+                                                    {subs.map(sub => (
+                                                        <option key={sub} value={sub}>{sub}</option>
+                                                    ))}
+                                                </>
+                                            );
+                                        })()}
+                                    </select>
+                                )}
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold mb-2">Special Day</label>
-                                <select 
-                                    value={formState.specialDay} 
-                                    onChange={(e) => handleChange('specialDay', e.target.value)}
-                                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
-                                >
-                                    <option value="" disabled>Select Special Day (Optional)</option>
-                                    <option value="Amavasya">Amavasya</option>
-                                    <option value="Purnima">Purnima</option>
-                                    <option value="Ekadashi">Ekadashi</option>
-                                    <option value="Pradosham">Pradosham</option>
-                                    <option value="Chaturthi">Chaturthi</option>
-                                    <option value="Sashti">Sashti</option>
-                                    <option value="Sankashti">Sankashti</option>
-                                    <option value="Shivaratri">Shivaratri</option>
-                                    <option value="Navratri">Navratri</option>
-                                    <option value="Diwali">Diwali</option>
-                                    <option value="Pongal / Makar Sankranti">Pongal / Makar Sankranti</option>
-                                    <option value="Tamil New Year">Tamil New Year</option>
-                                    <option value="Krishna Janmashtami">Krishna Janmashtami</option>
-                                    <option value="Ganesh Chaturthi">Ganesh Chaturthi</option>
-                                    <option value="Maha Shivaratri">Maha Shivaratri</option>
-                                </select>
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700 flex justify-between items-center">
+                                    Special Day
+                                    <button type="button" onClick={() => toggleCustomMode('specialDay')} className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold hover:bg-blue-200 transition-colors">
+                                        {customInputModes.specialDay ? 'Cancel' : '+ Add'}
+                                    </button>
+                                </label>
+                                {customInputModes.specialDay ? (
+                                    <input 
+                                        type="text"
+                                        placeholder="Type custom special day..."
+                                        value={formState.specialDay || ''}
+                                        onChange={(e) => handleChange('specialDay', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-blue-200 bg-white focus:border-blue-500 outline-none text-sm"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <select 
+                                        value={formState.specialDay || ''} 
+                                        onChange={(e) => handleChange('specialDay', e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
+                                    >
+                                        <option value="" disabled>Select Special Day (Optional)</option>
+                                        {formState.specialDay && !['Amavasya', 'Purnima', 'Ekadashi', 'Pradosham', 'Chaturthi', 'Sashti', 'Sankashti', 'Shivaratri', 'Navratri', 'Diwali', 'Pongal / Makar Sankranti', 'Tamil New Year', 'Krishna Janmashtami', 'Ganesh Chaturthi', 'Maha Shivaratri'].includes(formState.specialDay) && (
+                                            <option value={formState.specialDay}>{formState.specialDay}</option>
+                                        )}
+                                        <option value="Amavasya">Amavasya</option>
+                                        <option value="Purnima">Purnima</option>
+                                        <option value="Ekadashi">Ekadashi</option>
+                                        <option value="Pradosham">Pradosham</option>
+                                        <option value="Chaturthi">Chaturthi</option>
+                                        <option value="Sashti">Sashti</option>
+                                        <option value="Sankashti">Sankashti</option>
+                                        <option value="Shivaratri">Shivaratri</option>
+                                        <option value="Navratri">Navratri</option>
+                                        <option value="Diwali">Diwali</option>
+                                        <option value="Pongal / Makar Sankranti">Pongal / Makar Sankranti</option>
+                                        <option value="Tamil New Year">Tamil New Year</option>
+                                        <option value="Krishna Janmashtami">Krishna Janmashtami</option>
+                                        <option value="Ganesh Chaturthi">Ganesh Chaturthi</option>
+                                        <option value="Maha Shivaratri">Maha Shivaratri</option>
+                                    </select>
+                                )}
                             </div>
 
                             <div className="relative">

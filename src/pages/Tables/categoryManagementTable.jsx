@@ -8,6 +8,7 @@ export default function CategoryManagement() {
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
+  const [editingSubcategories, setEditingSubcategories] = useState("");
 
   // Sort state
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
@@ -36,6 +37,7 @@ export default function CategoryManagement() {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       setEditingId(null);
       setEditingName("");
+      setEditingSubcategories("");
     },
     onError: (err) => toast.error(err.message || "Update failed"),
   });
@@ -49,11 +51,16 @@ export default function CategoryManagement() {
   const startEdit = (cat) => {
     setEditingId(cat.categoryId);
     setEditingName(cat.categoriesName);
+    setEditingSubcategories(cat.subcategories ? cat.subcategories.join(", ") : "");
   };
 
   const handleUpdate = (categoryId) => {
     if (editingName.trim() === "") return toast.error("Category name cannot be empty");
-    updateMutation.mutate({ id: categoryId, name: editingName.trim() });
+    updateMutation.mutate({ 
+      id: categoryId, 
+      name: editingName.trim(), 
+      subcategories: editingSubcategories 
+    });
   };
 
   // Handle sorting
@@ -122,6 +129,7 @@ export default function CategoryManagement() {
             <tr className="border-b border-gray-200 dark:border-gray-700">
               <th className="p-2">#</th>
               <th className="p-2">Name</th>
+              <th className="p-2">Subcategories</th>
 
               {/* Sortable columns */}
               {["videoCount", "audioCount", "imageCount", "totalFeeds"].map((key) => (
@@ -163,10 +171,34 @@ export default function CategoryManagement() {
                     <input
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
-                      className="w-full border border-gray-300 rounded px-2 py-1"
+                      className="w-full border border-gray-300 rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700"
                     />
                   ) : (
-                    cat.categoriesName
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{cat.categoriesName}</span>
+                  )}
+                </td>
+
+                {/* Editable Subcategories */}
+                <td className="p-2">
+                  {editingId === cat.categoryId ? (
+                    <input
+                      value={editingSubcategories}
+                      onChange={(e) => setEditingSubcategories(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700"
+                      placeholder="e.g. Sub1, Sub2"
+                    />
+                  ) : (
+                    <div className="flex flex-wrap gap-1 max-w-[200px]">
+                      {cat.subcategories && cat.subcategories.length > 0 ? (
+                        cat.subcategories.map(sub => (
+                          <span key={sub} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs rounded-full border border-gray-200 dark:border-gray-700">
+                            {sub}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-400 text-xs italic">None</span>
+                      )}
+                    </div>
                   )}
                 </td>
 
