@@ -238,8 +238,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000
 
 const getFullImageUrl = (url) => {
   if (!url) return "";
-  if (url.startsWith("http")) return url;
-  return `${API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+  let normalizedUrl = url.replace(/\\/g, "/");
+  if (normalizedUrl.startsWith("http")) return normalizedUrl;
+  const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+  return `${baseUrl}${normalizedUrl.startsWith("/") ? "" : "/"}${normalizedUrl}`;
 };
 
 export default function PromptManagementPage() {
@@ -385,6 +387,18 @@ export default function PromptManagementPage() {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const ratio = img.width / img.height;
+        let aspectString = "1:1";
+        if (ratio > 1.2) aspectString = "16:9";
+        else if (ratio < 0.85) aspectString = "9:16";
+        setFormAspectRatio(aspectString);
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+
       setUploadingImage(true);
       try {
         const formData = new FormData();
@@ -755,24 +769,24 @@ export default function PromptManagementPage() {
               exit={{ scale: 0.95, y: 10 }}
               className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-5xl w-full flex flex-col md:flex-row max-h-[95vh] overflow-hidden"
             >
-              <form onSubmit={handleSubmit} className="flex flex-col md:flex-row w-full h-full overflow-hidden">
+              <form onSubmit={handleSubmit} className="flex flex-col md:flex-row w-full h-full min-h-0 overflow-hidden">
                 
                 {/* Left Column: Image Upload */}
-                <div className="w-full md:w-[45%] p-6 md:p-8 bg-white dark:bg-gray-900 flex flex-col shrink-0">
-                  <label className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white mb-4">
+                <div className="w-full md:w-[35%] p-6 md:p-8 bg-white dark:bg-gray-900 flex flex-col min-h-0 shrink-0">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white mb-4 shrink-0">
                     <ImageIcon className="w-4 h-4 text-indigo-600" />
                     Prompt Image <span className="text-red-500">*</span>
                   </label>
 
-                  <div className="flex-1 flex flex-col">
+                  <div className="flex-1 flex flex-col min-h-0">
                     {uploadingImage ? (
                       <div className="flex-1 border-2 border-dashed border-indigo-200 dark:border-indigo-800 bg-transparent rounded-[2rem] p-6 flex flex-col items-center justify-center min-h-[250px]">
                         <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
                         <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Uploading Image...</span>
                       </div>
                     ) : formImageUrl ? (
-                      <div className="flex-1 flex flex-col gap-4">
-                        <div className={`relative rounded-[2rem] overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 flex items-center justify-center w-full flex-1 min-h-[250px]`}>
+                      <div className="flex-1 flex flex-col gap-4 min-h-0">
+                        <div className={`relative rounded-[2rem] overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 flex items-center justify-center w-full flex-1 min-h-[250px] min-h-0`}>
                           <img
                             src={getFullImageUrl(formImageUrl)}
                             alt="Preview"
@@ -820,8 +834,8 @@ export default function PromptManagementPage() {
                 </div>
 
                 {/* Right Column: Form Inputs */}
-                <div className="w-full md:w-[55%] p-6 md:p-8 flex flex-col overflow-y-auto">
-                  <div className="flex items-start justify-between mb-6">
+                <div className="w-full md:w-[65%] p-6 md:p-8 flex flex-col min-h-0 bg-white dark:bg-gray-900">
+                  <div className="flex items-start justify-between mb-6 shrink-0">
                     <div className="flex items-center gap-3">
                       <div className="p-3 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
                         <Sparkles className="w-5 h-5" />
@@ -844,7 +858,7 @@ export default function PromptManagementPage() {
                     </button>
                   </div>
 
-                  <div className="space-y-4 flex-1 pr-2">
+                  <div className="space-y-4 flex-1 pr-2 overflow-y-auto min-h-0">
                     {/* Title */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
@@ -929,24 +943,24 @@ export default function PromptManagementPage() {
                         className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition-shadow"
                       />
                     </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="flex justify-end gap-3 pt-4 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setIsFormOpen(false)}
-                      className="px-6 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-95 flex items-center gap-2"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      {editingPrompt ? "Save Changes" : "Create Prompt"}
-                    </button>
+                    {/* Actions */}
+                    <div className="flex justify-end gap-3 pt-6 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setIsFormOpen(false)}
+                        className="px-6 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-95 flex items-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        {editingPrompt ? "Save Changes" : "Create Prompt"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </form>

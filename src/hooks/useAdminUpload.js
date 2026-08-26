@@ -51,6 +51,10 @@ export const useAdminUpload = () => {
         categoryIds: [],
         isScheduled: false,
         scheduleDate: '',
+        expiryDate: '',
+        session: '',
+        god: '',
+        specialDay: '',
         applyCategoryToAll: false,
         applyScheduleToAll: false
     });
@@ -188,6 +192,10 @@ export const useAdminUpload = () => {
                 categoryIds: globalSettings.applyCategoryToAll ? globalSettings.categoryIds : [],
                 caption: '',
                 scheduleDate: globalSettings.applyScheduleToAll ? globalSettings.scheduleDate : '',
+                expiryDate: globalSettings.applyScheduleToAll ? globalSettings.expiryDate : '',
+                session: globalSettings.applyScheduleToAll ? globalSettings.session : '',
+                god: globalSettings.applyScheduleToAll ? globalSettings.god : '',
+                specialDay: globalSettings.applyScheduleToAll ? globalSettings.specialDay : '',
                 isScheduled: globalSettings.applyScheduleToAll ? globalSettings.isScheduled : false,
                 progress: 0,
                 isEdited: false,
@@ -286,11 +294,15 @@ export const useAdminUpload = () => {
 
             // Auto-apply logic for scheduling
             if (next.applyScheduleToAll) {
-                const hasScheduleUpdate = updates.scheduleDate !== undefined || updates.isScheduled !== undefined;
+                const hasScheduleUpdate = updates.scheduleDate !== undefined || updates.isScheduled !== undefined || updates.expiryDate !== undefined || updates.session !== undefined || updates.god !== undefined || updates.specialDay !== undefined;
                 if (hasScheduleUpdate) {
                     setFiles(f => f.map(file => ({ 
                         ...file, 
                         scheduleDate: next.scheduleDate, 
+                        expiryDate: next.expiryDate,
+                        session: next.session,
+                        god: next.god,
+                        specialDay: next.specialDay,
                         isScheduled: next.isScheduled, 
                         isEdited: true 
                     })));
@@ -301,6 +313,10 @@ export const useAdminUpload = () => {
                 setFiles(f => f.map(file => ({ 
                     ...file, 
                     scheduleDate: next.scheduleDate, 
+                    expiryDate: next.expiryDate,
+                    session: next.session,
+                    god: next.god,
+                    specialDay: next.specialDay,
                     isScheduled: next.isScheduled, 
                     isEdited: true 
                 })));
@@ -380,25 +396,25 @@ export const useAdminUpload = () => {
                     postType = 'image+audio';
                 }
 
-                const formState = fileForms[f.id] || fileForms['default'] || {};
+                const formState = (fileForms && !fileForms.nativeEvent) ? (fileForms[f.id] || fileForms['default'] || {}) : {};
 
                 perFileMetadata[f.file.name] = {
-                    title: formState.title || '',
-                    language: formState.language || 'Both',
-                    tags: formState.tags || '',
-                    description: formState.description || '',
-                    categoryIds: formState.category && formState.category.length > 0 ? formState.category : [],
+                    title: formState.title || f.title || '',
+                    language: formState.language || f.language || 'Both',
+                    tags: formState.tags || f.tags || '',
+                    description: formState.description || f.description || '',
+                    categoryIds: (formState.category && formState.category.length > 0) ? formState.category : (f.categoryIds || []),
                     caption: f.caption,
                     scheduleTime: f.isScheduled ? f.scheduleDate : null,
                     scheduling: {
-                        session: formState.session || '',
-                        day: formState.day || '',
-                        god: formState.god || '',
-                        specialDay: formState.specialDay || '',
-                        publishDate: formState.publishDate || '',
-                        expiryDate: formState.expiryDate || '',
-                        startTime: formState.startTime || '',
-                        endTime: formState.endTime || ''
+                        session: f.session || formState.session || '',
+                        day: f.day || formState.day || '',
+                        god: f.god || formState.god || '',
+                        specialDay: f.specialDay || formState.specialDay || '',
+                        publishDate: f.isScheduled ? f.scheduleDate : (formState.publishDate || ''),
+                        expiryDate: f.expiryDate || formState.expiryDate || '',
+                        startTime: f.startTime || formState.startTime || '',
+                        endTime: f.endTime || formState.endTime || ''
                     },
                     statusOverride,
                     designData: {

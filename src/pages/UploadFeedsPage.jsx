@@ -216,17 +216,73 @@ const UploadFeedsPage = () => {
                                     </button>
 
                                     {globalSettings.isScheduled && (
-                                        <div className="relative animate-in slide-in-from-top-4 duration-500">
-                                            <div className="absolute left-5 top-1/2 -translate-y-1/2 p-2 bg-gray-800 rounded-lg text-blue-400">
-                                                <Calendar size={18} />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-500">
+                                            <div className="relative">
+                                                <div className="absolute left-5 top-1/2 -translate-y-1/2 p-2 bg-gray-800 rounded-lg text-blue-400">
+                                                    <Calendar size={18} />
+                                                </div>
+                                                <input
+                                                    type="datetime-local"
+                                                    disabled={!globalSettings.applyScheduleToAll}
+                                                    value={globalSettings.scheduleDate}
+                                                    onChange={(e) => updateGlobalSettings('scheduleDate', e.target.value)}
+                                                    className="w-full pl-16 bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
+                                                    title="Publish Date"
+                                                />
                                             </div>
-                                            <input
-                                                type="datetime-local"
-                                                disabled={!globalSettings.applyScheduleToAll}
-                                                value={globalSettings.scheduleDate}
-                                                onChange={(e) => updateGlobalSettings('scheduleDate', e.target.value)}
-                                                className="w-full pl-16 bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
-                                            />
+                                            <div className="relative">
+                                                <div className="absolute left-5 top-1/2 -translate-y-1/2 p-2 bg-gray-800 rounded-lg text-red-400">
+                                                    <Calendar size={18} />
+                                                </div>
+                                                <input
+                                                    type="datetime-local"
+                                                    disabled={!globalSettings.applyScheduleToAll}
+                                                    value={globalSettings.expiryDate}
+                                                    onChange={(e) => updateGlobalSettings('expiryDate', e.target.value)}
+                                                    className="w-full pl-16 bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
+                                                    title="Expiry Date (Optional)"
+                                                />
+                                            </div>
+                                            <div className="relative">
+                                                <select
+                                                    disabled={!globalSettings.applyScheduleToAll}
+                                                    value={globalSettings.session}
+                                                    onChange={(e) => updateGlobalSettings('session', e.target.value)}
+                                                    className="w-full bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
+                                                >
+                                                    <option value="">Select Time Slot (Optional)</option>
+                                                    <option value="Morning">Morning</option>
+                                                    <option value="Afternoon">Afternoon</option>
+                                                    <option value="Evening">Evening</option>
+                                                    <option value="Night">Night</option>
+                                                </select>
+                                            </div>
+                                            <div className="relative">
+                                                <select
+                                                    disabled={!globalSettings.applyScheduleToAll}
+                                                    value={globalSettings.god}
+                                                    onChange={(e) => updateGlobalSettings('god', e.target.value)}
+                                                    className="w-full bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
+                                                >
+                                                    <option value="">Select God (Optional)</option>
+                                                    <option value="Shiva">Shiva</option>
+                                                    <option value="Murugan">Murugan</option>
+                                                    <option value="Perumal">Perumal</option>
+                                                    <option value="Sai Baba">Sai Baba</option>
+                                                    <option value="Amman">Amman</option>
+                                                    <option value="Vinayagar">Vinayagar</option>
+                                                </select>
+                                            </div>
+                                            <div className="relative md:col-span-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Festival / Special Day (e.g. Pongal)"
+                                                    disabled={!globalSettings.applyScheduleToAll}
+                                                    value={globalSettings.specialDay}
+                                                    onChange={(e) => updateGlobalSettings('specialDay', e.target.value)}
+                                                    className="w-full bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
+                                                />
+                                            </div>
                                         </div>
                                     )}
                                 </div>

@@ -17,7 +17,7 @@ const MediaCard = ({
     return (
         <div className={`bg-gray-900 border rounded-2xl p-4 flex flex-col gap-4 group transition-all hover:shadow-2xl hover:shadow-blue-500/10 ${fileData.isEdited ? 'border-yellow-500/50 ring-1 ring-yellow-500/20' : 'border-gray-800 hover:border-blue-500/50'}`}>
             {/* Preview Section */}
-            <div className="relative aspect-9/16 bg-black rounded-xl overflow-hidden shadow-inner group/preview">
+            <div className="relative aspect-9/16 bg-black rounded-xl overflow-hidden shadow-inner relative">
                 {isVideo ? (
                     <video
                         src={fileData.preview}
@@ -67,10 +67,10 @@ const MediaCard = ({
                     </div>
                 )}
 
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/preview:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 {/* Actions Shortcut */}
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover/preview:opacity-100 translate-y-2 group-hover/preview:translate-y-0 transition-all duration-300 z-20">
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-20">
                     <button
                         onClick={() => onLivePreview(fileData.id)}
                         className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-lg text-white transition-colors border border-white/10"
@@ -134,8 +134,8 @@ const MediaCard = ({
                         placeholder="Select Categories"
                     />
 
-                    <div className="flex items-center justify-between p-2 bg-gray-800/50 rounded-lg border border-gray-800">
-                        <div className="flex items-center gap-2">
+                    <div className="p-2 bg-gray-800/50 rounded-lg border border-gray-800 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
                             <label className="flex items-center gap-2 cursor-pointer group">
                                 <input
                                     type="checkbox"
@@ -146,16 +146,57 @@ const MediaCard = ({
                                 <div className={`w-8 h-4 rounded-full transition-colors relative ${fileData.isScheduled ? 'bg-blue-600' : 'bg-gray-700'}`}>
                                     <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-all ${fileData.isScheduled ? 'translate-x-4' : ''}`} />
                                 </div>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Schedule</span>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Schedule Rules</span>
                             </label>
                         </div>
                         {fileData.isScheduled && (
-                            <input
-                                type="datetime-local"
-                                value={fileData.scheduleDate}
-                                onChange={(e) => onUpdateField('scheduleDate', e.target.value)}
-                                className="bg-transparent text-white text-[10px] outline-none max-w-[120px]"
-                            />
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                <input
+                                    type="datetime-local"
+                                    value={fileData.scheduleDate || ''}
+                                    onChange={(e) => onUpdateField('scheduleDate', e.target.value)}
+                                    className="bg-gray-900 border border-gray-700 rounded text-white text-[10px] outline-none px-2 py-1 w-full"
+                                    title="Publish Date"
+                                />
+                                <input
+                                    type="datetime-local"
+                                    value={fileData.expiryDate || ''}
+                                    onChange={(e) => onUpdateField('expiryDate', e.target.value)}
+                                    className="bg-gray-900 border border-gray-700 rounded text-white text-[10px] outline-none px-2 py-1 w-full"
+                                    title="Expiry Date"
+                                />
+                                <select
+                                    value={fileData.session || ''}
+                                    onChange={(e) => onUpdateField('session', e.target.value)}
+                                    className="bg-gray-900 border border-gray-700 rounded text-white text-[10px] outline-none px-2 py-1 w-full"
+                                >
+                                    <option value="">Time Slot</option>
+                                    <option value="Morning">Morning</option>
+                                    <option value="Afternoon">Afternoon</option>
+                                    <option value="Evening">Evening</option>
+                                    <option value="Night">Night</option>
+                                </select>
+                                <select
+                                    value={fileData.god || ''}
+                                    onChange={(e) => onUpdateField('god', e.target.value)}
+                                    className="bg-gray-900 border border-gray-700 rounded text-white text-[10px] outline-none px-2 py-1 w-full"
+                                >
+                                    <option value="">God</option>
+                                    <option value="Shiva">Shiva</option>
+                                    <option value="Murugan">Murugan</option>
+                                    <option value="Perumal">Perumal</option>
+                                    <option value="Sai Baba">Sai Baba</option>
+                                    <option value="Amman">Amman</option>
+                                    <option value="Vinayagar">Vinayagar</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    placeholder="Festival (e.g. Pongal)"
+                                    value={fileData.specialDay || ''}
+                                    onChange={(e) => onUpdateField('specialDay', e.target.value)}
+                                    className="col-span-2 bg-gray-900 border border-gray-700 rounded text-white text-[10px] outline-none px-2 py-1 w-full"
+                                />
+                            </div>
                         )}
                     </div>
                 </div>
