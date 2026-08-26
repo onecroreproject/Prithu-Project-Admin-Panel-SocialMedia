@@ -9,6 +9,7 @@ export default function CategoryManagement() {
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [editingSubcategories, setEditingSubcategories] = useState("");
+  const [viewingSubcatId, setViewingSubcatId] = useState(null);
 
   // Sort state
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
@@ -61,6 +62,17 @@ export default function CategoryManagement() {
       name: editingName.trim(), 
       subcategories: editingSubcategories 
     });
+  };
+
+  const handleDeleteSubcategory = (cat, subToRemove) => {
+    if (confirm(`Are you sure you want to remove "${subToRemove}" from ${cat.categoriesName}?`)) {
+      const updatedSubs = cat.subcategories.filter(s => s !== subToRemove);
+      updateMutation.mutate({
+        id: cat.categoryId,
+        name: cat.categoriesName,
+        subcategories: updatedSubs.join(", ")
+      });
+    }
   };
 
   // Handle sorting
@@ -188,13 +200,18 @@ export default function CategoryManagement() {
                       placeholder="e.g. Sub1, Sub2"
                     />
                   ) : (
-                    <div className="flex flex-wrap gap-1 max-w-[200px]">
+                    <div className="flex items-center gap-2">
                       {cat.subcategories && cat.subcategories.length > 0 ? (
-                        cat.subcategories.map(sub => (
-                          <span key={sub} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs rounded-full border border-gray-200 dark:border-gray-700">
-                            {sub}
-                          </span>
-                        ))
+                        <>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{cat.subcategories.length} Subcategories</span>
+                          <button 
+                            className="p-1 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
+                            onClick={() => setViewingSubcatId(cat.categoryId)}
+                            title="View Subcategories"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </>
                       ) : (
                         <span className="text-gray-400 text-xs italic">None</span>
                       )}
@@ -240,6 +257,41 @@ export default function CategoryManagement() {
           </tbody>
         </table>
       )}
+
+      {/* Subcategory View Modal */}
+      {viewingSubcatId && (() => {
+        const cat = categories.find(c => c.categoryId === viewingSubcatId);
+        if (!cat) return null;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl w-full max-w-md max-h-[80vh] flex flex-col shadow-xl border border-gray-200 dark:border-gray-800">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Subcategories for {cat.categoriesName}</h3>
+                <button 
+                  onClick={() => setViewingSubcatId(null)}
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="space-y-2 overflow-y-auto flex-1 pr-2">
+                {cat.subcategories.map(sub => (
+                  <div key={sub} className="flex justify-between items-center p-3 border border-gray-100 dark:border-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">{sub}</span>
+                    <button 
+                      onClick={() => handleDeleteSubcategory(cat, sub)} 
+                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded transition-colors"
+                      title={`Delete ${sub}`}
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   );
 }

@@ -4,8 +4,12 @@ import { Info, CloudUpload, Play, Pencil, CheckCircle, Calendar, Clock } from 'l
 import { clsx } from 'clsx';
 import TemplateEditor from './template/TemplateEditor';
 import CategorySelector from '../common/CategorySelector';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchDropdownConfig, updateDropdownConfig, updateCategory } from '../../Services/FeedServices/feedServices';
+import toast from 'react-hot-toast';
 
 const FeedUploadPage = () => {
+    const queryClient = useQueryClient();
     const {
         files,
         categories,
@@ -28,7 +32,80 @@ const FeedUploadPage = () => {
         specialDay: false
     });
 
-    const toggleCustomMode = (field) => {
+    const [localCustomGods, setLocalCustomGods] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('customUploadGods')) || [];
+        } catch (e) {
+            return [];
+        }
+    });
+
+    // Fetch config
+    const { data: config } = useQuery({
+        queryKey: ["dropdownConfig"],
+        queryFn: fetchDropdownConfig,
+    });
+    
+    // Ensure we always have arrays even if data isn't loaded yet
+    const customOptions = config || { sessions: [], days: [], specialDays: [] };
+    
+    // Update mutation
+    const updateMutation = useMutation({
+        mutationFn: updateDropdownConfig,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["dropdownConfig"] });
+        },
+        onError: (err) => toast.error(err.message || "Failed to save option")
+    });
+
+    const updateCategoryMutation = useMutation({
+        mutationFn: updateCategory,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["categories"] });
+            toast.success("Subcategory permanently added to category!");
+        },
+        onError: (err) => toast.error(err.message || "Failed to save subcategory")
+    });
+
+    const toggleCustomMode = (field, currentValue) => {
+        if (customInputModes[field]) {
+            // we are turning it off, save the current value
+            if (currentValue && field !== 'god') {
+                const apiField = field === 'session' ? 'sessions' : field === 'day' ? 'days' : 'specialDays';
+                const currentList = customOptions[apiField] || [];
+                
+                if (!currentList.includes(currentValue)) {
+                    updateMutation.mutate({
+                        [apiField]: [...currentList, currentValue]
+                    });
+                }
+            } else if (currentValue && field === 'god') {
+                const categoryId = formState.category?.[0];
+                if (categoryId) {
+                    const selectedCat = categories?.find(c => String(c.categoryId) === String(categoryId));
+                    if (selectedCat) {
+                        const currentSubs = selectedCat.subcategories || [];
+                        if (!currentSubs.includes(currentValue)) {
+                            const newSubs = [...currentSubs, currentValue];
+                            updateCategoryMutation.mutate({
+                                id: selectedCat.categoryId,
+                                name: selectedCat.categoriesName,
+                                subcategories: newSubs.join(", ")
+                            });
+                        }
+                    }
+                }
+
+                setLocalCustomGods(prev => {
+                    if (!prev.includes(currentValue)) {
+                        const newList = [...prev, currentValue];
+                        localStorage.setItem('customUploadGods', JSON.stringify(newList));
+                        return newList;
+                    }
+                    return prev;
+                });
+            }
+        }
         setCustomInputModes(prev => ({ ...prev, [field]: !prev[field] }));
     };
 
@@ -230,8 +307,8 @@ const FeedUploadPage = () => {
                             <div>
                                 <label className="text-sm font-semibold mb-2 flex justify-between items-center text-gray-700">
                                     Session
-                                    <button type="button" onClick={() => toggleCustomMode('session')} className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold hover:bg-blue-200 transition-colors">
-                                        {customInputModes.session ? 'Cancel' : '+ Add'}
+                                    <button type="button" onClick={() => toggleCustomMode('session', formState.session)} className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-colors ${customInputModes.session ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}>
+                                        {customInputModes.session ? '✓ Done' : '+ Add'}
                                     </button>
                                 </label>
                                 {customInputModes.session ? (
@@ -250,21 +327,20 @@ const FeedUploadPage = () => {
                                         className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
                                     >
                                         <option value="" disabled>Select Session</option>
-                                        {formState.session && !['Anytime', 'Morning', 'Afternoon', 'Evening'].includes(formState.session) && (
+                                        {customOptions.sessions.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                        {formState.session && !customOptions.sessions.includes(formState.session) && (
                                             <option value={formState.session}>{formState.session}</option>
                                         )}
-                                        <option value="Anytime">Anytime</option>
-                                        <option value="Morning">🌅 Morning (5:00 AM – 11:00 AM)</option>
-                                        <option value="Afternoon">☀️ Afternoon (11:00 AM – 5:00 PM)</option>
-                                        <option value="Evening">🌙 Evening/Night (5:00 PM – 11:00 PM)</option>
                                     </select>
                                 )}
                             </div>
                             <div>
                                 <label className="text-sm font-semibold mb-2 flex justify-between items-center text-gray-700">
                                     Day
-                                    <button type="button" onClick={() => toggleCustomMode('day')} className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold hover:bg-blue-200 transition-colors">
-                                        {customInputModes.day ? 'Cancel' : '+ Add'}
+                                    <button type="button" onClick={() => toggleCustomMode('day', formState.day)} className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-colors ${customInputModes.day ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}>
+                                        {customInputModes.day ? '✓ Done' : '+ Add'}
                                     </button>
                                 </label>
                                 {customInputModes.day ? (
@@ -283,25 +359,20 @@ const FeedUploadPage = () => {
                                         className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
                                     >
                                         <option value="" disabled>Select Day</option>
-                                        {formState.day && !['Everyday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].includes(formState.day) && (
+                                        {customOptions.days.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                        {formState.day && !customOptions.days.includes(formState.day) && (
                                             <option value={formState.day}>{formState.day}</option>
                                         )}
-                                        <option value="Everyday">Everyday</option>
-                                        <option value="Monday">Monday</option>
-                                        <option value="Tuesday">Tuesday</option>
-                                        <option value="Wednesday">Wednesday</option>
-                                        <option value="Thursday">Thursday</option>
-                                        <option value="Friday">Friday</option>
-                                        <option value="Saturday">Saturday</option>
-                                        <option value="Sunday">Sunday</option>
                                     </select>
                                 )}
                             </div>
                             <div className="space-y-1">
                                 <label className="text-sm font-semibold text-gray-700 flex justify-between items-center">
                                     Subcategory
-                                    <button type="button" onClick={() => toggleCustomMode('god')} className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold hover:bg-blue-200 transition-colors">
-                                        {customInputModes.god ? 'Cancel' : '+ Add'}
+                                    <button type="button" onClick={() => toggleCustomMode('god', formState.god)} className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-colors ${customInputModes.god ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}>
+                                        {customInputModes.god ? '✓ Done' : '+ Add'}
                                     </button>
                                 </label>
                                 {customInputModes.god ? (
@@ -327,10 +398,13 @@ const FeedUploadPage = () => {
                                             const subs = selectedCat?.subcategories || [];
                                             
                                             // Ensure custom value shows up if not in standard subcategories
-                                            const hasCustomVal = formState.god && !subs.includes(formState.god);
+                                            const hasCustomVal = formState.god && !subs.includes(formState.god) && !localCustomGods.includes(formState.god);
                                             
                                             return (
                                                 <>
+                                                    {localCustomGods.map(opt => (
+                                                        <option key={opt} value={opt}>{opt}</option>
+                                                    ))}
                                                     {hasCustomVal && <option value={formState.god}>{formState.god}</option>}
                                                     {subs.map(sub => (
                                                         <option key={sub} value={sub}>{sub}</option>
@@ -344,8 +418,8 @@ const FeedUploadPage = () => {
                             <div className="space-y-1">
                                 <label className="text-sm font-semibold text-gray-700 flex justify-between items-center">
                                     Special Day
-                                    <button type="button" onClick={() => toggleCustomMode('specialDay')} className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold hover:bg-blue-200 transition-colors">
-                                        {customInputModes.specialDay ? 'Cancel' : '+ Add'}
+                                    <button type="button" onClick={() => toggleCustomMode('specialDay', formState.specialDay)} className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-colors ${customInputModes.specialDay ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}>
+                                        {customInputModes.specialDay ? '✓ Done' : '+ Add'}
                                     </button>
                                 </label>
                                 {customInputModes.specialDay ? (
@@ -364,24 +438,12 @@ const FeedUploadPage = () => {
                                         className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-blue-500 outline-none text-sm appearance-none text-gray-500"
                                     >
                                         <option value="" disabled>Select Special Day (Optional)</option>
-                                        {formState.specialDay && !['Amavasya', 'Purnima', 'Ekadashi', 'Pradosham', 'Chaturthi', 'Sashti', 'Sankashti', 'Shivaratri', 'Navratri', 'Diwali', 'Pongal / Makar Sankranti', 'Tamil New Year', 'Krishna Janmashtami', 'Ganesh Chaturthi', 'Maha Shivaratri'].includes(formState.specialDay) && (
+                                        {customOptions.specialDays.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                        {formState.specialDay && !customOptions.specialDays.includes(formState.specialDay) && (
                                             <option value={formState.specialDay}>{formState.specialDay}</option>
                                         )}
-                                        <option value="Amavasya">Amavasya</option>
-                                        <option value="Purnima">Purnima</option>
-                                        <option value="Ekadashi">Ekadashi</option>
-                                        <option value="Pradosham">Pradosham</option>
-                                        <option value="Chaturthi">Chaturthi</option>
-                                        <option value="Sashti">Sashti</option>
-                                        <option value="Sankashti">Sankashti</option>
-                                        <option value="Shivaratri">Shivaratri</option>
-                                        <option value="Navratri">Navratri</option>
-                                        <option value="Diwali">Diwali</option>
-                                        <option value="Pongal / Makar Sankranti">Pongal / Makar Sankranti</option>
-                                        <option value="Tamil New Year">Tamil New Year</option>
-                                        <option value="Krishna Janmashtami">Krishna Janmashtami</option>
-                                        <option value="Ganesh Chaturthi">Ganesh Chaturthi</option>
-                                        <option value="Maha Shivaratri">Maha Shivaratri</option>
                                     </select>
                                 )}
                             </div>

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Layers, Folder } from "lucide-react";
+import { Layers, Folder, Settings2 } from "lucide-react";
 
 import CategoryUploadForm from "./Forms/categoryForm";
 import CategoryManagement from "./Tables/categoryManagementTable";
+
+import DropdownManagement from "./Forms/dropdownManagement";
 
 export default function CategoryManagementPage() {
     const [activeTab, setActiveTab] = useState("categoryUpload");
@@ -17,6 +19,7 @@ export default function CategoryManagementPage() {
     const tabs = [
         { id: "categoryUpload", label: "Category Upload", icon: <Layers className="h-4 w-4 mr-2" /> },
         { id: "categoryManagement", label: "Category Management", icon: <Folder className="h-4 w-4 mr-2" /> },
+        { id: "dropdownManagement", label: "Global Options", icon: <Settings2 className="h-4 w-4 mr-2" /> },
     ];
 
     return (
@@ -64,6 +67,19 @@ export default function CategoryManagementPage() {
                             transition={{ duration: 0.3 }}
                         >
                             <CategoryManagement />
+                        </motion.div>
+                    )}
+
+                    {activeTab === "dropdownManagement" && (
+                        <motion.div
+                            key="dropdownManagement"
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            variants={tabVariants}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <DropdownManagement />
                         </motion.div>
                     )}
                 </AnimatePresence>

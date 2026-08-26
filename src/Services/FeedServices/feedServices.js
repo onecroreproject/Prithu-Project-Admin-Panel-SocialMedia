@@ -15,6 +15,26 @@ export async function fetchCategories() {
   }
 }
 
+// ✅ Get Global Dropdown Options
+export async function fetchDropdownConfig() {
+  try {
+    const res = await Api.get("/api/admin/dropdown-config");
+    return res.data.config;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch dropdown config");
+  }
+}
+
+// ✅ Update Global Dropdown Options
+export async function updateDropdownConfig(data) {
+  try {
+    const res = await Api.put("/api/admin/dropdown-config", data);
+    return res.data.config;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update dropdown config");
+  }
+}
+
 // ✅ Upload Feed
 export async function uploadFeed(formData) {
   try {
@@ -98,9 +118,9 @@ export async function deleteCategory(categoryId) {
 
 
 
-export const updateCategory = async ({ id, name }) => {
+export const updateCategory = async ({ id, name, subcategories }) => {
   try {
-    const res = await Api.put(API_ENDPOINTS.ADMIN_UPDATE_CATEGORY, { id, name });
+    const res = await Api.put(API_ENDPOINTS.ADMIN_UPDATE_CATEGORY, { id, name, subcategories });
     return res.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to update category");
