@@ -80,16 +80,26 @@ const FeedUploadPage = () => {
                     });
                 }
             } else if (currentValue && field === 'god') {
+                const currentGodsList = customOptions?.gods || [];
+                if (!currentGodsList.includes(currentValue)) {
+                    updateMutation.mutate({
+                        gods: [...currentGodsList, currentValue]
+                    });
+                }
+
                 const categoryId = formState.category?.[0];
                 if (categoryId) {
-                    const selectedCat = categories?.find(c => String(c.categoryId) === String(categoryId));
+                    const selectedCat = categories?.find(c => 
+                        String(c.categoryId || c._id || c.id) === String(categoryId) ||
+                        String(c.categoriesName || c.name).toLowerCase() === String(categoryId).toLowerCase()
+                    );
                     if (selectedCat) {
                         const currentSubs = selectedCat.subcategories || [];
                         if (!currentSubs.includes(currentValue)) {
                             const newSubs = [...currentSubs, currentValue];
                             updateCategoryMutation.mutate({
-                                id: selectedCat.categoryId,
-                                name: selectedCat.categoriesName,
+                                id: selectedCat.categoryId || selectedCat._id || selectedCat.id,
+                                name: selectedCat.categoriesName || selectedCat.name,
                                 subcategories: newSubs.join(", ")
                             });
                         }
@@ -394,23 +404,24 @@ const FeedUploadPage = () => {
                                         <option value="">Select Subcategory (Optional)</option>
                                         {(() => {
                                             const primaryCatId = formState.category?.[0];
-                                            const selectedCat = categories?.find(c => String(c.categoryId) === String(primaryCatId));
-                                            const subs = selectedCat?.subcategories || [];
-                                            
-                                            // Ensure custom value shows up if not in standard subcategories
-                                            const hasCustomVal = formState.god && !subs.includes(formState.god) && !localCustomGods.includes(formState.god);
-                                            
-                                            return (
-                                                <>
-                                                    {localCustomGods.map(opt => (
-                                                        <option key={opt} value={opt}>{opt}</option>
-                                                    ))}
-                                                    {hasCustomVal && <option value={formState.god}>{formState.god}</option>}
-                                                    {subs.map(sub => (
-                                                        <option key={sub} value={sub}>{sub}</option>
-                                                    ))}
-                                                </>
+                                            const selectedCat = categories?.find(c => 
+                                                String(c.categoryId || c._id || c.id) === String(primaryCatId) ||
+                                                String(c.categoriesName || c.name).toLowerCase() === String(primaryCatId).toLowerCase()
                                             );
+                                            const catSubs = selectedCat?.subcategories || [];
+                                            const configGods = customOptions?.gods || [];
+                                            
+                                            // Combine unique list of subcategories
+                                            const allOptions = Array.from(new Set([
+                                                ...catSubs,
+                                                ...configGods,
+                                                ...localCustomGods,
+                                                ...(formState.god ? [formState.god] : [])
+                                            ])).filter(Boolean);
+
+                                            return allOptions.map(opt => (
+                                                <option key={opt} value={opt}>{opt}</option>
+                                            ));
                                         })()}
                                     </select>
                                 )}
