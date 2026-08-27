@@ -411,15 +411,33 @@ const FeedUploadPage = () => {
                                             const catSubs = selectedCat?.subcategories || [];
                                             const configGods = customOptions?.gods || [];
                                             
-                                            // Combine unique list of subcategories
-                                            const allOptions = Array.from(new Set([
+                                            // Prioritize category subcategories if present, otherwise fallback to global gods
+                                            const rawList = [
                                                 ...catSubs,
-                                                ...configGods,
+                                                ...(catSubs.length === 0 ? configGods : []),
                                                 ...localCustomGods,
                                                 ...(formState.god ? [formState.god] : [])
-                                            ])).filter(Boolean);
+                                            ];
 
-                                            return allOptions.map(opt => (
+                                            // Deduplicate by base text (ignoring emojis/symbols) so "🔱 Lord Shiva" and "Lord Shiva" don't duplicate
+                                            const seen = new Map();
+                                            for (const opt of rawList) {
+                                                if (!opt || typeof opt !== 'string') continue;
+                                                const trimmed = opt.trim();
+                                                if (!trimmed) continue;
+                                                const baseKey = trimmed.replace(/[^\w\s]/gi, '').replace(/\s+/g, ' ').toLowerCase().trim();
+                                                if (!seen.has(baseKey)) {
+                                                    seen.set(baseKey, trimmed);
+                                                } else {
+                                                    // Prefer emoji/richer formatted version
+                                                    const existing = seen.get(baseKey);
+                                                    if (trimmed.length > existing.length) {
+                                                        seen.set(baseKey, trimmed);
+                                                    }
+                                                }
+                                            }
+
+                                            return Array.from(seen.values()).map(opt => (
                                                 <option key={opt} value={opt}>{opt}</option>
                                             ));
                                         })()}
