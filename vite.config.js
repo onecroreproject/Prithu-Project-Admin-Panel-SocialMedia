@@ -15,6 +15,7 @@ export default defineConfig({
     // rollupOptions removed: Aggressive manualChunks often cause "Cannot access 'React' before initialization" in Vite/Rollup by breaking module execution order.
   },
   server: {
+    port: 5175,
     host: true, // Allow access from local network IPs
   }
 });

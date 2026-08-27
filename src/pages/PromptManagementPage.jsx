@@ -362,14 +362,19 @@ export default function PromptManagementPage() {
 
   const handleDeleteCategory = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
+      const prevCats = [...categories];
+      setCategories((prev) => prev.filter((c) => c._id !== id && c.id !== id));
       setCategoryLoading(true);
       try {
         const { data } = await api.delete(`/api/admin/aicategories/${id}`);
         if (data && data.success) {
           toast.success("Category deleted successfully! 🗑️");
-          fetchCategoriesFromApi();
+        } else {
+          setCategories(prevCats);
+          toast.error(data?.message || "Failed to delete category");
         }
       } catch (err) {
+        setCategories(prevCats);
         console.error("Error deleting category:", err);
         toast.error(err.response?.data?.message || "Failed to delete category. Check if prompts are using it.");
       } finally {
@@ -497,18 +502,25 @@ export default function PromptManagementPage() {
     }
   };
 
-  // Delete Prompt
+  // Delete Prompt (Instant Optimistic Delete)
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this prompt?")) {
+      // Keep previous list for rollback if API fails
+      const previousPrompts = [...prompts];
+
+      // ⚡ Instant 0ms UI removal
+      setPrompts((prev) => prev.filter((p) => p.id !== id && p._id !== id));
+
       try {
         const { data } = await api.delete("/api/admin/prompts/" + id);
         if (data && data.success) {
           toast.success("Prompt deleted successfully! 🗑️");
-          fetchPromptsFromApi();
         } else {
-          toast.error(data.message || "Failed to delete prompt");
+          setPrompts(previousPrompts);
+          toast.error(data?.message || "Failed to delete prompt");
         }
       } catch (err) {
+        setPrompts(previousPrompts);
         console.error("Error deleting prompt:", err);
         toast.error(err.response?.data?.message || "Server error while deleting prompt.");
       }
@@ -699,6 +711,10 @@ export default function PromptManagementPage() {
                           src={getFullImageUrl(prompt.imageUrl)}
                           alt="preview"
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100";
+                          }}
                         />
                       </div>
                     </td>
@@ -1047,6 +1063,10 @@ export default function PromptManagementPage() {
                   src={getFullImageUrl(previewPrompt.imageUrl)}
                   alt={previewPrompt.title}
                   className="w-full h-full object-cover max-h-[90vh]"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600";
+                  }}
                 />
                 <span className="absolute bottom-4 right-4 bg-black/60 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-xs">
                   {previewPrompt.aspectRatio} | {previewPrompt.category}
