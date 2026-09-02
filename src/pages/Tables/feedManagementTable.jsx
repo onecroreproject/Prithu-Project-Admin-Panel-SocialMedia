@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, Trash, Calendar, Play, X, Edit, Image } from "lucide-react";
+import { Eye, Trash, Calendar, Play, X, Edit, Image, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { fetchFeeds, deleteFeed, removeFeedCategory, fetchCategories, updateFeedSchedule } from "../../Services/FeedServices/feedServices";
@@ -9,12 +9,14 @@ import usePagination from "../../hooks/pagePagination";
 import FeedPreviewModal from "../../components/common/FeedPreviewModal";
 import FeedOverlayEditModal from "../../components/common/FeedOverlayEditModal";
 import ScheduleEditModal from "../../components/common/ScheduleEditModal";
+import FeedCategoryEditModal from "../../components/common/FeedCategoryEditModal";
 
 export default function FeedManagement() {
   const queryClient = useQueryClient();
   const { filters, handleFilterChange, resetFilters, applyFilters } = useFeedFilter();
   const [selectedFeed, setSelectedFeed] = useState(null);
   const [editingFeed, setEditingFeed] = useState(null);
+  const [editingCategoryFeed, setEditingCategoryFeed] = useState(null);
 
   // Fetch feeds
   const { data: feedData = { feeds: [], totalFeeds: 0, totalImages: 0, totalVideos: 0 }, isLoading: feedsLoading, isError: feedsError, error: feedsErr } = useQuery({
@@ -33,11 +35,24 @@ export default function FeedManagement() {
   // Mutation: Delete feed
   const deleteMutation = useMutation({
     mutationFn: ({ feedId }) => deleteFeed({ feedId }),
+    onMutate: async ({ feedId }) => {
+      await queryClient.cancelQueries({ queryKey: ["feeds"] });
+      queryClient.setQueriesData({ queryKey: ["feeds"] }, (oldData) => {
+        if (!oldData || !oldData.feeds) return oldData;
+        return {
+          ...oldData,
+          feeds: oldData.feeds.filter(f => f._id !== feedId)
+        };
+      });
+    },
     onSuccess: () => {
       toast.success("Feed deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["feeds"] });
     },
-    onError: (err) => toast.error(err.message || "Delete failed"),
+    onError: (err) => {
+      toast.error(err.message || "Delete failed");
+      queryClient.invalidateQueries({ queryKey: ["feeds"] });
+    },
   });
 
   // Mutation: Remove category from feed
@@ -302,26 +317,43 @@ export default function FeedManagement() {
 
                 {/* CATEGORIES COLUMN */}
                 <td className="p-3">
-                  <div className="flex flex-wrap gap-1.5">
-                    {feed.categories && feed.categories.length > 0 ? (
-                      feed.categories.map((cat) => (
-                        <span
-                          key={cat.id}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-[11px] font-bold uppercase tracking-wider dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200/50 dark:border-blue-700/50"
-                        >
-                          {cat.name}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 items-center">
+                      {feed.categories && feed.categories.length > 0 ? (
+                        <>
+                          {feed.categories.map((cat) => (
+                            <span
+                              key={cat.id}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-[11px] font-bold uppercase tracking-wider dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200/50 dark:border-blue-700/50"
+                            >
+                              {cat.name}
+                            </span>
+                          ))}
+                          {feed.subCategory && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-full text-[11px] font-bold uppercase tracking-wider dark:bg-indigo-900/40 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-700/50">
+                              {feed.subCategory}
+                            </span>
+                          )}
                           <button
-                            onClick={() => handleRemoveCategory(feed._id, cat.id)}
-                            className="hover:text-red-500 transition-colors p-0.5"
-                            title="Remove Category"
+                            onClick={() => setEditingCategoryFeed(feed)}
+                            className="ml-2 text-gray-500 hover:text-blue-600 transition-colors"
+                            title="Edit Category"
                           >
-                            <X className="w-3 h-3" />
+                            <Edit className="w-4 h-4" />
                           </button>
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-400 text-xs italic">No Categories</span>
-                    )}
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 text-xs italic">No Categories</span>
+                          <button
+                            onClick={() => setEditingCategoryFeed(feed)}
+                            className="text-blue-500 hover:text-blue-700 flex items-center gap-1 text-xs font-medium"
+                          >
+                            <Plus className="w-3 h-3" /> Add
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
 
@@ -413,6 +445,19 @@ export default function FeedManagement() {
           <FeedOverlayEditModal
             feed={editingFeed}
             onClose={() => setEditingFeed(null)}
+          />
+        )
+      }
+
+      {/* ============================================
+          FEED CATEGORY EDIT MODAL
+      ============================================ */}
+      {
+        editingCategoryFeed && (
+          <FeedCategoryEditModal
+            feed={editingCategoryFeed}
+            categories={categories}
+            onClose={() => setEditingCategoryFeed(null)}
           />
         )
       }

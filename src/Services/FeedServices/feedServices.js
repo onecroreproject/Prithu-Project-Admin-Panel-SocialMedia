@@ -136,6 +136,15 @@ export async function removeFeedCategory({ feedId, categoryId }) {
   }
 }
 
+export async function updateFeedCategoryAndSub({ feedId, categoryId, subCategory }) {
+  try {
+    const res = await Api.put(`${API_ENDPOINTS.ADMIN_UPDATE_FEED_DESIGN}/${feedId}/category`, { categoryId, subCategory });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update category for feed");
+  }
+}
+
 // ✅ Get Feed Design
 export async function fetchFeedDesign(feedId) {
   try {
