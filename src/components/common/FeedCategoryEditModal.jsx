@@ -1,8 +1,77 @@
-import React, { useState } from "react";
-import { X, Check, Plus, Trash } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { X, Check, Plus, Trash, ChevronDown } from "lucide-react";
 import { updateFeedCategoryAndSub, addCategory, updateCategory, deleteCategory } from "../../Services/FeedServices/feedServices";
 import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+const SearchableSelect = ({ value, options, onChange, placeholder, disabled = false }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredOptions = options.filter(opt => 
+    opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className={`relative ${disabled ? "opacity-50 pointer-events-none" : ""}`} ref={dropdownRef}>
+      <div 
+        className="w-full border border-gray-300 rounded p-2 dark:bg-gray-800 dark:border-gray-700 text-sm cursor-pointer flex justify-between items-center bg-white dark:bg-gray-800"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="truncate pr-2">{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDown className="w-4 h-4 text-gray-500 shrink-0" />
+      </div>
+      
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg max-h-60 flex flex-col">
+          <div className="p-2 border-b dark:border-gray-700 sticky top-0 bg-gray-50 dark:bg-gray-900 rounded-t">
+            <input 
+              type="text"
+              placeholder="Search..."
+              className="w-full p-1 border rounded dark:bg-gray-800 dark:border-gray-700 text-sm focus:outline-none focus:border-blue-500 bg-white"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+            />
+          </div>
+          <div className="overflow-y-auto">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map(opt => (
+                <div
+                  key={opt.value}
+                  className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm ${opt.value === value ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium" : ""}`}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                    setSearchTerm("");
+                  }}
+                >
+                  {opt.label}
+                </div>
+              ))
+            ) : (
+              <div className="p-2 text-gray-500 text-sm text-center">No results found</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function FeedCategoryEditModal({ feed, categories, onClose }) {
   const queryClient = useQueryClient();
@@ -229,107 +298,98 @@ export default function FeedCategoryEditModal({ feed, categories, onClose }) {
                 />
                 <button 
                   onClick={handleAddMain}
-                  disabled={addMainMutation.isLoading || !newMainName.trim()}
+                  disabled={addMainMutation.isPending || !newMainName.trim()}
                   className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50"
                 >
                   Save
                 </button>
               </div>
             ) : (
-              <select
+              <SearchableSelect
                 value={selectedMainCat}
-                onChange={handleMainCatChange}
-                className="w-full border border-gray-300 rounded p-2 dark:bg-gray-800 dark:border-gray-700 text-sm"
-              >
-                <option value="">-- Select Main Category --</option>
-                {categories.map((cat) => (
-                  <option key={cat.categoryId} value={cat.categoryId}>
-                    {cat.categoriesName}
-                  </option>
-                ))}
-              </select>
+                options={categories.map(cat => ({ value: cat.categoryId, label: cat.categoriesName }))}
+                onChange={(val) => {
+                  setSelectedMainCat(val);
+                  setSelectedSubCat("");
+                }}
+                placeholder="-- Select Main Category --"
+              />
             )}
           </div>
 
-          {selectedMainCat && !isAddingMain && (
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium">Subcategory</label>
-                <div className="flex gap-2">
-                  {selectedSubCat && !isAddingSub && (
-                    <button 
-                      onClick={handleDeleteSub}
-                      disabled={deleteSubMutation.isLoading}
-                      className="text-red-500 hover:text-red-600 text-xs flex items-center gap-1"
-                    >
-                      <Trash className="w-3 h-3" /> Delete
-                    </button>
-                  )}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-sm font-medium">Subcategory</label>
+              <div className="flex gap-2">
+                {selectedSubCat && !isAddingSub && (
+                  <button 
+                    onClick={handleDeleteSub}
+                    disabled={deleteSubMutation.isPending}
+                    className="text-red-500 hover:text-red-600 text-xs flex items-center gap-1"
+                  >
+                    <Trash className="w-3 h-3" /> Delete
+                  </button>
+                )}
+                {selectedMainCat && (
                   <button 
                     onClick={() => setIsAddingSub(!isAddingSub)}
                     className="text-blue-500 hover:text-blue-600 text-xs flex items-center gap-1"
                   >
                     <Plus className="w-3 h-3" /> {isAddingSub ? "Cancel" : "Add"}
                   </button>
-                </div>
+                )}
               </div>
-              
-              {isAddingSub ? (
-                <div className="flex gap-2">
-                  <input 
-                    type="text" 
-                    value={newSubName}
-                    onChange={(e) => setNewSubName(e.target.value)}
-                    placeholder="New Subcategory"
-                    className="w-full border border-gray-300 rounded p-2 dark:bg-gray-800 dark:border-gray-700 text-sm"
-                  />
-                  <button 
-                    onClick={handleAddSub}
-                    disabled={addSubMutation.isLoading || !newSubName.trim()}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50"
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : subcategories.length > 0 ? (
-                <select
-                  value={selectedSubCat}
-                  onChange={(e) => setSelectedSubCat(e.target.value)}
-                  className="w-full border border-gray-300 rounded p-2 dark:bg-gray-800 dark:border-gray-700 text-sm"
-                >
-                  <option value="">-- Select Subcategory --</option>
-                  {subcategories.map((sub, idx) => (
-                    <option key={idx} value={sub}>
-                      {sub}
-                    </option>
-                  ))}
-                  {selectedSubCat && !subcategories.includes(selectedSubCat) && (
-                    <option value={selectedSubCat}>{selectedSubCat}</option>
-                  )}
-                </select>
-              ) : (
-                <p className="text-sm text-gray-500 italic">
-                  No subcategories available for this category.
-                </p>
-              )}
             </div>
-          )}
+            
+            {isAddingSub ? (
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={newSubName}
+                  onChange={(e) => setNewSubName(e.target.value)}
+                  placeholder="New Subcategory"
+                  className="w-full border border-gray-300 rounded p-2 dark:bg-gray-800 dark:border-gray-700 text-sm"
+                />
+                <button 
+                  onClick={handleAddSub}
+                  disabled={addSubMutation.isPending || !newSubName.trim()}
+                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <SearchableSelect
+                value={selectedSubCat}
+                options={subcategories.map(sub => ({ value: sub, label: sub }))}
+                onChange={setSelectedSubCat}
+                placeholder="-- Select Subcategory --"
+                disabled={!selectedMainCat || subcategories.length === 0}
+              />
+            )}
+            
+            {!isAddingSub && selectedMainCat && subcategories.length === 0 && (
+              <p className="text-xs text-gray-500 mt-1 italic">
+                No subcategories available for this category.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm font-medium"
+            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm font-medium"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            disabled={!isChanged || updateMutation.isLoading || isAddingMain || isAddingSub}
+            disabled={!isChanged || updateMutation.isPending || isAddingMain || isAddingSub}
             className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 text-sm font-medium"
           >
             <Check className="w-4 h-4" />
-            {updateMutation.isLoading ? "Saving..." : "Save"}
+            {updateMutation.isPending ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
