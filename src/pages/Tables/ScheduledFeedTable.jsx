@@ -17,10 +17,11 @@ export default function ScheduledFeedTable() {
     const [editingFeed, setEditingFeed] = useState(null);
 
     // Fetch feeds
-    const { data: feeds = [], isLoading: feedsLoading, isError: feedsError, error: feedsErr } = useQuery({
+    const { data: feedData = { feeds: [] }, isLoading: feedsLoading, isError: feedsError, error: feedsErr } = useQuery({
         queryKey: ["feeds"],
         queryFn: fetchFeeds,
     });
+    const feeds = feedData.feeds || [];
 
     // Fetch categories
     const { data: categories = [] } = useQuery({

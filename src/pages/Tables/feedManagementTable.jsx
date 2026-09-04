@@ -277,9 +277,11 @@ export default function FeedManagement() {
                     {feed.type === "video" ? (
                       <div className="relative w-16 h-16 cursor-pointer group">
                         <video
-                          src={feed.contentUrl}
+                          src={`${feed.contentUrl}#t=0.001`}
+                          poster={feed.thumbnailUrl || feed.contentUrl}
                           className="w-full h-full object-cover rounded-md"
                           muted
+                          preload="metadata"
                           onClick={() => setSelectedFeed(feed)}
                         />
                         <div
