@@ -1,0 +1,241 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* --- ENTRY ANIMATIONS --- */
+.anim-n {
+  animation: slideInN var(--anim-speed, 0.8s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-s {
+  animation: slideInS var(--anim-speed, 0.8s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-e {
+  animation: slideInE var(--anim-speed, 0.8s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-w {
+  animation: slideInW var(--anim-speed, 0.8s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-nw {
+  animation: slideInNW var(--anim-speed, 0.8s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-ne {
+  animation: slideInNE var(--anim-speed, 0.8s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-sw {
+  animation: slideInSW var(--anim-speed, 0.8s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.anim-se {
+  animation: slideInSE var(--anim-speed, 0.8s) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes slideInN {
+  from {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInS {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInE {
+  from {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInW {
+  from {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInNW {
+  from {
+    transform: translate(-100px, -100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInNE {
+  from {
+    transform: translate(100px, -100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInSW {
+  from {
+    transform: translate(-100px, 100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInSE {
+  from {
+    transform: translate(100px, 100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+/* --- RESIZERS --- */
+.resizer {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #3b82f6;
+  border: 1px solid white;
+  z-index: 100;
+  border-radius: 50%;
+}
+
+.resizer.nw {
+  top: -5px;
+  left: -5px;
+  cursor: nw-resize;
+}
+
+.resizer.ne {
+  top: -5px;
+  right: -5px;
+  cursor: ne-resize;
+}
+
+.resizer.sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: sw-resize;
+}
+
+.resizer.se {
+  bottom: -5px;
+  right: -5px;
+  cursor: se-resize;
+}
+
+.resizer.n {
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+
+.resizer.s {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+
+.resizer.e {
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
+
+.resizer.w {
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: w-resize;
+}
+
+.canvas-el.sel {
+  outline: 2px dashed #3b82f6;
+}

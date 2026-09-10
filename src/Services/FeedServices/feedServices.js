@@ -1,0 +1,263 @@
+import Api from "../apiService.js";
+import { API_ENDPOINTS } from "../../API-Constanse/apiConstance.js";
+
+
+
+
+// ✅ Get categories
+export async function fetchCategories() {
+  try {
+    const res = await Api.get(API_ENDPOINTS.ADMIN_GET_CATEGORY);
+
+    return res.data.categories;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch categories");
+  }
+}
+
+// ✅ Get Global Dropdown Options (Legacy Compatible)
+export async function fetchDropdownConfig() {
+  try {
+    const res = await Api.get("/api/admin/dropdown-config");
+    return res.data.config;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch dropdown config");
+  }
+}
+
+// ✅ Update Global Dropdown Options (Legacy Compatible)
+export async function updateDropdownConfig(data) {
+  try {
+    const res = await Api.put("/api/admin/dropdown-config", data);
+    return res.data.config;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update dropdown config");
+  }
+}
+
+// ==========================================
+// 🚀 POST GLOBAL OPTIONS API
+// ==========================================
+
+export async function fetchPostGlobalOptions() {
+  try {
+    const res = await Api.get("/api/admin/post-global-options");
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch post global options");
+  }
+}
+
+export async function addWeekGod(data) {
+  try {
+    const res = await Api.post("/api/admin/post-global-options/week-gods", data);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to add week god");
+  }
+}
+
+export async function updateWeekGod({ id, data }) {
+  try {
+    const res = await Api.put(`/api/admin/post-global-options/week-gods/${id}`, data);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update week god");
+  }
+}
+
+export async function deleteWeekGod(id) {
+  try {
+    const res = await Api.delete(`/api/admin/post-global-options/week-gods/${id}`);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to delete week god");
+  }
+}
+
+export async function addSpecialDay(data) {
+  try {
+    const res = await Api.post("/api/admin/post-global-options/special-days", data);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to add special day");
+  }
+}
+
+export async function updateSpecialDay({ id, data }) {
+  try {
+    const res = await Api.put(`/api/admin/post-global-options/special-days/${id}`, data);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update special day");
+  }
+}
+
+export async function deleteSpecialDay(id) {
+  try {
+    const res = await Api.delete(`/api/admin/post-global-options/special-days/${id}`);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to delete special day");
+  }
+}
+
+export async function updateSessionsConfig(sessions) {
+  try {
+    const res = await Api.put("/api/admin/post-global-options/sessions", { sessions });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update sessions");
+  }
+}
+
+export async function updateDaysConfig(days) {
+  try {
+    const res = await Api.put("/api/admin/post-global-options/days", { days });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update days");
+  }
+}
+
+// ✅ Upload Feed
+export async function uploadFeed(formData) {
+  try {
+    const tokenData = localStorage.getItem("admin");
+    if (!tokenData) throw new Error("Admin token not found");
+
+    const { token } = JSON.parse(tokenData);
+
+
+    const res = await Api.post(API_ENDPOINTS.ADMIN_UPLOAD_FEED, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || "Failed to upload feed");
+  }
+}
+
+
+export async function deleteFeed({ feedId }) {
+  try {
+    const res = await Api.delete(API_ENDPOINTS.ADMIN_DELETE_FEED, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: { feedId },
+    });
+
+    return res.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to delete feed"
+    );
+  }
+}
+
+
+
+
+
+// ✅ Add Category
+export async function addCategory(data) {
+  try {
+
+    const res = await Api.post(API_ENDPOINTS.ADMIN_UPLOAD_CATEGORY, data);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to add category");
+  }
+}
+
+
+// ✅ Fetch Feeds
+export async function fetchFeeds(params = {}) {
+  try {
+    const res = await Api.get(API_ENDPOINTS.ADMIN_GET_ALL_FEED, { params });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch feeds");
+  }
+}
+
+
+// ✅ Delete Category
+export async function deleteCategory(categoryId) {
+  try {
+    const res = await Api.delete(API_ENDPOINTS.ADMIN_DELETE_CATEGORY, {
+      data: { categoryId }
+    });
+    return res.data; // 👈 return success info
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to delete category");
+  }
+}
+
+
+
+export const updateCategory = async ({ id, name, subcategories }) => {
+  try {
+    const res = await Api.put(API_ENDPOINTS.ADMIN_UPDATE_CATEGORY, { id, name, subcategories });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update category");
+  }
+};
+
+export async function removeFeedCategory({ feedId, categoryId }) {
+  try {
+    const res = await Api.delete(`${API_ENDPOINTS.REMOVE_FEED_CATEGORY}/${feedId}/category/${categoryId}`);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to remove category from feed");
+  }
+}
+
+export async function updateFeedCategoryAndSub({ feedId, categoryId, subCategory }) {
+  try {
+    const res = await Api.put(`${API_ENDPOINTS.ADMIN_UPDATE_FEED_DESIGN}/${feedId}/category`, { categoryId, subCategory });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update category for feed");
+  }
+}
+
+// ✅ Get Feed Design
+export async function fetchFeedDesign(feedId) {
+  try {
+    const res = await Api.get(`${API_ENDPOINTS.ADMIN_GET_FEED_DESIGN}/${feedId}/design`);
+    return res.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch feed design");
+  }
+}
+
+// ✅ Update Feed Design
+export async function updateFeedDesignMetadata(feedId, { designMetadata, editMetadata }) {
+  try {
+    const res = await Api.put(`${API_ENDPOINTS.ADMIN_UPDATE_FEED_DESIGN}/${feedId}/design`, { designMetadata, editMetadata });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update feed design");
+  }
+}
+
+
+
+// ✅ Update Feed Schedule
+export async function updateFeedSchedule(feedId, { scheduleTime }) {
+  try {
+    const res = await Api.patch(`${API_ENDPOINTS.ADMIN_UPDATE_FEED_SCHEDULE}/${feedId}/schedule`, { scheduleTime });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update feed schedule");
+  }
+}
