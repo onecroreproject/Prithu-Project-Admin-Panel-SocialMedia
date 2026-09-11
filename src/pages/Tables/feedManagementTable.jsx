@@ -158,6 +158,7 @@ export default function FeedManagement() {
     resetPage, 
     pageSize, 
     setPageSize,
+    itemsPerPage,
     startIndex,
     endIndex,
     totalItems
@@ -627,7 +628,7 @@ export default function FeedManagement() {
           <div className="p-4 sm:p-6 bg-slate-50/30 dark:bg-slate-900/30">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-5">
               {currentItems.map((feed, idx) => {
-                const globalIdx = (page - 1) * itemsPerPage + idx + 1;
+                const globalIdx = startIndex + idx;
                 const isVideo = feed.type === "video";
                 const creatorName = feed.creator?.userName || feed.creator?.name || "Admin Studio";
                 const aspectClass = getAspectRatioClass(postSize, feed);
