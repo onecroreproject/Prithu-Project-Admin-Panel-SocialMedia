@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { clsx } from 'clsx';
-import { Play, Pause, RotateCcw, X } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Calendar as CalendarIcon } from 'lucide-react';
 import { throttle } from 'lodash';
 import sampleAvatar from '../../../Assets/sampleimage.png';
 
@@ -209,38 +209,197 @@ const OverlayItem = React.memo(({
                     </div>
                 )}
                 {overlay.type === 'calendar' && (
-                    <div 
-                        className={clsx(
-                            "w-full h-full flex flex-col bg-white shadow-2xl overflow-hidden relative border border-gray-200",
-                            overlay.shape === 'round' ? 'rounded-full' : overlay.shape === 'square' ? 'rounded-3xl' : 'rounded-lg'
-                        )}
-                    >
-                        <div className="absolute top-0 w-full flex justify-evenly z-10" style={{ height: calendarWidth * 0.1, marginTop: -calendarWidth * 0.02 }}>
-                            {[1,2,3,4].map(i => (
-                                <div key={i} className="bg-gray-800 shadow-sm" style={{ width: calendarWidth * 0.03, height: calendarWidth * 0.1, borderRadius: calendarWidth }} />
-                            ))}
-                        </div>
-                        <div className="w-full flex items-center justify-center" style={{ 
-                            paddingTop: calendarWidth * 0.12, 
-                            paddingBottom: calendarWidth * 0.04,
-                            backgroundColor: overlay.calendarConfig?.headerColor || footerColor || '#E54B35' 
-                        }}>
-                            <span className="text-white font-black uppercase tracking-widest" style={{ fontSize: calendarWidth * 0.15 }}>{new Date().toLocaleString('default', { month: 'short' })}</span>
-                        </div>
-                        <div className="flex-1 flex flex-col items-center justify-center" style={{ 
-                            paddingLeft: calendarWidth * 0.05, paddingRight: calendarWidth * 0.05, paddingTop: calendarWidth * 0.02, paddingBottom: calendarWidth * 0.02,
-                            backgroundColor: overlay.calendarConfig?.bodyColor || '#F9F9F9' 
-                        }}>
-                            <span className="font-semibold text-gray-500 uppercase tracking-widest" style={{ fontSize: calendarWidth * 0.12, marginBottom: -calendarWidth * 0.05 }}>{new Date().toLocaleString('default', { weekday: 'short' })}</span>
-                            <span className="font-black text-[#2B3544] tracking-tighter leading-none" style={{ fontSize: calendarWidth * 0.45 }}>{new Date().getDate()}</span>
-                            <span className="font-bold text-gray-400" style={{ fontSize: calendarWidth * 0.10, marginTop: calendarWidth * 0.02 }}>{new Date().getFullYear()}</span>
-                        </div>
-                    </div>
+                    renderCalendarOverlay(overlay, calendarWidth, footerColor)
                 )}
             </div>
         </div>
     );
 });
+
+const renderCalendarOverlay = (overlay, calendarWidth, footerColor) => {
+    const calConfig = overlay.calendarConfig || overlay.metadata?.calendarConfig || {};
+    const calStyle = calConfig.style || overlay.style || 'simple_icon';
+    const showIcon = calConfig.showIcon !== false;
+    const shape = overlay.shape || overlay.metadata?.shape || 'rectangle';
+    const headerColor = overlay.bg || calConfig.headerColor || overlay.metadata?.calendarConfig?.headerColor || footerColor || '#E54B35';
+    const bodyColor = overlay.bodyBg || calConfig.bodyColor || overlay.metadata?.calendarConfig?.bodyColor || '#F9F9F9';
+    let textColor = calConfig.textColor || calConfig.headerColor || '#FFFFFF';
+    let iconColor = calConfig.iconColor || calConfig.headerColor || '#FFFFFF';
+
+    const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const resolveMonthIndex = (m) => {
+        if (m === undefined || m === null) return -1;
+        if (typeof m === 'number') return m;
+        const idx = MONTH_NAMES.indexOf(String(m).toUpperCase().slice(0, 3));
+        return idx;
+    };
+
+    let d = null;
+    const rawDay = overlay.day ?? overlay.metadata?.day ?? calConfig.day;
+    const rawMonth = overlay.month ?? overlay.metadata?.month ?? calConfig.month;
+    const rawYear = overlay.year ?? overlay.metadata?.year ?? calConfig.year;
+
+    if (rawDay && rawMonth !== undefined && rawMonth !== null && rawYear) {
+        const monthIdx = resolveMonthIndex(rawMonth);
+        if (monthIdx >= 0) {
+            d = new Date(Number(rawYear), monthIdx, Number(rawDay));
+            if (isNaN(d.getTime())) d = null;
+        }
+    }
+
+    if (!d) {
+        d = new Date();
+    }
+
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const monthLabel = overlay.month || overlay.metadata?.month || (d ? months[d.getMonth()] : '');
+    const dayLabel = overlay.dayLabel || overlay.metadata?.dayLabel || (d ? days[d.getDay()] : '');
+    const dateNum = overlay.day || overlay.metadata?.day || (d ? String(d.getDate()).padStart(2, '0') : '');
+    const monthNum = d ? String(d.getMonth() + 1).padStart(2, '0') : '01';
+    const yearNum = overlay.year || overlay.metadata?.year || (d ? d.getFullYear() : '');
+
+    const format = calConfig.format || 'DD.MM.YYYY';
+    const formattedDate = format === 'DD/MM/YYYY' ? `${dateNum}/${monthNum}/${yearNum}`
+        : format === 'DD-MM-YYYY' ? `${dateNum}-${monthNum}-${yearNum}`
+        : format === 'DD MMM YYYY' ? `${dateNum} ${monthLabel} ${yearNum}`
+        : `${dateNum}.${monthNum}.${yearNum}`;
+
+    const showBgBadge = calConfig.showBgBadge === true || (calStyle === 'tag_badge' && calConfig.showBgBadge !== false);
+    const badgeStyle = calConfig.badgeStyle || (calStyle === 'tag_badge' ? 'solid_white' : 'none');
+    const badgeShape = calConfig.badgeShape || shape || 'pill';
+
+    let badgeBg = 'transparent';
+    let badgeBorderColor = 'transparent';
+    let badgeBorderWidth = 0;
+    let badgeShadow = false;
+
+    if (showBgBadge && badgeStyle !== 'none') {
+        if (badgeStyle === 'silver_pill' || badgeStyle === 'frosted_light' || !badgeStyle) {
+            badgeBg = '#E2E8F0';
+            badgeBorderColor = 'rgba(255, 255, 255, 0.85)';
+            badgeBorderWidth = 1;
+            badgeShadow = true;
+            if (!calConfig.textColor) textColor = '#0F172A';
+            if (!calConfig.iconColor) iconColor = '#2563EB';
+        } else if (badgeStyle === 'frosted_dark') {
+            badgeBg = 'rgba(0, 0, 0, 0.65)';
+            badgeBorderColor = 'rgba(255, 255, 255, 0.18)';
+            badgeBorderWidth = 1;
+            badgeShadow = true;
+            if (!calConfig.textColor) textColor = '#FFFFFF';
+            if (!calConfig.iconColor) iconColor = '#60A5FA';
+        } else if (badgeStyle === 'solid_white') {
+            badgeBg = '#FFFFFF';
+            badgeBorderColor = '#E2E8F0';
+            badgeBorderWidth = 1;
+            badgeShadow = true;
+            if (!calConfig.textColor) textColor = '#0F172A';
+        } else if (badgeStyle === 'solid_dark') {
+            badgeBg = '#18181B';
+            badgeBorderColor = '#27272A';
+            badgeBorderWidth = 1;
+            badgeShadow = true;
+            if (!calConfig.textColor) textColor = '#FFFFFF';
+            if (!calConfig.iconColor) iconColor = '#60A5FA';
+        } else if (badgeStyle === 'accent') {
+            badgeBg = iconColor;
+            badgeBorderColor = iconColor;
+            badgeBorderWidth = 1;
+            badgeShadow = true;
+            if (!calConfig.textColor) textColor = '#FFFFFF';
+            iconColor = '#FFFFFF';
+        } else if (badgeStyle === 'custom') {
+            badgeBg = calConfig.badgeBgColor || bodyColor || '#FFFFFF';
+            badgeBorderColor = calConfig.badgeBorderColor || '#E5E7EB';
+            badgeBorderWidth = 1;
+        }
+    }
+
+    const badgeBorderRadius = badgeShape === 'pill' ? '9999px'
+        : badgeShape === 'rounded' ? '12px'
+        : badgeShape === 'square' ? '4px'
+        : shape === 'round' ? '9999px' : '8px';
+
+    const baseFontSize = calConfig.fontSize
+        ? Number(calConfig.fontSize)
+        : Math.max(9, Math.min(calendarWidth * 0.13, 14));
+    const baseIconSize = calConfig.iconSize
+        ? Number(calConfig.iconSize)
+        : Math.max(9, Math.round(baseFontSize * 0.95));
+
+    if (calStyle === 'simple_icon' || calStyle === 'simple' || calStyle === 'serif_date' || calStyle === 'tag_badge' || calStyle === 'pill') {
+        const isSerif = calStyle === 'serif_date' || calConfig.fontFamily === 'serif';
+        return (
+            <div className="w-full h-full flex items-center justify-center pointer-events-none">
+                <div
+                    className="flex items-center justify-center transition-all select-none"
+                    style={{
+                        padding: showBgBadge && badgeStyle !== 'none' ? '4px 10px' : '2px 4px',
+                        backgroundColor: badgeBg,
+                        border: `${badgeBorderWidth}px solid ${badgeBorderColor}`,
+                        borderRadius: badgeBorderRadius,
+                        boxShadow: badgeShadow ? '0 2px 8px rgba(0,0,0,0.18)' : 'none',
+                        backdropFilter: badgeStyle.includes('frosted') ? 'blur(8px)' : 'none',
+                    }}
+                >
+                    {showIcon && (
+                        <CalendarIcon
+                            size={baseIconSize}
+                            color={iconColor}
+                            style={{ marginRight: Math.max(3, Math.round(baseFontSize * 0.35)) }}
+                        />
+                    )}
+                    <span
+                        style={{
+                            color: textColor,
+                            fontSize: `${baseFontSize}px`,
+                            fontWeight: isSerif ? 600 : 800,
+                            fontStyle: isSerif ? 'italic' : 'normal',
+                            fontFamily: isSerif ? 'serif' : 'inherit',
+                            letterSpacing: '0.04em',
+                            textShadow: '0 1px 3px rgba(0,0,0,0.65)',
+                            whiteSpace: 'nowrap'
+                        }}
+                    >
+                        {formattedDate}
+                    </span>
+                </div>
+            </div>
+        );
+    }
+
+    // Classic Desk Calendar view
+    return (
+        <div 
+            className={clsx(
+                "w-full h-full flex flex-col bg-white shadow-2xl overflow-hidden relative border border-gray-200 select-none",
+                shape === 'round' ? 'rounded-full' : shape === 'square' ? 'rounded-3xl' : 'rounded-lg'
+            )}
+        >
+            <div className="absolute top-0 w-full flex justify-evenly z-10" style={{ height: calendarWidth * 0.1, marginTop: -calendarWidth * 0.02 }}>
+                {[1,2,3,4].map(i => (
+                    <div key={i} className="bg-gray-800 shadow-sm" style={{ width: calendarWidth * 0.03, height: calendarWidth * 0.1, borderRadius: calendarWidth }} />
+                ))}
+            </div>
+            <div className="w-full flex items-center justify-center" style={{ 
+                paddingTop: calendarWidth * 0.12, 
+                paddingBottom: calendarWidth * 0.04,
+                backgroundColor: headerColor 
+            }}>
+                <span className="text-white font-black uppercase tracking-widest leading-none" style={{ fontSize: calendarWidth * 0.15 }}>{monthLabel}</span>
+            </div>
+            <div className="flex-1 flex flex-col items-center justify-center" style={{ 
+                paddingLeft: calendarWidth * 0.05, paddingRight: calendarWidth * 0.05, paddingTop: calendarWidth * 0.02, paddingBottom: calendarWidth * 0.02,
+                backgroundColor: bodyColor 
+            }}>
+                <span className="font-semibold text-gray-500 uppercase tracking-widest leading-none" style={{ fontSize: calendarWidth * 0.12, marginBottom: -calendarWidth * 0.05 }}>{dayLabel}</span>
+                <span className="font-black text-[#2B3544] tracking-tighter leading-none my-0.5" style={{ fontSize: calendarWidth * 0.45 }}>{dateNum}</span>
+                <span className="font-bold text-gray-400 leading-none" style={{ fontSize: calendarWidth * 0.10, marginTop: calendarWidth * 0.02 }}>{yearNum}</span>
+            </div>
+        </div>
+    );
+};
 
 const CanvasPreview = ({
     previewUrl,

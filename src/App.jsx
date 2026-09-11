@@ -50,6 +50,7 @@ const UsersWillingToPost = lazy(() => import("./pages/socialMedia/Feed/userFeedR
 const UserDeletionLogsPage = lazy(() => import("./pages/UserProfile/UserDeletionLogsPage"));
 const PromptManagementPage = lazy(() => import("./pages/PromptManagementPage"));
 const AICategoryManagementPage = lazy(() => import("./pages/AICategoryManagementPage"));
+const FeedCalendarPage = lazy(() => import("./pages/Calendar"));
 
 // Monetization Module
 const MonetizationDashboard = lazy(() => import("./pages/Monetization/MonetizationDashboard"));
@@ -151,6 +152,8 @@ function AnimatedRoutes() {
             <Route path="/social/post/request/approval" element={<UsersWillingToPost />} />
             <Route path="/social/user/deletion-logs" element={<UserDeletionLogsPage />} />
             <Route path="/social/admin/upload/page" element={<UploadPage />} />
+            <Route path="/social/calendar" element={<FeedCalendarPage />} />
+            <Route path="/calendar" element={<FeedCalendarPage />} />
             <Route path="/social/category/management" element={<CategoryManagementPage />} />
             <Route path="/social/post-global-options" element={<PostGlobalOptionsPage />} />
             <Route path="/social/party/management" element={<PartyManagement />} />

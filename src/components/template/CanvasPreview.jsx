@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
-import { Play, Pause, RotateCcw, X } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Calendar as CalendarIcon } from 'lucide-react';
 import sampleAvatar from '../../Assets/sampleimage.png';
 
 const FILTER_STYLES = {
@@ -617,6 +617,25 @@ const CanvasPreview = ({
                                                         ) : (
                                                             <span className="text-[8px] text-white/40 font-black uppercase text-center px-1">Preview Image Overlay</span>
                                                         )}
+                                                    </div>
+                                                )}
+                                                {overlay.type === 'calendar' && (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <div 
+                                                            className="flex items-center justify-center px-3 py-1.5 rounded-full border shadow-md"
+                                                            style={{
+                                                                backgroundColor: overlay.calendarConfig?.badgeBgColor || '#E2E8F0',
+                                                                borderColor: overlay.calendarConfig?.badgeBorderColor || 'rgba(255,255,255,0.85)',
+                                                                color: overlay.calendarConfig?.textColor || '#0F172A'
+                                                            }}
+                                                        >
+                                                            {overlay.calendarConfig?.showIcon !== false && (
+                                                                <CalendarIcon size={12} color={overlay.calendarConfig?.iconColor || '#2563EB'} className="mr-1.5" />
+                                                            )}
+                                                            <span className="text-[10px] font-black tracking-wide">
+                                                                {new Date().toLocaleDateString()}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>

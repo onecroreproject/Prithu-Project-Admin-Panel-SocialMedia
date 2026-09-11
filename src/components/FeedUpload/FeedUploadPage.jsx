@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAdminUpload } from '../../hooks/useAdminUpload';
 import {
     Info, CloudUpload, Play, Pencil, CheckCircle, Calendar, Clock,
     Eye, Sliders, Sparkles, Trash2, Smartphone, Check, Layers,
-    Palette, RefreshCw, Send, FilePlus, ChevronDown, CheckCircle2
+    Palette, RefreshCw, Send, FilePlus, ChevronDown, CheckCircle2,
+    ChevronLeft, ChevronRight, Maximize2
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import TemplateEditor from './template/TemplateEditor';
@@ -23,6 +24,7 @@ const FeedUploadPage = () => {
         handleRemoveFile,
         handleUpdateEditMetadata,
         handleUpdateMetadata,
+        handleBatchUpdateFiles,
         upload,
         setFiles,
         isUploading,
@@ -34,6 +36,14 @@ const FeedUploadPage = () => {
     const [editingFileId, setEditingFileId] = useState(null);       // Template layers editor
     const [colorModalFileId, setColorModalFileId] = useState(null);   // Color & visual adjustments modal
     const [previewModalFileId, setPreviewModalFileId] = useState(null); // Full device live preview modal
+
+    const rowScrollRef = useRef(null);
+    const scrollRow = (direction) => {
+        if (rowScrollRef.current) {
+            const offset = direction === 'left' ? -260 : 260;
+            rowScrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+        }
+    };
 
     const [customInputModes, setCustomInputModes] = useState({
         session: false,
@@ -143,6 +153,7 @@ const FeedUploadPage = () => {
     const defaultFormState = {
         title: '',
         contentType: 'Image',
+        aspectRatio: '9:16',
         category: [],
         language: 'Both',
         tags: '',
@@ -212,6 +223,106 @@ const FeedUploadPage = () => {
         }));
     };
 
+    // Multi-selected file IDs for batch actions (e.g. changing post sizes)
+    const [selectedFileIds, setSelectedFileIds] = useState([]);
+    // Per-file individual post sizes { [fileId]: '4:5' | '1:1' | '9:16' | '16:9' | 'auto' }
+    const [filePostSizes, setFilePostSizes] = useState({});
+
+    // Clean up selected IDs if files are removed
+    useEffect(() => {
+        const existingIds = new Set(files.map(f => f.id));
+        setSelectedFileIds(prev => prev.filter(id => existingIds.has(id)));
+    }, [files]);
+
+    const toggleSelectFile = (fileId, e) => {
+        if (e) e.stopPropagation();
+        setSelectedFileIds(prev => 
+            prev.includes(fileId) ? prev.filter(id => id !== fileId) : [...prev, fileId]
+        );
+    };
+
+    const isAllCurrentSelected = currentFiles.length > 0 && currentFiles.every(f => selectedFileIds.includes(f.id));
+
+    const toggleSelectAll = () => {
+        if (isAllCurrentSelected) {
+            const currentIds = new Set(currentFiles.map(f => f.id));
+            setSelectedFileIds(prev => prev.filter(id => !currentIds.has(id)));
+        } else {
+            const currentIds = currentFiles.map(f => f.id);
+            setSelectedFileIds(prev => Array.from(new Set([...prev, ...currentIds])));
+        }
+    };
+
+    // Post Size / Aspect Ratio: "4:5", "1:1", "9:16", "16:9", "auto"
+    const [postSize, setPostSize] = useState(() => {
+        return localStorage.getItem("upload_post_size") || "9:16";
+    });
+
+    const handlePostSizeChange = (size) => {
+        setPostSize(size);
+        localStorage.setItem("upload_post_size", size);
+
+        // Determine targets:
+        // If items are multi-selected in current format, apply to them.
+        // Otherwise, apply to active file or all files in current tab.
+        const currentSelected = currentFiles.filter(f => selectedFileIds.includes(f.id));
+        const targets = currentSelected.length > 0 
+            ? currentSelected 
+            : (selectedFile ? [selectedFile] : currentFiles);
+
+        if (targets.length === 0) return;
+
+        const targetIds = targets.map(t => t.id);
+
+        // 1. Update individual file post sizes map
+        setFilePostSizes(prev => {
+            const next = { ...prev };
+            targetIds.forEach(id => {
+                next[id] = size;
+            });
+            return next;
+        });
+
+        // 2. Update fileForms metadata
+        setFileForms(prev => {
+            const next = { ...prev };
+            targetIds.forEach(id => {
+                next[id] = {
+                    ...(next[id] || defaultFormState),
+                    aspectRatio: size
+                };
+            });
+            return next;
+        });
+
+        // 3. Batch update the files state in useAdminUpload
+        if (handleBatchUpdateFiles) {
+            handleBatchUpdateFiles(targetIds, { aspectRatio: size });
+        }
+
+        const sizeLabel = {
+            '4:5': '4:5 Portrait',
+            '1:1': '1:1 Square',
+            '9:16': '9:16 Reel',
+            '16:9': '16:9 Landscape',
+            'auto': 'Auto'
+        }[size] || size;
+
+        toast.success(`Set ${sizeLabel} for ${targets.length} ${targets.length > 1 ? 'items' : 'item'}`, {
+            icon: '📐'
+        });
+    };
+
+    const getCardSizeClasses = (size, file) => {
+        if (size === "1:1") return "aspect-square w-40 sm:w-48 md:w-56";
+        if (size === "4:5") return "aspect-[4/5] w-40 sm:w-52 md:w-60";
+        if (size === "9:16") return "aspect-[9/16] w-36 sm:w-44 md:w-52";
+        if (size === "16:9") return "aspect-[16/9] w-52 sm:w-64 md:w-72";
+        // auto
+        const isVid = file?.file?.type?.startsWith('video');
+        return isVid ? "aspect-[9/16] w-36 sm:w-44 md:w-52" : "aspect-[4/5] w-40 sm:w-52 md:w-60";
+    };
+
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
         if (selectedFiles.length > 0) {
@@ -264,7 +375,7 @@ const FeedUploadPage = () => {
                             Upload & Publish Feeds
                         </h1>
                         <p className="text-xs md:text-sm text-slate-500 mt-1">
-                            Configure content metadata, scheduling, color tone presets, and test live on mobile preview.
+                            Configure content metadata, color tone presets, and test live on mobile preview.
                         </p>
                     </div>
 
@@ -314,21 +425,18 @@ const FeedUploadPage = () => {
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-bold text-slate-900">
-                                        1. Content Details
+                                        Content Details
                                     </h2>
                                     <p className="text-xs text-slate-400">
-                                        Essential titles, categories, sessions, and language options
+                                        Essential title, categories, language, and tag options
                                     </p>
                                 </div>
                             </div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
-                                Step 1 of 2
-                            </span>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                             
-                            {/* Title + Session — stacked in left column */}
+                            {/* Title + Language — stacked in left column */}
                             <div className="flex flex-col gap-4">
                                 {/* Title */}
                                 <div>
@@ -344,78 +452,27 @@ const FeedUploadPage = () => {
                                     />
                                 </div>
 
-                                {/* Session — below Title on the left side */}
+                                {/* Language */}
                                 <div>
-                                    <label className="text-sm font-semibold mb-2 flex justify-between items-center text-slate-700">
-                                        <span>Session</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => toggleCustomMode('session', formState.session)}
-                                            className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold border transition-all ${customInputModes.session ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
-                                        >
-                                            {customInputModes.session ? '✓ Done' : '+ Custom'}
-                                        </button>
-                                    </label>
-                                    {customInputModes.session ? (
-                                        <input
-                                            type="text"
-                                            placeholder="Type custom session..."
-                                            value={formState.session || ''}
-                                            onChange={(e) => handleChange('session', e.target.value)}
-                                            className="w-full px-3.5 py-2.5 rounded-xl border border-blue-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm text-slate-900"
-                                            autoFocus
-                                        />
-                                    ) : (
-                                        <div className="relative">
-                                            <select
-                                                value={formState.session || ''}
-                                                onChange={(e) => {
-                                                    const selectedVal = e.target.value;
-                                                    handleChange('session', selectedVal);
-                                                    if (customOptions.sessionsDetailed?.length) {
-                                                        const match = customOptions.sessionsDetailed.find(s => s.name === selectedVal);
-                                                        if (match && match.startTime && !formState.startTime) {
-                                                            const match24 = match.startTime.match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)?$/i);
-                                                            if (match24) {
-                                                                let h = parseInt(match24[1], 10);
-                                                                const m = match24[2] || "00";
-                                                                const mod = match24[3]?.toUpperCase();
-                                                                if (mod === "PM" && h < 12) h += 12;
-                                                                if (mod === "AM" && h === 12) h = 0;
-                                                                handleChange('startTime', `${String(h).padStart(2, '0')}:${m}`);
-                                                            }
-                                                        }
-                                                    }
-                                                }}
-                                                className="w-full px-3.5 py-2.5 pr-8 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white focus:border-blue-500 outline-none text-sm appearance-none text-slate-700 transition-colors cursor-pointer"
+                                    <label className="block text-sm font-semibold mb-2 text-slate-700">Language</label>
+                                    <div className="grid grid-cols-3 gap-2 mt-1">
+                                        {['Tamil', 'English', 'Both'].map(lang => (
+                                            <button
+                                                key={lang}
+                                                type="button"
+                                                onClick={() => handleChange('language', lang)}
+                                                className={clsx(
+                                                    "py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5",
+                                                    formState.language === lang
+                                                        ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-500/20"
+                                                        : "bg-slate-50/60 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300"
+                                                )}
                                             >
-                                                <option value="" disabled>— Select Session —</option>
-                                                {customOptions.sessionsDetailed && customOptions.sessionsDetailed.length > 0 ? (
-                                                    customOptions.sessionsDetailed.map(sess => (
-                                                        <option key={sess.name} value={sess.name}>
-                                                            {sess.name}{sess.timeRange ? ` (${sess.timeRange})` : ''}
-                                                        </option>
-                                                    ))
-                                                ) : (
-                                                    customOptions.sessions.map(opt => (
-                                                        <option key={opt} value={opt}>{opt}</option>
-                                                    ))
-                                                )}
-                                                {formState.session && !customOptions.sessions.includes(formState.session) && (
-                                                    <option value={formState.session}>{formState.session}</option>
-                                                )}
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                        </div>
-                                    )}
-                                    {formState.session && (
-                                        <div className="mt-1.5 flex items-center gap-1.5">
-                                            <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
-                                                {formState.session}
-                                            </span>
-                                            <button type="button" onClick={() => handleChange('session', '')} className="text-slate-400 hover:text-red-500 transition-colors text-xs">✕</button>
-                                        </div>
-                                    )}
+                                                {formState.language === lang && <Check size={13} className="stroke-[3]" />}
+                                                <span>{lang}</span>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
@@ -424,8 +481,6 @@ const FeedUploadPage = () => {
                                 {/* Category */}
                                 <div className="relative z-50">
                                     {(() => {
-                                        // Find "God" and "Special Day" categories using activeCategories
-                                        // Specifically match category "God" (#2 with subcategories), NOT "God Quotes" (#1)
                                         const godCat = activeCategories?.find(c => {
                                             const n = (c.categoriesName || c.name || '').trim().toLowerCase();
                                             return n === 'god' || n === 'gods';
@@ -450,103 +505,62 @@ const FeedUploadPage = () => {
                                             currentCatIds.some(id => id.includes('special') || (specialDayCat && id === (specialDayCat.categoriesName || specialDayCat.name || '').toLowerCase()))
                                         );
 
-                                        const handleQuickSelect = (type) => {
-                                            let newCat = [];
-                                            if (type === 'god') {
-                                                if (isGodChecked) {
-                                                    newCat = [];
-                                                } else {
-                                                    const targetId = godCat 
-                                                        ? (godCat.categoryId || godCat._id || godCat.id) 
-                                                        : 'God';
-                                                    newCat = [String(targetId)];
-                                                }
-                                            } else if (type === 'specialDay') {
-                                                if (isSpecialDayChecked) {
-                                                    newCat = [];
-                                                } else {
-                                                    const targetId = specialDayCat 
-                                                        ? (specialDayCat.categoryId || specialDayCat._id || specialDayCat.id) 
-                                                        : 'Special Days';
-                                                    newCat = [String(targetId)];
-                                                }
-                                            }
+                                        const toggleCategoryById = (targetCat) => {
+                                            if (!targetCat) return;
+                                            const targetId = targetCat.categoryId || targetCat._id || targetCat.id;
+                                            const currentList = formState.category || [];
+                                            const isPresent = currentList.some(id => 
+                                                String(id).toLowerCase() === String(targetId).toLowerCase() ||
+                                                String(id).toLowerCase() === String(targetCat.categoriesName || targetCat.name).toLowerCase()
+                                            );
 
-                                            // 1. Immediately update active category
-                                            handleChange('category', newCat);
-
-                                            // 2. Also persist to default and all files so every attached file gets it
-                                            setFileForms(prev => {
-                                                const next = { ...prev };
-                                                next['default'] = {
-                                                    ...(next['default'] || defaultFormState),
-                                                    category: newCat
-                                                };
-                                                files.forEach(f => {
-                                                    next[f.id] = {
-                                                        ...(next[f.id] || defaultFormState),
-                                                        category: newCat
-                                                    };
-                                                });
-                                                return next;
-                                            });
-
-                                            if (newCat.length > 0) {
-                                                toast.success(`Auto-selected ${type === 'god' ? 'GOD' : 'SPECIAL DAY'} category!`, { id: 'quick-select-cat' });
+                                            if (isPresent) {
+                                                handleChange('category', currentList.filter(id => 
+                                                    String(id).toLowerCase() !== String(targetId).toLowerCase() &&
+                                                    String(id).toLowerCase() !== String(targetCat.categoriesName || targetCat.name).toLowerCase()
+                                                ));
                                             } else {
-                                                toast('Category cleared', { id: 'quick-select-cat' });
+                                                handleChange('category', [...currentList, targetId]);
                                             }
                                         };
 
                                         return (
                                             <>
-                                                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                                                    <label className="text-sm font-semibold text-slate-700">
-                                                        Category <span className="text-red-500">*</span>
-                                                    </label>
-
-                                                    {/* Quick Select Buttons */}
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                                                            Quick Select:
-                                                        </span>
-
-                                                        {/* GOD Checkbox Button */}
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <label className="text-sm font-semibold text-slate-700">Category</label>
+                                                    <div className="flex items-center gap-1.5">
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleQuickSelect('god')}
+                                                            onClick={() => toggleCategoryById(godCat)}
                                                             className={clsx(
-                                                                "flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none shadow-2xs",
+                                                                "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider border transition-all flex items-center gap-1 cursor-pointer",
                                                                 isGodChecked
-                                                                    ? "bg-purple-600 border-purple-600 text-white shadow-sm shadow-purple-500/25"
-                                                                    : "bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-300 hover:bg-purple-50/50"
+                                                                    ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                                                                    : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-600"
                                                             )}
-                                                            title="Click to auto select GOD category"
                                                         >
                                                             <div className={clsx(
-                                                                "w-3.5 h-3.5 rounded flex items-center justify-center border transition-colors",
-                                                                isGodChecked ? "bg-white text-purple-600 border-white" : "border-slate-300 bg-white"
+                                                                "w-2.5 h-2.5 rounded-xs flex items-center justify-center transition-colors",
+                                                                isGodChecked ? "text-white" : "border border-slate-300"
                                                             )}>
                                                                 {isGodChecked && <Check size={11} className="stroke-[3]" />}
                                                             </div>
                                                             <span>GOD</span>
                                                         </button>
 
-                                                        {/* SPECIAL DAY Checkbox Button */}
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleQuickSelect('specialDay')}
+                                                            onClick={() => toggleCategoryById(specialDayCat)}
                                                             className={clsx(
-                                                                "flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none shadow-2xs",
+                                                                "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider border transition-all flex items-center gap-1 cursor-pointer",
                                                                 isSpecialDayChecked
-                                                                    ? "bg-amber-500 border-amber-500 text-white shadow-sm shadow-amber-500/25"
-                                                                    : "bg-slate-50 border-slate-200 text-slate-700 hover:border-amber-300 hover:bg-amber-50/50"
+                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                                                                    : "bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600"
                                                             )}
-                                                            title="Click to auto select SPECIAL DAY category"
                                                         >
                                                             <div className={clsx(
-                                                                "w-3.5 h-3.5 rounded flex items-center justify-center border transition-colors",
-                                                                isSpecialDayChecked ? "bg-white text-amber-600 border-white" : "border-slate-300 bg-white"
+                                                                "w-2.5 h-2.5 rounded-xs flex items-center justify-center transition-colors",
+                                                                isSpecialDayChecked ? "text-white" : "border border-slate-300"
                                                             )}>
                                                                 {isSpecialDayChecked && <Check size={11} className="stroke-[3]" />}
                                                             </div>
@@ -567,7 +581,7 @@ const FeedUploadPage = () => {
                                     })()}
                                 </div>
 
-                                {/* Subcategory — below Category */}
+                                {/* Subcategory */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <label className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
@@ -648,31 +662,8 @@ const FeedUploadPage = () => {
                                 </div>
                             </div>
 
-                            {/* Language */}
-                            <div>
-                                <label className="block text-sm font-semibold mb-2 text-slate-700">Language</label>
-                                <div className="grid grid-cols-3 gap-2 mt-1">
-                                    {['Tamil', 'English', 'Both'].map(lang => (
-                                        <button
-                                            key={lang}
-                                            type="button"
-                                            onClick={() => handleChange('language', lang)}
-                                            className={clsx(
-                                                "py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5",
-                                                formState.language === lang
-                                                    ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-500/20"
-                                                    : "bg-slate-50/60 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300"
-                                            )}
-                                        >
-                                            {formState.language === lang && <Check size={13} className="stroke-[3]" />}
-                                            <span>{lang}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
                             {/* Tags */}
-                            <div>
+                            <div className="md:col-span-2">
                                 <label className="block text-sm font-semibold mb-2 text-slate-700">Tags</label>
                                 <input
                                     type="text"
@@ -704,82 +695,290 @@ const FeedUploadPage = () => {
                         </div>
                     </div>
 
-                    {/* 2. Scheduling & Publishing Card */}
-                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-sm transition-shadow">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* 2. Preview & Modals Row with Scroll View */}
+                    <div className="bg-white p-5 sm:p-6 md:p-8 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-sm transition-shadow">
+                        {/* Header: Title, Media Counts & Format Switcher + Select All */}
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-100">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-                                    <Calendar size={20} />
+                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center text-white shadow-md shadow-purple-500/20 shrink-0">
+                                    <Eye size={20} />
                                 </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-slate-900">
-                                        2. Scheduling & Publication
-                                    </h2>
-                                    <p className="text-xs text-slate-400">
-                                        Set automated release schedule or publish immediately
+                                <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <h2 className="text-base sm:text-lg font-bold text-slate-900">Preview & Modals</h2>
+                                        <span className="px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-extrabold uppercase tracking-wide border border-purple-100 shrink-0">
+                                            {currentFiles.length} {previewType}{currentFiles.length !== 1 ? 's' : ''}
+                                        </span>
+                                        {selectedFileIds.length > 0 && (
+                                            <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wide shadow-xs animate-in fade-in shrink-0">
+                                                {currentFiles.filter(f => selectedFileIds.includes(f.id)).length} Selected
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-slate-400 mt-0.5">
+                                        Multi-select media to batch change post sizes • Preview device frame, adjust tones & layers
                                     </p>
                                 </div>
                             </div>
 
-                            <label className="flex items-center gap-3 px-4 py-2 rounded-2xl border border-indigo-200/80 bg-indigo-50/70 hover:bg-indigo-100/70 cursor-pointer transition-colors shadow-2xs self-start sm:self-auto">
-                                <input
-                                    type="checkbox"
-                                    checked={Boolean(formState.isScheduled)}
-                                    onChange={(e) => handleChange('isScheduled', e.target.checked)}
-                                    className="w-4 h-4 text-indigo-600 rounded-md border-slate-300 focus:ring-indigo-500 cursor-pointer"
-                                />
-                                <span className="text-xs font-bold text-indigo-950 select-none">
-                                    Enable Scheduling
-                                </span>
-                            </label>
+                            {/* Top Actions: Format switcher and Select All */}
+                            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                                {/* Format Switcher (Images vs Videos) */}
+                                <div className="flex p-1 bg-slate-100 rounded-xl">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setPreviewType('Image')}
+                                        className={clsx(
+                                            "px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer",
+                                            previewType === 'Image'
+                                                ? "bg-white text-blue-700 shadow-2xs"
+                                                : "text-slate-500 hover:text-slate-800"
+                                        )}
+                                    >
+                                        Images ({imageFiles.length})
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setPreviewType('Video')}
+                                        className={clsx(
+                                            "px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer",
+                                            previewType === 'Video'
+                                                ? "bg-white text-blue-700 shadow-2xs"
+                                                : "text-slate-500 hover:text-slate-800"
+                                        )}
+                                    >
+                                        Videos ({videoFiles.length})
+                                    </button>
+                                </div>
+
+                                {/* Multi-Select Toggle All Button */}
+                                {currentFiles.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={toggleSelectAll}
+                                        className={clsx(
+                                            "px-3 py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0",
+                                            isAllCurrentSelected
+                                                ? "bg-blue-600 text-white border-blue-600 shadow-blue-500/20"
+                                                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                                        )}
+                                        title={isAllCurrentSelected ? "Deselect all items" : "Select all items"}
+                                    >
+                                        <CheckCircle2 size={14} className={isAllCurrentSelected ? "text-white" : "text-blue-600"} />
+                                        <span>{isAllCurrentSelected ? "Deselect All" : "Select All"}</span>
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
-                        {formState.isScheduled ? (
-                            <div className="mt-6 pt-6 border-t border-slate-100 animate-in fade-in duration-200">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="relative">
-                                        <label className="block text-sm font-semibold mb-2 text-slate-700">Publish Date</label>
-                                        <div className="relative cursor-pointer" onClick={() => document.getElementById('publishDateInput')?.showPicker()}>
-                                            <input
-                                                id="publishDateInput"
-                                                type="date"
-                                                value={formState.publishDate}
-                                                onChange={(e) => handleChange('publishDate', e.target.value)}
-                                                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-sm text-slate-700 cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden"
-                                            />
-                                            <Calendar className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-500 pointer-events-none" />
-                                        </div>
-                                    </div>
-                                    <div className="relative">
-                                        <label className="block text-sm font-semibold mb-2 text-slate-700">Start Time</label>
-                                        <div className="relative cursor-pointer" onClick={() => document.getElementById('startTimeInput')?.showPicker()}>
-                                            <input
-                                                id="startTimeInput"
-                                                type="time"
-                                                value={formState.startTime}
-                                                onChange={(e) => handleChange('startTime', e.target.value)}
-                                                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-sm text-slate-700 cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden"
-                                            />
-                                            <Clock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-500 pointer-events-none" />
-                                        </div>
-                                    </div>
+                        {/* Dedicated Sizing & Navigation Tool Ribbon */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 bg-slate-50/90 rounded-2xl border border-slate-200/70 mb-5">
+                            {/* Post Size Aspect Ratio Switcher */}
+                            <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-0.5 min-w-0">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-2 flex items-center gap-1 shrink-0">
+                                    <Maximize2 size={12} className="text-purple-600" /> Size:
+                                </span>
+                                <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200/70 shadow-2xs shrink-0">
+                                    {[
+                                        { id: "4:5", short: "4:5", full: "Portrait" },
+                                        { id: "1:1", short: "1:1", full: "Square" },
+                                        { id: "9:16", short: "9:16", full: "Reel" },
+                                        { id: "16:9", short: "16:9", full: "Landscape" },
+                                        { id: "auto", short: "Auto", full: "" }
+                                    ].map((sz) => {
+                                        const currentSelected = currentFiles.filter(f => selectedFileIds.includes(f.id));
+                                        const targets = currentSelected.length > 0 ? currentSelected : (selectedFile ? [selectedFile] : currentFiles);
+                                        const isAllTargetsThisSize = targets.length > 0 && targets.every(t => (filePostSizes[t.id] || t.aspectRatio || postSize) === sz.id);
+
+                                        return (
+                                            <button
+                                                key={sz.id}
+                                                type="button"
+                                                onClick={() => handlePostSizeChange(sz.id)}
+                                                className={clsx(
+                                                    "px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap",
+                                                    isAllTargetsThisSize || postSize === sz.id
+                                                        ? "bg-purple-600 text-white shadow-xs"
+                                                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                                                )}
+                                                title={`Apply ${sz.short} ${sz.full} to ${targets.length} item${targets.length > 1 ? 's' : ''}`}
+                                            >
+                                                <span>{sz.short}</span>
+                                                {sz.full && <span className="hidden md:inline font-normal opacity-90"> {sz.full}</span>}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                        ) : (
-                            <div className="mt-5 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600">
-                                <div className="flex items-center gap-2.5">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 inline-block ring-4 ring-emerald-100"></span>
-                                    <span><strong>Immediate Release:</strong> Content goes live instantly once you click Publish.</span>
+
+                            {/* Scroll Nav Buttons */}
+                            {currentFiles.length > 2 && (
+                                <div className="flex items-center gap-1.5 justify-end shrink-0 pl-2 self-end sm:self-auto">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider hidden sm:inline mr-0.5">
+                                        Scroll:
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollRow('left')}
+                                        className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-all shadow-2xs active:scale-95 cursor-pointer"
+                                        title="Scroll Left"
+                                    >
+                                        <ChevronLeft size={16} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollRow('right')}
+                                        className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-all shadow-2xs active:scale-95 cursor-pointer"
+                                        title="Scroll Right"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => handleChange('isScheduled', true)}
-                                    className="text-indigo-600 hover:text-indigo-800 font-bold hover:underline shrink-0 text-left sm:text-right"
+                            )}
+                        </div>
+
+                        {/* Media Row with Horizontal Scroll View */}
+                        <div 
+                            ref={rowScrollRef}
+                            className="flex flex-row items-center gap-4 overflow-x-auto custom-scrollbar pb-3 pt-1 scroll-smooth"
+                        >
+                            {currentFiles.length > 0 ? (
+                                currentFiles.map(file => {
+                                    const isCurrentSelected = activeFileId === file.id;
+                                    const isVid = file.file.type.startsWith('video');
+                                    const filePostSize = filePostSizes[file.id] || file.aspectRatio || (file.metadata?.canvasSettings?.aspectRatio) || postSize || '9:16';
+                                    const cardSizeClass = getCardSizeClasses(filePostSize, file);
+                                    const isMultiSelected = selectedFileIds.includes(file.id);
+
+                                    return (
+                                        <div
+                                            key={file.id}
+                                            onClick={() => previewType === 'Image' ? setActiveImageId(file.id) : setActiveVideoId(file.id)}
+                                            className={clsx(
+                                                "bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center relative shadow-sm group shrink-0 transition-all duration-300 border-2 cursor-pointer",
+                                                cardSizeClass,
+                                                isMultiSelected 
+                                                    ? "border-blue-500 ring-4 ring-blue-500/35 shadow-md scale-[1.01]" 
+                                                    : isCurrentSelected 
+                                                    ? "border-blue-500/80 ring-2 ring-blue-500/20" 
+                                                    : "border-transparent hover:border-slate-300"
+                                            )}
+                                        >
+                                            {/* Top left aspect ratio badge */}
+                                            <div className="absolute top-3 left-3 z-10 pointer-events-none">
+                                                <span className="bg-black/70 backdrop-blur-md text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm border border-white/10">
+                                                    {filePostSize === 'auto' ? (isVid ? '9:16' : '4:5') : filePostSize}
+                                                </span>
+                                            </div>
+                                            {isVid ? (
+                                                <video src={file.preview} className="w-full h-full object-cover pointer-events-none" />
+                                            ) : (
+                                                <img src={file.preview} className="w-full h-full object-cover pointer-events-none" alt="Preview" />
+                                            )}
+
+                                            {/* Quick Action Overlay Buttons */}
+                                            <div className="absolute top-3 right-3 flex flex-col gap-2 z-20">
+                                                {/* Multi-Select Toggle Button */}
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => toggleSelectFile(file.id, e)}
+                                                    className={clsx(
+                                                        "w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 cursor-pointer",
+                                                        isMultiSelected
+                                                            ? "bg-blue-600 text-white ring-2 ring-white/70 shadow-blue-500/50 scale-105"
+                                                            : "bg-white/90 text-slate-400 hover:text-slate-800 hover:bg-white"
+                                                    )}
+                                                    title={isMultiSelected ? "Deselect this item" : "Multi-select this item for batch size change"}
+                                                >
+                                                    <Check size={14} className={clsx("stroke-[3]", isMultiSelected ? "text-white" : "text-slate-400")} />
+                                                </button>
+
+                                                {/* Full Preview Modal Button */}
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setPreviewModalFileId(file.id);
+                                                    }}
+                                                    className="w-8 h-8 bg-white/90 hover:bg-white text-purple-700 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 cursor-pointer"
+                                                    title="Open Phone Preview Modal"
+                                                >
+                                                    <Smartphone size={14} />
+                                                </button>
+
+                                                {/* Color & Filter Modal Button */}
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setColorModalFileId(file.id);
+                                                    }}
+                                                    className="w-8 h-8 bg-white/90 hover:bg-white text-indigo-600 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 cursor-pointer"
+                                                    title="Open Color & Filter Modal"
+                                                >
+                                                    <Palette size={14} />
+                                                </button>
+
+                                                {/* Template Layers Editor */}
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingFileId(file.id);
+                                                    }}
+                                                    className="w-8 h-8 bg-white/90 hover:bg-white text-blue-600 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 cursor-pointer"
+                                                    title="Template Layers Editor"
+                                                >
+                                                    <Layers size={14} />
+                                                </button>
+
+                                                {/* Delete File */}
+                                                {handleRemoveFile && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleRemoveFile(file.id);
+                                                        }}
+                                                        className="w-8 h-8 bg-white/90 hover:bg-red-50 text-red-600 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 cursor-pointer"
+                                                        title="Remove media"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {/* Bottom Badge overlay */}
+                                            <div className="absolute bottom-3 inset-x-3 flex items-center justify-between text-white text-[10px] z-20 pointer-events-none">
+                                                <span className="bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                                    {file.file.name.split('.').pop() || (isVid ? 'MP4' : 'IMG')}
+                                                </span>
+                                                {file.editMetadata?.filters?.preset && (
+                                                    <span className="bg-purple-600/80 backdrop-blur-md px-2 py-0.5 rounded-full font-bold capitalize">
+                                                        {file.editMetadata.filters.preset}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div 
+                                    onClick={() => document.getElementById('file-upload-input').click()}
+                                    className="w-full bg-slate-50/80 hover:bg-blue-50/30 rounded-2xl border-2 border-dashed border-slate-200 hover:border-blue-400 p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[180px]"
                                 >
-                                    Switch to scheduled →
-                                </button>
-                            </div>
-                        )}
+                                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-2 shadow-xs">
+                                        <CloudUpload size={24} />
+                                    </div>
+                                    <p className="text-slate-700 text-xs font-bold mb-1">
+                                        No {previewType.toLowerCase()}s uploaded yet
+                                    </p>
+                                    <p className="text-[11px] text-slate-400">
+                                        Click here or use the upload area on the right to add content
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Form Action Controls Bar */}
@@ -913,161 +1112,54 @@ const FeedUploadPage = () => {
                         </div>
                     </div>
 
-                    {/* 4. Live Preview & Gallery Card */}
-                    <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center text-white shadow-md shadow-purple-500/20">
-                                    <Eye size={18} />
+                    {/* 4. Active Media Focus Card */}
+                    {selectedFile && (
+                        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shadow-2xs">
+                                        <Check size={16} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900">Active Selection</h3>
+                                        <p className="text-[10px] text-slate-400 truncate max-w-[150px]">{selectedFile.file.name}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-base font-bold text-slate-900">Preview & Modals</h3>
-                                    <p className="text-[11px] text-slate-400">Preview and tone adjustments</p>
-                                </div>
+                                <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-wider border border-blue-100">
+                                    {selectedFile.file.type.startsWith('video') ? 'Video' : 'Image'}
+                                </span>
                             </div>
-                        </div>
 
-                        {/* Format Switcher */}
-                        <div className="flex p-1 bg-slate-100 rounded-2xl mb-4">
-                            <button 
-                                onClick={() => setPreviewType('Image')}
-                                className={clsx(
-                                    "flex-1 py-1.5 text-xs font-bold rounded-xl transition-all text-center",
-                                    previewType === 'Image'
-                                        ? "bg-white text-blue-700 shadow-2xs"
-                                        : "text-slate-500 hover:text-slate-800"
-                                )}
-                            >
-                                Images ({imageFiles.length})
-                            </button>
-                            <button 
-                                onClick={() => setPreviewType('Video')}
-                                className={clsx(
-                                    "flex-1 py-1.5 text-xs font-bold rounded-xl transition-all text-center",
-                                    previewType === 'Video'
-                                        ? "bg-white text-blue-700 shadow-2xs"
-                                        : "text-slate-500 hover:text-slate-800"
-                                )}
-                            >
-                                Videos ({videoFiles.length})
-                            </button>
-                        </div>
-                        
-                        {/* Media Grid / Thumbnails */}
-                        <div className="max-h-[460px] overflow-y-auto custom-scrollbar flex flex-col gap-4 pr-1">
-                            {currentFiles.length > 0 ? (
-                                currentFiles.map(file => {
-                                    const isCurrentSelected = activeFileId === file.id;
-                                    const isVid = file.file.type.startsWith('video');
+                            {/* Focused Media Frame */}
+                            {(() => {
+                                const activeSelectedSize = filePostSizes[selectedFile.id] || selectedFile.aspectRatio || postSize || '9:16';
+                                const activeAspectClass = activeSelectedSize === '1:1' ? 'aspect-square' : activeSelectedSize === '4:5' ? 'aspect-[4/5]' : activeSelectedSize === '16:9' ? 'aspect-[16/9]' : 'aspect-[9/16]';
 
-                                    return (
-                                        <div
-                                            key={file.id}
-                                            className={clsx(
-                                                "bg-slate-900 rounded-2xl overflow-hidden aspect-[9/16] flex items-center justify-center relative shadow-sm group shrink-0 transition-all border-2",
-                                                isCurrentSelected ? "border-blue-600 ring-4 ring-blue-500/20" : "border-transparent"
-                                            )}
-                                        >
-                                            {isVid ? (
-                                                <video src={file.preview} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <img src={file.preview} className="w-full h-full object-cover" alt="Preview" />
-                                            )}
-
-                                            {/* Quick Action Overlay Buttons */}
-                                            <div className="absolute top-3 right-3 flex flex-col gap-2 z-20">
-                                                {/* Select button */}
-                                                <button
-                                                    onClick={() => previewType === 'Image' ? setActiveImageId(file.id) : setActiveVideoId(file.id)}
-                                                    className={clsx(
-                                                        "w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110",
-                                                        isCurrentSelected ? "bg-blue-600 text-white" : "bg-white/90 text-slate-700 hover:bg-white"
-                                                    )}
-                                                    title="Select this media"
-                                                >
-                                                    <Check size={14} className="stroke-[3]" />
-                                                </button>
-
-                                                {/* Full Preview Modal Button */}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setPreviewModalFileId(file.id);
-                                                    }}
-                                                    className="w-8 h-8 bg-white/90 hover:bg-white text-purple-700 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
-                                                    title="Open Phone Preview Modal"
-                                                >
-                                                    <Smartphone size={14} />
-                                                </button>
-
-                                                {/* Color & Filter Modal Button */}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setColorModalFileId(file.id);
-                                                    }}
-                                                    className="w-8 h-8 bg-white/90 hover:bg-white text-indigo-600 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
-                                                    title="Open Color & Filter Modal"
-                                                >
-                                                    <Palette size={14} />
-                                                </button>
-
-                                                {/* Template Layers Editor */}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setEditingFileId(file.id);
-                                                    }}
-                                                    className="w-8 h-8 bg-white/90 hover:bg-white text-blue-600 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
-                                                    title="Template Layers Editor"
-                                                >
-                                                    <Layers size={14} />
-                                                </button>
-
-                                                {/* Delete File */}
-                                                {handleRemoveFile && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleRemoveFile(file.id);
-                                                        }}
-                                                        className="w-8 h-8 bg-white/90 hover:bg-red-50 text-red-600 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
-                                                        title="Remove media"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            {/* Bottom Badge overlay */}
-                                            <div className="absolute bottom-3 inset-x-3 flex items-center justify-between text-white text-[10px] z-20 pointer-events-none">
-                                                <span className="bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full font-bold">
-                                                    {file.file.name.split('.').pop()?.toUpperCase()}
-                                                </span>
-                                                {file.editMetadata?.filters?.preset && (
-                                                    <span className="bg-purple-600/80 backdrop-blur-md px-2 py-0.5 rounded-full font-bold capitalize">
-                                                        {file.editMetadata.filters.preset}
-                                                    </span>
-                                                )}
-                                            </div>
+                                return (
+                                    <div className={clsx("rounded-2xl overflow-hidden bg-slate-950 relative shadow-md mb-4 flex items-center justify-center group transition-all duration-300", activeAspectClass)}>
+                                        {selectedFile.file.type.startsWith('video') ? (
+                                            <video src={selectedFile.preview} className="w-full h-full object-cover" controls />
+                                        ) : (
+                                            <img src={selectedFile.preview} className="w-full h-full object-cover" alt="Active preview" />
+                                        )}
+                                        <div className="absolute bottom-2.5 left-2.5 z-10 pointer-events-none flex items-center gap-1.5">
+                                            <span className="bg-black/70 backdrop-blur-md text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                {selectedFile.file.name.split('.').pop() || 'MEDIA'}
+                                            </span>
+                                            <span className="bg-purple-600/90 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                {activeSelectedSize}
+                                            </span>
                                         </div>
-                                    );
-                                })
-                            ) : (
-                                <div className="bg-slate-50 rounded-2xl border border-dashed border-slate-200 aspect-[4/3] flex flex-col items-center justify-center text-center p-4">
-                                    <p className="text-slate-400 text-xs font-semibold">No {previewType.toLowerCase()}s uploaded yet</p>
-                                    <span className="text-[10px] text-slate-400 mt-1">Use upload zone above</span>
-                                </div>
-                            )}
-                        </div>
+                                    </div>
+                                );
+                            })()}
 
-                        {/* Quick Action Bar under gallery */}
-                        {selectedFile && (
-                            <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2">
+                            {/* Quick Action Buttons */}
+                            <div className="flex flex-col gap-2">
                                 <button
                                     type="button"
                                     onClick={() => setPreviewModalFileId(selectedFile.id)}
-                                    className="w-full py-2.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                                    className="w-full py-2.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
                                 >
                                     <Smartphone size={15} />
                                     <span>Open Live Device Preview</span>
@@ -1075,14 +1167,22 @@ const FeedUploadPage = () => {
                                 <button
                                     type="button"
                                     onClick={() => setColorModalFileId(selectedFile.id)}
-                                    className="w-full py-2.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                                    className="w-full py-2.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
                                 >
                                     <Palette size={15} />
                                     <span>Adjust Color Tone & Filters</span>
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingFileId(selectedFile.id)}
+                                    className="w-full py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-bold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
+                                >
+                                    <Layers size={15} />
+                                    <span>Edit Template Layers</span>
+                                </button>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* 5. File Information Card */}
                     <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">

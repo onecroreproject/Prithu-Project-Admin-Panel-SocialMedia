@@ -62,6 +62,7 @@ const mainNavItems = [
     subItems: [
       { name: "Trending Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
+      { name: "Feed Calendar", path: "/social/calendar", permission: "canManageFeeds" },
       { name: "Video Dashboard", path: "/settings/video-compression", permission: "canManageFeeds" },
       { name: "Category Management", path: "/social/category/management", permission: "canManageCategories" },
       { name: "Post Global Options", path: "/social/post-global-options", permission: "canManageCategories" },

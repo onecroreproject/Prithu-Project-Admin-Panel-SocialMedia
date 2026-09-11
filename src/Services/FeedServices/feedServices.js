@@ -44,6 +44,27 @@ export async function fetchPostGlobalOptions() {
     const res = await Api.get("/api/admin/post-global-options");
     return res.data;
   } catch (error) {
+    // If backend hasn't been restarted with the new route yet, fallback to legacy dropdown-config
+    if (error.response?.status === 404) {
+      console.warn("⚠️ /api/admin/post-global-options returned 404. Falling back to /api/admin/dropdown-config...");
+      try {
+        const legacyRes = await Api.get("/api/admin/dropdown-config");
+        const legacyConfig = legacyRes.data?.config || {};
+        return {
+          success: true,
+          config: {
+            sessions: legacyConfig.sessions || ["Morning", "Afternoon", "Evening", "Night"],
+            sessionsDetailed: legacyConfig.sessionsDetailed || [],
+            days: legacyConfig.days || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            weekGods: legacyConfig.weekGodsDetailed || [],
+            specialDays: legacyConfig.specialDaysDetailed || (legacyConfig.specialDays || []).map((name) => ({ name, date: "", isActive: true })),
+          },
+          categories: []
+        };
+      } catch (fallbackErr) {
+        console.error("Fallback to dropdown-config also failed:", fallbackErr);
+      }
+    }
     throw new Error(error.response?.data?.message || "Failed to fetch post global options");
   }
 }

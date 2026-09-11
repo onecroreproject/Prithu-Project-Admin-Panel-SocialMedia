@@ -264,6 +264,28 @@ export const useAdminUpload = () => {
         setFiles(prev => prev.map(f => f.id === id ? { ...f, [field]: value, isEdited: true } : f));
     }, []);
 
+    const handleBatchUpdateFiles = useCallback((ids, updates) => {
+        setFiles(prev => prev.map(f => {
+            if (ids.includes(f.id)) {
+                const nextMetadata = updates.aspectRatio ? {
+                    ...(f.metadata || {}),
+                    canvasSettings: {
+                        ...(f.metadata?.canvasSettings || {}),
+                        aspectRatio: updates.aspectRatio
+                    }
+                } : f.metadata;
+
+                return {
+                    ...f,
+                    ...updates,
+                    metadata: nextMetadata,
+                    isEdited: true
+                };
+            }
+            return f;
+        }));
+    }, []);
+
     const updateGlobalSettings = (fieldOrObject, value) => {
         setGlobalSettings(prev => {
             const updates = typeof fieldOrObject === 'object' ? fieldOrObject : { [fieldOrObject]: value };
@@ -398,9 +420,12 @@ export const useAdminUpload = () => {
 
                 const formState = (fileForms && !fileForms.nativeEvent) ? (fileForms[f.id] || fileForms['default'] || {}) : {};
 
+                const targetAspectRatio = formState.aspectRatio || f.aspectRatio || f.metadata?.canvasSettings?.aspectRatio || '9:16';
+
                 perFileMetadata[f.file.name] = {
                     title: formState.title || f.title || '',
                     language: formState.language || f.language || 'Both',
+                    aspectRatio: targetAspectRatio,
                     tags: formState.tags || f.tags || '',
                     description: formState.description || f.description || '',
                     categoryIds: (formState.category && formState.category.length > 0) ? formState.category : (f.categoryIds || []),
@@ -419,6 +444,10 @@ export const useAdminUpload = () => {
                     statusOverride,
                     designData: {
                         ...f.metadata,
+                        canvasSettings: {
+                            ...(f.metadata?.canvasSettings || {}),
+                            aspectRatio: targetAspectRatio
+                        },
                         isTemplate,
                         uploadType: isTemplate ? 'template' : 'normal',
                         postType,
@@ -458,6 +487,7 @@ export const useAdminUpload = () => {
         handleSelectFiles,
         handleRemoveFile,
         handleUpdateFileField,
+        handleBatchUpdateFiles,
         handleToggleMode,
         handleUpdateMetadata,
         handleUpdateEditMetadata,

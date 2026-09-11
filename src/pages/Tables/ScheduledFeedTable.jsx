@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Eye, Trash, Calendar, Play, X, Edit, Clock } from "lucide-react";
 import toast from "react-hot-toast";
@@ -12,6 +13,7 @@ import ScheduleEditModal from "../../components/common/ScheduleEditModal";
 
 export default function ScheduledFeedTable() {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [selectedFeed, setSelectedFeed] = useState(null);
     const [schedulingFeed, setSchedulingFeed] = useState(null);
     const [editingFeed, setEditingFeed] = useState(null);
@@ -59,10 +61,19 @@ export default function ScheduledFeedTable() {
     return (
         <div className="max-w-7xl mx-auto mt-4">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold dark:text-white/90">Scheduled Feeds</h2>
-                <div className="text-sm text-gray-500">
-                    Total Scheduled: {scheduledFeeds.length}
+                <div>
+                    <h2 className="text-xl font-bold dark:text-white/90">Scheduled Feeds</h2>
+                    <div className="text-sm text-gray-500">
+                        Total Scheduled: {scheduledFeeds.length}
+                    </div>
                 </div>
+                <button
+                    onClick={() => navigate("/social/calendar")}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-xl text-xs font-bold transition-all border border-blue-200 dark:border-blue-800/40 cursor-pointer"
+                >
+                    <Calendar className="w-4 h-4" />
+                    <span>Open Calendar View</span>
+                </button>
             </div>
 
             {currentItems.length === 0 ? (

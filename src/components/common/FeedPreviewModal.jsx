@@ -20,6 +20,22 @@ const DEFAULT_METADATA = {
             id: 'username', type: 'username', visible: true, text: 'User Name',
             xPercent: 10, yPercent: 80, wPercent: 30, hPercent: 5,
             animation: { enabled: true, direction: 'bottom', speed: 1 }
+        },
+        {
+            id: 'calendar', type: 'calendar', visible: true,
+            xPercent: 70, yPercent: 20, wPercent: 20, hPercent: 15,
+            animation: { enabled: true, direction: 'right', speed: 1 },
+            calendarConfig: {
+                style: 'simple_icon',
+                format: 'DD.MM.YYYY',
+                headerColor: '#E54B35',
+                bodyColor: '#F9F9F9',
+                badgeStyle: 'silver_pill',
+                badgeShape: 'pill',
+                showIcon: true,
+                textColor: '#0F172A',
+                iconColor: '#2563EB'
+            }
         }
     ],
     audioConfig: { enabled: false, volume: 1 },
@@ -32,12 +48,24 @@ const FeedPreviewModal = ({ feed, onClose }) => {
 
     const metadata = feed.designMetadata || DEFAULT_METADATA;
 
-    // If the feed has a custom username, update the overlay text
+    // Map overlay elements and bind dynamic properties like user name and date
     const updatedMetadata = {
         ...metadata,
-        overlayElements: metadata.overlayElements.map(el => {
+        overlayElements: (metadata.overlayElements || DEFAULT_METADATA.overlayElements).map(el => {
             if (el.type === 'username') {
                 return { ...el, text: feed.creator?.userName || el.text || 'User Name' };
+            }
+            if (el.type === 'calendar') {
+                const postDate = feed.scheduleDate ? new Date(feed.scheduleDate) : (feed.createdAt ? new Date(feed.createdAt) : new Date());
+                const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+                return {
+                    ...el,
+                    day: String(postDate.getDate()).padStart(2, '0'),
+                    month: months[postDate.getMonth()],
+                    year: postDate.getFullYear(),
+                    dayLabel: days[postDate.getDay()]
+                };
             }
             return el;
         })

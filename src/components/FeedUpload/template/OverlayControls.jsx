@@ -260,32 +260,179 @@ const OverlayControls = React.memo(({ overlay, onUpdate }) => {
             {/* Calendar Specific Settings */}
             {overlay.type === 'calendar' && (
                 <div className="space-y-6 pt-4 border-t border-gray-100">
-                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Header Color</label>
-                    <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-                        <div
-                            className="w-12 h-12 rounded-xl border border-gray-100 shadow-inner shrink-0"
-                            style={{ backgroundColor: overlay.calendarConfig?.headerColor || '#E54B35' }}
-                        />
-                        <input
-                            type="color"
-                            value={overlay.calendarConfig?.headerColor || '#E54B35'}
-                            onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, headerColor: e.target.value })}
-                            className="flex-1 bg-transparent h-10 cursor-pointer outline-none border-none p-0"
-                        />
+                    <div className="flex items-center gap-3">
+                        <Calendar className="text-blue-600" size={14} />
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Calendar Style</h4>
                     </div>
-                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Body Color</label>
-                    <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-                        <div
-                            className="w-12 h-12 rounded-xl border border-gray-100 shadow-inner shrink-0"
-                            style={{ backgroundColor: overlay.calendarConfig?.bodyColor || '#F9F9F9' }}
-                        />
-                        <input
-                            type="color"
-                            value={overlay.calendarConfig?.bodyColor || '#F9F9F9'}
-                            onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, bodyColor: e.target.value })}
-                            className="flex-1 bg-transparent h-10 cursor-pointer outline-none border-none p-0"
-                        />
+
+                    {/* Style selector */}
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Presentation Style</label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { id: 'simple_icon', label: 'Icon + Date' },
+                                { id: 'tag_badge', label: 'Tag Badge' },
+                                { id: 'pill', label: 'Pill Badge' },
+                                { id: 'serif_date', label: 'Editorial Serif' },
+                                { id: 'classic', label: 'Desk Calendar' }
+                            ].map(st => {
+                                const currentStyle = overlay.calendarConfig?.style || 'simple_icon';
+                                return (
+                                    <button
+                                        key={st.id}
+                                        type="button"
+                                        onClick={() => handleChange('calendarConfig', { ...overlay.calendarConfig, style: st.id })}
+                                        className={clsx(
+                                            "py-2.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider border transition-all text-left",
+                                            currentStyle === st.id
+                                                ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                                                : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+                                        )}
+                                    >
+                                        {st.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
+
+                    {/* Date Format */}
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Date Format</label>
+                        <select
+                            value={overlay.calendarConfig?.format || 'DD.MM.YYYY'}
+                            onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, format: e.target.value })}
+                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 outline-none focus:border-blue-500 cursor-pointer"
+                        >
+                            <option value="DD.MM.YYYY">DD.MM.YYYY (e.g. 10.09.2026)</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 10/09/2026)</option>
+                            <option value="DD-MM-YYYY">DD-MM-YYYY (e.g. 10-09-2026)</option>
+                            <option value="DD MMM YYYY">DD MMM YYYY (e.g. 10 SEP 2026)</option>
+                        </select>
+                    </div>
+
+                    {/* Badge Options (for non-classic) */}
+                    {(overlay.calendarConfig?.style || 'simple_icon') !== 'classic' && (
+                        <>
+                            {/* Show Icon Toggle */}
+                            <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-gray-600">Show Calendar Icon</span>
+                                <input
+                                    type="checkbox"
+                                    checked={overlay.calendarConfig?.showIcon !== false}
+                                    onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, showIcon: e.target.checked })}
+                                    className="w-4 h-4 text-blue-600 rounded cursor-pointer accent-blue-600"
+                                />
+                            </div>
+
+                            {/* Badge Theme */}
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Badge Surface Style</label>
+                                <select
+                                    value={overlay.calendarConfig?.badgeStyle || 'silver_pill'}
+                                    onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, badgeStyle: e.target.value, showBgBadge: e.target.value !== 'none' })}
+                                    className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 outline-none focus:border-blue-500 cursor-pointer"
+                                >
+                                    <option value="silver_pill">Silver Pill (Light Slate)</option>
+                                    <option value="frosted_light">Frosted Glass (Light)</option>
+                                    <option value="frosted_dark">Frosted Glass (Dark)</option>
+                                    <option value="solid_white">Solid White</option>
+                                    <option value="solid_dark">Solid Dark</option>
+                                    <option value="accent">Accent Color</option>
+                                    <option value="custom">Custom Color</option>
+                                    <option value="none">No Background (Clean)</option>
+                                </select>
+                            </div>
+
+                            {/* Badge Shape */}
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Badge Corner Shape</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        { id: 'pill', label: 'Pill' },
+                                        { id: 'rounded', label: 'Rounded' },
+                                        { id: 'square', label: 'Square' }
+                                    ].map(bs => (
+                                        <button
+                                            key={bs.id}
+                                            type="button"
+                                            onClick={() => handleChange('calendarConfig', { ...overlay.calendarConfig, badgeShape: bs.id })}
+                                            className={clsx(
+                                                "py-2 px-2 text-center rounded-xl text-[9px] font-black uppercase tracking-wider border transition-all",
+                                                (overlay.calendarConfig?.badgeShape || 'pill') === bs.id
+                                                    ? "bg-gray-900 text-white border-gray-900"
+                                                    : "bg-white border-gray-200 text-gray-500 hover:border-gray-300"
+                                            )}
+                                        >
+                                            {bs.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Text Color & Icon Color */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Text Color</label>
+                                    <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
+                                        <input
+                                            type="color"
+                                            value={overlay.calendarConfig?.textColor || '#0F172A'}
+                                            onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, textColor: e.target.value })}
+                                            className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent p-0"
+                                        />
+                                        <span className="text-[10px] font-mono font-bold text-gray-600">{overlay.calendarConfig?.textColor || '#0F172A'}</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Icon Color</label>
+                                    <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
+                                        <input
+                                            type="color"
+                                            value={overlay.calendarConfig?.iconColor || '#2563EB'}
+                                            onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, iconColor: e.target.value })}
+                                            className="w-8 h-8 rounded-lg cursor-pointer border-none bg-transparent p-0"
+                                        />
+                                        <span className="text-[10px] font-mono font-bold text-gray-600">{overlay.calendarConfig?.iconColor || '#2563EB'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {/* Classic Desk Calendar Colors */}
+                    {(overlay.calendarConfig?.style === 'classic') && (
+                        <>
+                            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Header Color</label>
+                            <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
+                                <div
+                                    className="w-10 h-10 rounded-xl border border-gray-100 shadow-inner shrink-0"
+                                    style={{ backgroundColor: overlay.calendarConfig?.headerColor || '#E54B35' }}
+                                />
+                                <input
+                                    type="color"
+                                    value={overlay.calendarConfig?.headerColor || '#E54B35'}
+                                    onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, headerColor: e.target.value })}
+                                    className="flex-1 bg-transparent h-10 cursor-pointer outline-none border-none p-0"
+                                />
+                            </div>
+
+                            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block ml-1">Body Color</label>
+                            <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
+                                <div
+                                    className="w-10 h-10 rounded-xl border border-gray-100 shadow-inner shrink-0"
+                                    style={{ backgroundColor: overlay.calendarConfig?.bodyColor || '#F9F9F9' }}
+                                />
+                                <input
+                                    type="color"
+                                    value={overlay.calendarConfig?.bodyColor || '#F9F9F9'}
+                                    onChange={(e) => handleChange('calendarConfig', { ...overlay.calendarConfig, bodyColor: e.target.value })}
+                                    className="flex-1 bg-transparent h-10 cursor-pointer outline-none border-none p-0"
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
 
