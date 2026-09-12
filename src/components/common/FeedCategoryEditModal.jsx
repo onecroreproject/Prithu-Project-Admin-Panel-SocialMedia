@@ -76,7 +76,9 @@ const SearchableSelect = ({ value, options, onChange, placeholder, disabled = fa
 export default function FeedCategoryEditModal({ feed, categories, onClose }) {
   const queryClient = useQueryClient();
   
-  const originalMainCat = feed.categories && feed.categories.length > 0 ? feed.categories[0].id : "";
+  const originalMainCat = feed.categories && feed.categories.length > 0 
+    ? String(feed.categories[0].id || feed.categories[0]._id || feed.categories[0].categoryId || "") 
+    : "";
   const originalSubCat = feed.subCategory || "";
 
   const [selectedMainCat, setSelectedMainCat] = useState(originalMainCat);
@@ -88,10 +90,10 @@ export default function FeedCategoryEditModal({ feed, categories, onClose }) {
   const [isAddingSub, setIsAddingSub] = useState(false);
   const [newSubName, setNewSubName] = useState("");
 
-  const currentCategory = categories.find((c) => c.categoryId === selectedMainCat);
+  const currentCategory = categories.find((c) => String(c.categoryId || c._id || c.id) === String(selectedMainCat));
   const subcategories = currentCategory?.subcategories || [];
 
-  const isChanged = selectedMainCat !== originalMainCat || selectedSubCat !== originalSubCat;
+  const isChanged = String(selectedMainCat) !== String(originalMainCat) || selectedSubCat !== originalSubCat;
 
   const handleMainCatChange = (e) => {
     setSelectedMainCat(e.target.value);
@@ -105,8 +107,8 @@ export default function FeedCategoryEditModal({ feed, categories, onClose }) {
       await queryClient.cancelQueries({ queryKey: ["feeds"] });
 
       // Find the new category name
-      const selectedCat = categories.find(c => c.categoryId === variables.categoryId);
-      const newCategoryArray = selectedCat ? [{ id: selectedCat.categoryId, name: selectedCat.categoriesName }] : [];
+      const selectedCat = categories.find(c => String(c.categoryId || c._id || c.id) === String(variables.categoryId));
+      const newCategoryArray = selectedCat ? [{ id: selectedCat.categoryId || selectedCat._id, name: selectedCat.categoriesName || selectedCat.name }] : [];
 
       // Optimistically update the UI cache
       queryClient.setQueriesData({ queryKey: ["feeds"] }, (oldData) => {
@@ -307,7 +309,7 @@ export default function FeedCategoryEditModal({ feed, categories, onClose }) {
             ) : (
               <SearchableSelect
                 value={selectedMainCat}
-                options={categories.map(cat => ({ value: cat.categoryId, label: cat.categoriesName }))}
+                options={categories.map(cat => ({ value: String(cat.categoryId || cat._id || cat.id), label: cat.categoriesName || cat.name }))}
                 onChange={(val) => {
                   setSelectedMainCat(val);
                   setSelectedSubCat("");

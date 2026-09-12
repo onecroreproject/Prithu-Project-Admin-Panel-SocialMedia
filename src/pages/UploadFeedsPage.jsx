@@ -247,8 +247,13 @@ const UploadFeedsPage = () => {
                                             <div className="relative">
                                                 <select
                                                     disabled={!globalSettings.applyScheduleToAll || !globalSettings.categoryId}
-                                                    value={globalSettings.god}
-                                                    onChange={(e) => updateGlobalSettings('god', e.target.value)}
+                                                    value={globalSettings.subCategory || globalSettings.god || ''}
+                                                    onChange={(e) => {
+                                                        updateGlobalSettings({
+                                                            subCategory: e.target.value,
+                                                            god: e.target.value
+                                                        });
+                                                    }}
                                                     className="w-full bg-gray-800/30 border-2 border-gray-800/50 rounded-2xl px-6 py-4 text-white outline-none focus:border-blue-500 transition-all font-medium"
                                                 >
                                                     <option value="">Select Subcategory (Optional)</option>

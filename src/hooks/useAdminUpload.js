@@ -49,6 +49,7 @@ export const useAdminUpload = () => {
     const [globalSettings, setGlobalSettings] = useState({
         categoryId: '',
         categoryIds: [],
+        subCategory: '',
         isScheduled: false,
         scheduleDate: '',
         expiryDate: '',
@@ -293,12 +294,15 @@ export const useAdminUpload = () => {
 
             // Auto-apply logic for categories
             if (next.applyCategoryToAll) {
-                const hasCategoryUpdate = updates.categoryId !== undefined || updates.categoryIds !== undefined;
+                const hasCategoryUpdate = updates.categoryId !== undefined || updates.categoryIds !== undefined || updates.subCategory !== undefined || updates.god !== undefined;
                 if (hasCategoryUpdate) {
+                    const resolvedSub = updates.subCategory !== undefined ? updates.subCategory : (updates.god !== undefined ? updates.god : (next.subCategory || next.god || ''));
                     setFiles(f => f.map(file => ({ 
                         ...file, 
                         categoryId: next.categoryId, 
                         categoryIds: next.categoryIds, 
+                        subCategory: resolvedSub,
+                        god: resolvedSub,
                         isEdited: true 
                     })));
                 }
@@ -306,24 +310,29 @@ export const useAdminUpload = () => {
             
             // Trigger auto-apply when toggling the 'apply' checkbox
             if (updates.applyCategoryToAll === true) {
+                const resolvedSub = next.subCategory || next.god || '';
                 setFiles(f => f.map(file => ({ 
                     ...file, 
                     categoryId: next.categoryId, 
                     categoryIds: next.categoryIds, 
+                    subCategory: resolvedSub,
+                    god: resolvedSub,
                     isEdited: true 
                 })));
             }
 
             // Auto-apply logic for scheduling
             if (next.applyScheduleToAll) {
-                const hasScheduleUpdate = updates.scheduleDate !== undefined || updates.isScheduled !== undefined || updates.expiryDate !== undefined || updates.session !== undefined || updates.god !== undefined || updates.specialDay !== undefined;
+                const hasScheduleUpdate = updates.scheduleDate !== undefined || updates.isScheduled !== undefined || updates.expiryDate !== undefined || updates.session !== undefined || updates.god !== undefined || updates.subCategory !== undefined || updates.specialDay !== undefined;
                 if (hasScheduleUpdate) {
+                    const resolvedSub = updates.subCategory !== undefined ? updates.subCategory : (updates.god !== undefined ? updates.god : (next.subCategory || next.god || ''));
                     setFiles(f => f.map(file => ({ 
                         ...file, 
                         scheduleDate: next.scheduleDate, 
                         expiryDate: next.expiryDate,
                         session: next.session,
-                        god: next.god,
+                        god: resolvedSub,
+                        subCategory: resolvedSub,
                         specialDay: next.specialDay,
                         isScheduled: next.isScheduled, 
                         isEdited: true 
@@ -332,12 +341,14 @@ export const useAdminUpload = () => {
             }
 
             if (updates.applyScheduleToAll === true) {
+                const resolvedSub = next.subCategory || next.god || '';
                 setFiles(f => f.map(file => ({ 
                     ...file, 
                     scheduleDate: next.scheduleDate, 
                     expiryDate: next.expiryDate,
                     session: next.session,
-                    god: next.god,
+                    god: resolvedSub,
+                    subCategory: resolvedSub,
                     specialDay: next.specialDay,
                     isScheduled: next.isScheduled, 
                     isEdited: true 
@@ -418,28 +429,37 @@ export const useAdminUpload = () => {
                     postType = 'image+audio';
                 }
 
-                const formState = (fileForms && !fileForms.nativeEvent) ? (fileForms[f.id] || fileForms['default'] || {}) : {};
+                const defaultForm = (fileForms && !fileForms.nativeEvent) ? (fileForms['default'] || Object.values(fileForms)[0] || {}) : {};
+                const formState = (fileForms && !fileForms.nativeEvent) ? (fileForms[f.id] || defaultForm) : {};
 
                 const targetAspectRatio = formState.aspectRatio || f.aspectRatio || f.metadata?.canvasSettings?.aspectRatio || '9:16';
+                const targetSubCategory = formState.subCategory || formState.god || f.subCategory || f.god || globalSettings.subCategory || globalSettings.god || '';
+                const targetTitle = formState.title || defaultForm.title || f.title || '';
+                const targetDescription = formState.description || defaultForm.description || f.description || '';
+                const targetTags = formState.tags || defaultForm.tags || f.tags || '';
+                const targetCaption = formState.description || defaultForm.description || f.caption || targetTitle;
 
                 perFileMetadata[f.file.name] = {
-                    title: formState.title || f.title || '',
+                    title: targetTitle,
                     language: formState.language || f.language || 'Both',
                     aspectRatio: targetAspectRatio,
-                    tags: formState.tags || f.tags || '',
-                    description: formState.description || f.description || '',
-                    categoryIds: (formState.category && formState.category.length > 0) ? formState.category : (f.categoryIds || []),
-                    caption: f.caption,
+                    tags: targetTags,
+                    description: targetDescription,
+                    caption: targetCaption,
+                    categoryIds: (formState.category && formState.category.length > 0) ? formState.category : (defaultForm.category && defaultForm.category.length > 0 ? defaultForm.category : (f.categoryIds || [])),
+                    subCategory: targetSubCategory,
+                    god: targetSubCategory,
                     scheduleTime: f.isScheduled ? f.scheduleDate : null,
                     scheduling: {
-                        session: f.session || formState.session || '',
-                        day: f.day || formState.day || '',
-                        god: f.god || formState.god || '',
-                        specialDay: f.specialDay || formState.specialDay || '',
-                        publishDate: f.isScheduled ? f.scheduleDate : (formState.publishDate || ''),
-                        expiryDate: f.expiryDate || formState.expiryDate || '',
-                        startTime: f.startTime || formState.startTime || '',
-                        endTime: f.endTime || formState.endTime || ''
+                        session: f.session || formState.session || defaultForm.session || '',
+                        day: f.day || formState.day || defaultForm.day || '',
+                        god: targetSubCategory,
+                        subCategory: targetSubCategory,
+                        specialDay: f.specialDay || formState.specialDay || defaultForm.specialDay || '',
+                        publishDate: f.isScheduled ? f.scheduleDate : (formState.publishDate || defaultForm.publishDate || ''),
+                        expiryDate: f.expiryDate || formState.expiryDate || defaultForm.expiryDate || '',
+                        startTime: f.startTime || formState.startTime || defaultForm.startTime || '',
+                        endTime: f.endTime || formState.endTime || defaultForm.endTime || ''
                     },
                     statusOverride,
                     designData: {
@@ -463,6 +483,15 @@ export const useAdminUpload = () => {
             });
 
             formData.append('perFileMetadata', JSON.stringify(perFileMetadata));
+            formData.append('subCategory', globalSettings.subCategory || globalSettings.god || '');
+
+            const primaryForm = (fileForms && !fileForms.nativeEvent) ? (fileForms['default'] || Object.values(fileForms)[0] || {}) : {};
+            if (primaryForm.title) formData.append('title', primaryForm.title);
+            if (primaryForm.description) {
+                formData.append('description', primaryForm.description);
+                formData.append('caption', primaryForm.description);
+            }
+            if (primaryForm.tags) formData.append('tags', primaryForm.tags);
 
             await feedPortalService.uploadFeed(formData);
             alert("Upload Successful!");

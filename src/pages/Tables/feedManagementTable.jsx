@@ -103,6 +103,26 @@ export default function FeedManagement() {
     });
   }, [rawCategories]);
 
+  const selectedCategory = useMemo(() => {
+    if (!filters.categoryId) return null;
+    return categories.find(c => String(c.categoryId || c._id || c.id) === String(filters.categoryId));
+  }, [categories, filters.categoryId]);
+
+  const availableSubcategories = useMemo(() => {
+    if (selectedCategory && Array.isArray(selectedCategory.subcategories) && selectedCategory.subcategories.length > 0) {
+      return selectedCategory.subcategories;
+    }
+    // If no category selected or category has no explicit list, extract all unique subcategories from feeds
+    const set = new Set();
+    rawFeeds.forEach(f => {
+      const sub = f.subCategory || f.god;
+      if (sub && typeof sub === 'string' && sub.trim()) {
+        set.add(sub.trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, [selectedCategory, rawFeeds]);
+
   // Mutation: Delete feed
   const deleteMutation = useMutation({
     mutationFn: ({ feedId }) => deleteFeed({ feedId }),
@@ -135,12 +155,16 @@ export default function FeedManagement() {
     if (!searchQuery.trim()) return nonScheduledFeeds;
     const q = searchQuery.toLowerCase().trim();
     return nonScheduledFeeds.filter(f => {
-      const title = (f.title || f.caption || '').toLowerCase();
+      const title = (f.title || '').toLowerCase();
+      const caption = (f.caption || '').toLowerCase();
+      const desc = (f.description || '').toLowerCase();
       const creator = (f.creator?.userName || f.creator?.name || '').toLowerCase();
       const id = String(f._id || '').toLowerCase();
       const cats = (f.categories || []).map(c => (c.name || '').toLowerCase()).join(' ');
-      const sub = (f.subCategory || '').toLowerCase();
-      return title.includes(q) || creator.includes(q) || id.includes(q) || cats.includes(q) || sub.includes(q);
+      const sub = (f.subCategory || f.god || '').toLowerCase();
+      const tagList = Array.isArray(f.tags) ? f.tags.join(' ') : (Array.isArray(f.hashtags) ? f.hashtags.join(' ') : (f.tags || ''));
+      const tags = tagList.toLowerCase();
+      return title.includes(q) || caption.includes(q) || desc.includes(q) || creator.includes(q) || id.includes(q) || cats.includes(q) || sub.includes(q) || tags.includes(q);
     });
   }, [nonScheduledFeeds, searchQuery]);
 
@@ -192,6 +216,7 @@ export default function FeedManagement() {
   const hasActiveFilters = Boolean(
     filters.type || 
     filters.categoryId || 
+    filters.subCategory || 
     filters.startDate || 
     filters.endDate || 
     filters.isToday || 
@@ -446,12 +471,13 @@ export default function FeedManagement() {
         <div className="flex flex-wrap items-center gap-3 pt-1">
           
           {/* Category Dropdown */}
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-[180px]">
             <select
               className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs font-semibold outline-none focus:border-blue-500 transition-all cursor-pointer"
               value={filters.categoryId}
               onChange={(e) => {
                 handleFilterChange("categoryId", e.target.value);
+                handleFilterChange("subCategory", "");
                 resetPage();
               }}
             >
@@ -459,6 +485,28 @@ export default function FeedManagement() {
               {categories.map((cat) => (
                 <option key={cat.categoryId || cat._id} value={cat.categoryId || cat._id}>
                   {cat.categoriesName || cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Subcategory Dropdown */}
+          <div className="flex-1 min-w-[180px]">
+            <select
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs font-semibold outline-none focus:border-blue-500 transition-all cursor-pointer disabled:opacity-50"
+              value={filters.subCategory || ""}
+              onChange={(e) => {
+                handleFilterChange("subCategory", e.target.value);
+                resetPage();
+              }}
+              disabled={availableSubcategories.length === 0}
+            >
+              <option value="">
+                {selectedCategory ? `All Subcategories (${availableSubcategories.length})` : `All Subcategories`}
+              </option>
+              {availableSubcategories.map((sub) => (
+                <option key={sub} value={sub}>
+                  {sub}
                 </option>
               ))}
             </select>
@@ -758,21 +806,42 @@ export default function FeedManagement() {
                       </div>
                     </div>
 
-                    {/* Card Content (Title, Caption & Categories) */}
-                    <div className="p-3.5 flex flex-col flex-1 gap-2.5">
+                    {/* Card Content (Title, Description, Tags & Categories) */}
+                    <div className="p-3.5 flex flex-col flex-1 gap-2">
                       <div>
                         <h4
                           onClick={() => setSelectedFeed(feed)}
                           className="font-bold text-xs text-slate-900 dark:text-white line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer leading-snug"
-                          title={feed.title || feed.caption || "Untitled Feed"}
+                          title={feed.title || feed.caption || feed.description || "Untitled Feed"}
                         >
-                          {feed.title || feed.caption || "Untitled Feed"}
+                          {feed.title || feed.caption || feed.description || "Untitled Feed"}
                         </h4>
-                        {feed.caption && feed.title && (
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                            {feed.caption}
+                        {(feed.description || (feed.title && feed.caption && feed.caption !== feed.title ? feed.caption : null)) && (
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed" title={feed.description || feed.caption}>
+                            {feed.description || feed.caption}
                           </p>
                         )}
+                        {/* Tags */}
+                        {(() => {
+                          const tagList = (Array.isArray(feed.tags) && feed.tags.length > 0) 
+                            ? feed.tags 
+                            : ((Array.isArray(feed.hashtags) && feed.hashtags.length > 0) 
+                              ? feed.hashtags 
+                              : (typeof feed.tags === 'string' && feed.tags ? feed.tags.split(/[\s,]+/).filter(Boolean) : []));
+                          if (tagList.length === 0) return null;
+                          return (
+                            <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                              {tagList.slice(0, 3).map((tag, idx) => (
+                                <span key={idx} className="text-[9px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-md">
+                                  #{String(tag).replace(/^#/, '')}
+                                </span>
+                              ))}
+                              {tagList.length > 3 && (
+                                <span className="text-[9px] text-slate-400 font-bold">+{tagList.length - 3}</span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       {/* Categories & Subcategories */}
@@ -788,9 +857,9 @@ export default function FeedManagement() {
                                 <span className="truncate max-w-[85px]">{cat.name}</span>
                               </span>
                             ))}
-                            {feed.subCategory && (
+                            {(feed.subCategory || feed.god) && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40 truncate max-w-[95px]">
-                                ✦ {feed.subCategory}
+                                ✦ {feed.subCategory || feed.god}
                               </span>
                             )}
                             <button
@@ -804,7 +873,13 @@ export default function FeedManagement() {
                           </>
                         ) : (
                           <div className="flex items-center justify-between w-full">
-                            <span className="text-[10px] text-slate-400 italic">No category</span>
+                            {(feed.subCategory || feed.god) ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40 truncate max-w-[95px]">
+                                ✦ {feed.subCategory || feed.god}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-slate-400 italic">No category</span>
+                            )}
                             <button
                               type="button"
                               onClick={() => setEditingCategoryFeed(feed)}
@@ -934,10 +1009,36 @@ export default function FeedManagement() {
                             <p 
                               onClick={() => setSelectedFeed(feed)}
                               className="font-bold text-slate-900 dark:text-white truncate hover:text-blue-600 transition-colors cursor-pointer" 
-                              title={feed.title || feed.caption || "Untitled Feed"}
+                              title={feed.title || feed.caption || feed.description || "Untitled Feed"}
                             >
-                              {feed.title || feed.caption || "Untitled Feed"}
+                              {feed.title || feed.caption || feed.description || "Untitled Feed"}
                             </p>
+                            {(feed.description || (feed.title && feed.caption && feed.caption !== feed.title ? feed.caption : null)) && (
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5" title={feed.description || feed.caption}>
+                                {feed.description || feed.caption}
+                              </p>
+                            )}
+                            {/* Tags display */}
+                            {(() => {
+                              const tagList = (Array.isArray(feed.tags) && feed.tags.length > 0) 
+                                ? feed.tags 
+                                : ((Array.isArray(feed.hashtags) && feed.hashtags.length > 0) 
+                                  ? feed.hashtags 
+                                  : (typeof feed.tags === 'string' && feed.tags ? feed.tags.split(/[\s,]+/).filter(Boolean) : []));
+                              if (tagList.length === 0) return null;
+                              return (
+                                <div className="flex flex-wrap items-center gap-1 mt-1">
+                                  {tagList.slice(0, 4).map((tag, idx) => (
+                                    <span key={idx} className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                      #{String(tag).replace(/^#/, '')}
+                                    </span>
+                                  ))}
+                                  {tagList.length > 4 && (
+                                    <span className="text-[9px] text-slate-400 font-bold">+{tagList.length - 4}</span>
+                                  )}
+                                </div>
+                              );
+                            })()}
                             <div className="flex items-center gap-2 mt-1">
                               <span className="font-mono text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
                                 ID: {String(feed._id).slice(-6)}
@@ -988,7 +1089,6 @@ export default function FeedManagement() {
                           </span>
                         </div>
                       </td>
-
                       {/* Categories & Subcategories */}
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -1003,9 +1103,9 @@ export default function FeedManagement() {
                                   <span>{cat.name}</span>
                                 </span>
                               ))}
-                              {feed.subCategory && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/40">
-                                  <span>✦ {feed.subCategory}</span>
+                              {(feed.subCategory || feed.god) && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/40">
+                                  <span>✦ {feed.subCategory || feed.god}</span>
                                 </span>
                               )}
                               <button
@@ -1018,7 +1118,13 @@ export default function FeedManagement() {
                             </>
                           ) : (
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] text-slate-400 italic">No category</span>
+                              {(feed.subCategory || feed.god) ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/40">
+                                  <span>✦ {feed.subCategory || feed.god}</span>
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-slate-400 italic">No category</span>
+                              )}
                               <button
                                 onClick={() => setEditingCategoryFeed(feed)}
                                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"

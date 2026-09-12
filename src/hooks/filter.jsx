@@ -6,6 +6,7 @@ export default function useFeedFilter() {
     startDate: "",
     endDate: "",
     categoryId: "",
+    subCategory: "",
     isToday: false,
   });
 
@@ -19,6 +20,7 @@ export default function useFeedFilter() {
       startDate: "",
       endDate: "",
       categoryId: "",
+      subCategory: "",
       isToday: false,
     });
 
@@ -37,13 +39,17 @@ export default function useFeedFilter() {
 
       const matchesCategory =
         !filters.categoryId ||
-        (feed.categories && feed.categories.some((cat) => cat.id === filters.categoryId));
+        (feed.categories && feed.categories.some((cat) => String(cat.id || cat._id || cat.categoryId) === String(filters.categoryId)));
+
+      const matchesSubCategory =
+        !filters.subCategory ||
+        (feed.subCategory && feed.subCategory.toLowerCase() === filters.subCategory.toLowerCase());
 
       const matchesToday =
         !filters.isToday ||
         feedDate.toDateString() === new Date().toDateString();
 
-      return matchesType && matchesDate && matchesCategory && matchesToday;
+      return matchesType && matchesDate && matchesCategory && matchesSubCategory && matchesToday;
     });
   };
 

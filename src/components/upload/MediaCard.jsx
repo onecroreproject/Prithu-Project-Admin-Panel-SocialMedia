@@ -171,8 +171,11 @@ const MediaCard = ({
                                 </select>
                                 <select
                                     disabled={!fileData.categoryId}
-                                    value={fileData.god || ''}
-                                    onChange={(e) => onUpdateField('god', e.target.value)}
+                                    value={fileData.subCategory || fileData.god || ''}
+                                    onChange={(e) => {
+                                        onUpdateField('subCategory', e.target.value);
+                                        onUpdateField('god', e.target.value);
+                                    }}
                                     className="bg-gray-900 border border-gray-700 rounded text-white text-[10px] outline-none px-2 py-1 w-full disabled:opacity-50"
                                 >
                                     <option value="">Subcategory (Optional)</option>

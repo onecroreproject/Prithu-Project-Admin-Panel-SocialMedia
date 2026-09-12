@@ -311,9 +311,9 @@ const FeedLivePreviewModal = ({
                                 </span>
                             )}
 
-                            {formState.god && (
+                            {(formState.subCategory || formState.god) && (
                                 <span className="px-2 py-0.5 rounded-full bg-purple-600/90 text-white text-[9px] font-bold backdrop-blur-md shadow-sm">
-                                    ✦ {formState.god}
+                                    ✦ {formState.subCategory || formState.god}
                                 </span>
                             )}
 
@@ -452,10 +452,10 @@ const FeedLivePreviewModal = ({
                                 </span>
                             </div>
 
-                            {formState.god && (
+                            {(formState.subCategory || formState.god) && (
                                 <div className="flex justify-between">
                                     <span className="text-slate-400">Subcategory</span>
-                                    <span className="font-bold text-purple-400">✦ {formState.god}</span>
+                                    <span className="font-bold text-purple-400">✦ {formState.subCategory || formState.god}</span>
                                 </div>
                             )}
 

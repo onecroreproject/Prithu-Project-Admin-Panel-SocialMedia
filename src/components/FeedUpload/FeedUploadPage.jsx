@@ -155,6 +155,7 @@ const FeedUploadPage = () => {
         contentType: 'Image',
         aspectRatio: '9:16',
         category: [],
+        subCategory: '',
         language: 'Both',
         tags: '',
         description: '',
@@ -211,16 +212,25 @@ const FeedUploadPage = () => {
 
     const handleChange = (field, value) => {
         const targetId = activeFileId || 'default';
-        setFileForms(prev => ({
-            ...prev,
-            [targetId]: {
-                ...(prev[targetId] || {
-                    ...defaultFormState,
-                    contentType: selectedFile?.file?.type?.startsWith('video') ? 'Video' : 'Image'
-                }),
-                [field]: value
+        setFileForms(prev => {
+            const current = prev[targetId] || {
+                ...defaultFormState,
+                contentType: selectedFile?.file?.type?.startsWith('video') ? 'Video' : 'Image'
+            };
+            const updates = { [field]: value };
+            if (field === 'god') {
+                updates.subCategory = value;
+            } else if (field === 'subCategory') {
+                updates.god = value;
             }
-        }));
+            return {
+                ...prev,
+                [targetId]: {
+                    ...current,
+                    ...updates
+                }
+            };
+        });
     };
 
     // Multi-selected file IDs for batch actions (e.g. changing post sizes)
@@ -589,7 +599,7 @@ const FeedUploadPage = () => {
                                         </label>
                                         <button
                                             type="button"
-                                            onClick={() => toggleCustomMode('god', formState.god)}
+                                            onClick={() => toggleCustomMode('god', formState.subCategory || formState.god)}
                                             className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold border transition-all ${customInputModes.god ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
                                         >
                                             {customInputModes.god ? '✓ Done' : '+ Custom'}
@@ -599,8 +609,8 @@ const FeedUploadPage = () => {
                                         <input
                                             type="text"
                                             placeholder="Type custom subcategory..."
-                                            value={formState.god || ''}
-                                            onChange={(e) => handleChange('god', e.target.value)}
+                                            value={formState.subCategory || formState.god || ''}
+                                            onChange={(e) => handleChange('subCategory', e.target.value)}
                                             className="w-full px-3.5 py-2.5 rounded-xl border border-blue-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm text-slate-900"
                                             autoFocus
                                         />
@@ -608,8 +618,8 @@ const FeedUploadPage = () => {
                                         <div className="relative">
                                             <select
                                                 disabled={!formState.category || formState.category.length === 0}
-                                                value={formState.god || ''}
-                                                onChange={(e) => handleChange('god', e.target.value)}
+                                                value={formState.subCategory || formState.god || ''}
+                                                onChange={(e) => handleChange('subCategory', e.target.value)}
                                                 className="w-full px-3.5 py-2.5 pr-8 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white focus:border-blue-500 outline-none text-sm appearance-none text-slate-700 disabled:opacity-50 disabled:bg-slate-100 disabled:cursor-not-allowed transition-colors cursor-pointer"
                                             >
                                                 <option value="">— Optional Subcategory —</option>
@@ -624,11 +634,12 @@ const FeedUploadPage = () => {
                                                     const configGods = customOptions?.gods || [];
                                                     const configSpecialDays = customOptions?.specialDays || [];
 
+                                                    const currentSubVal = formState.subCategory || formState.god;
                                                     const rawList = [
                                                         ...catSubs,
                                                         ...(isSpecialDayCat ? configSpecialDays : (catSubs.length === 0 ? configGods : [])),
                                                         ...localCustomGods,
-                                                        ...(formState.god ? [formState.god] : [])
+                                                        ...(currentSubVal ? [currentSubVal] : [])
                                                     ];
                                                     const seen = new Map();
                                                     for (const opt of rawList) {
@@ -651,12 +662,12 @@ const FeedUploadPage = () => {
                                             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                                         </div>
                                     )}
-                                    {formState.god && (
+                                    {(formState.subCategory || formState.god) && (
                                         <div className="mt-1.5 flex items-center gap-1.5">
                                             <span className="text-[10px] bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
-                                                {formState.god}
+                                                ✦ {formState.subCategory || formState.god}
                                             </span>
-                                            <button type="button" onClick={() => handleChange('god', '')} className="text-slate-400 hover:text-red-500 transition-colors text-xs">✕</button>
+                                            <button type="button" onClick={() => handleChange('subCategory', '')} className="text-slate-400 hover:text-red-500 transition-colors text-xs cursor-pointer">✕</button>
                                         </div>
                                     )}
                                 </div>
