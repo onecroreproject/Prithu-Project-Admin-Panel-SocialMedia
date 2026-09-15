@@ -8,9 +8,11 @@ import { API_ENDPOINTS } from "../../API-Constanse/apiConstance.js";
 export async function fetchCategories() {
   try {
     const res = await Api.get(API_ENDPOINTS.ADMIN_GET_CATEGORY);
-
-    return res.data.categories;
+    return res.data?.categories || [];
   } catch (error) {
+    if (error.response?.status === 404) {
+      return [];
+    }
     throw new Error(error.response?.data?.message || "Failed to fetch categories");
   }
 }
