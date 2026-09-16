@@ -752,20 +752,28 @@ export default function FeedManagement() {
                       )}
 
                       {/* Top Badges */}
-                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10 pointer-events-none">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider backdrop-blur-md shadow-xs ${
-                          isVideo 
-                            ? "bg-purple-900/80 text-purple-200 border border-purple-500/30" 
-                            : "bg-emerald-900/80 text-emerald-200 border border-emerald-500/30"
-                        }`}>
-                          {isVideo ? <Video className="w-2.5 h-2.5" /> : <ImageIcon className="w-2.5 h-2.5" />}
-                          <span>{isVideo ? "Video" : "Image"}</span>
-                        </span>
-                        {feed.aspectRatio && (
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-black/60 text-white/90 backdrop-blur-md">
-                            {feed.aspectRatio}
+                      <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 z-10 pointer-events-none">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider backdrop-blur-md shadow-xs ${
+                            isVideo 
+                              ? "bg-purple-900/80 text-purple-200 border border-purple-500/30" 
+                              : "bg-emerald-900/80 text-emerald-200 border border-emerald-500/30"
+                          }`}>
+                            {isVideo ? <Video className="w-2.5 h-2.5" /> : <ImageIcon className="w-2.5 h-2.5" />}
+                            <span>{isVideo ? "Video" : "Image"}</span>
                           </span>
-                        )}
+                          {feed.aspectRatio && (
+                            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-black/60 text-white/90 backdrop-blur-md">
+                              {feed.aspectRatio}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Views Badge */}
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold bg-black/75 backdrop-blur-md text-cyan-300 border border-cyan-500/30 shadow-xs">
+                          <Eye className="w-2.5 h-2.5 text-cyan-400" />
+                          <span>{(feed.views || feed.viewsCount || feed.playbackStats?.totalViews || 0).toLocaleString()}</span>
+                        </span>
                       </div>
 
                       {/* Hover Overlay with Action Buttons */}
@@ -941,6 +949,7 @@ export default function FeedManagement() {
                   <th className="py-3.5 px-4 w-12 text-center">#</th>
                   <th className="py-3.5 px-4 min-w-[220px]">Media Content</th>
                   <th className="py-3.5 px-4 w-28">Type</th>
+                  <th className="py-3.5 px-4 w-28 text-center">Views</th>
                   <th className="py-3.5 px-4 w-28">Status</th>
                   <th className="py-3.5 px-4 min-w-[140px]">Creator</th>
                   <th className="py-3.5 px-4 min-w-[200px]">Categories & Tags</th>
@@ -1063,6 +1072,14 @@ export default function FeedManagement() {
                         }`}>
                           {isVideo ? <Video className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
                           <span>{feed.type}</span>
+                        </span>
+                      </td>
+
+                      {/* Views Badge */}
+                      <td className="py-3 px-4 text-center">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-900/40 tabular-nums shadow-2xs">
+                          <Eye size={12} className="text-cyan-500" />
+                          <span>{(feed.views || feed.viewsCount || feed.playbackStats?.totalViews || 0).toLocaleString()}</span>
                         </span>
                       </td>
 

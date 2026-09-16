@@ -95,6 +95,22 @@ export default function UserAnalytics() {
           createdAt: post.createdAt
         })) || [];
 
+      case "viewed":
+        return analyticsData.viewedPosts?.map((post, index) => ({
+          id: index + 1,
+          _id: post.id,
+          feedId: {
+            title: post.feedId?.title || `${post.feedId?.type === 'video' ? '🎥 Video' : '📷 Image'} Post`,
+            contentUrl: post.feedId?.contentUrl,
+            type: post.feedId?.type || post.postType || 'image',
+            description: post.feedId?.description || ""
+          },
+          category: post.category || "General",
+          watchDuration: post.watchDuration || 0,
+          viewedAt: post.viewedAt || post.createdAt || new Date().toISOString(),
+          deviceType: post.deviceType || "web"
+        })) || [];
+
       case "following":
         return analyticsData.following?.map((user, index) => ({
           id: index + 1,
@@ -235,6 +251,7 @@ export default function UserAnalytics() {
   // Calculate user stats
   const userStats = useMemo(() => ({
     posts: analyticsData?.posts?.length || 0,
+    viewed: analyticsData?.viewedPosts?.length || analyticsData?.interactions?.viewed || 0,
     images: analyticsData?.imageCount || 0,
     videos: analyticsData?.videoCount || 0,
     following: analyticsData?.following?.length || 0,

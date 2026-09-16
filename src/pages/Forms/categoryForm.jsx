@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 export default function CategoryUploadForm() {
   const [name, setName] = useState("");
+  const [order, setOrder] = useState("");
   const [subcatInput, setSubcatInput] = useState("");
   const [subcatTags, setSubcatTags] = useState([]);
   const queryClient = useQueryClient();
@@ -15,6 +16,7 @@ export default function CategoryUploadForm() {
     onSuccess: () => {
       toast.success("Category saved successfully!");
       setName("");
+      setOrder("");
       setSubcatInput("");
       setSubcatTags([]);
       queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -27,7 +29,11 @@ export default function CategoryUploadForm() {
     if (!name.trim()) return toast.error("Please enter a category name");
     const allSubs = [...subcatTags];
     if (subcatInput.trim()) allSubs.push(...subcatInput.split(",").map((s) => s.trim()).filter(Boolean));
-    mutate({ name: name.trim(), subcategories: allSubs.join(", ") });
+    mutate({ 
+      name: name.trim(), 
+      subcategories: allSubs.join(", "),
+      order: order !== "" ? Number(order) : 0
+    });
   };
 
   const addTag = () => {
@@ -55,7 +61,7 @@ export default function CategoryUploadForm() {
             </div>
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">Add Category</h2>
             <p className="text-blue-200 text-sm mt-1">
-              Create a new category with optional subcategories for content organization.
+              Create a new category with display order and optional subcategories.
             </p>
           </div>
           <div className="p-3 bg-white/10 rounded-2xl border border-white/20">
@@ -66,18 +72,34 @@ export default function CategoryUploadForm() {
 
       {/* Form Card */}
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Category Name */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-            Category Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. God, Special Days, News..."
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Category Name */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+              Category Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. God, Special Days, News..."
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+            />
+          </div>
+
+          {/* Category Order */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+              Display Order (Position)
+            </label>
+            <input
+              type="number"
+              value={order}
+              onChange={(e) => setOrder(e.target.value)}
+              placeholder="e.g. 1, 2, 3 (lower shows first)"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+            />
+          </div>
         </div>
 
         {/* Subcategories */}

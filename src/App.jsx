@@ -28,6 +28,7 @@ const EmailManagementDashboard = lazy(() => import("./pages/EmailManagement/Emai
 const GoogleDriveDashboard = lazy(() => import("./DriverDashboard/googleDashboard"));
 const RecommendationDashboard = lazy(() => import("./pages/RecommendationDashboard"));
 const VideoCompressionDashboard = lazy(() => import("./pages/AdminPages/VideoCompressionDashboard"));
+const FeedViewAnalyticsPage = lazy(() => import("./pages/Dashboard/FeedViewAnalyticsPage"));
 
 // Social Media Module
 const UploadPage = lazy(() => import("./pages/uploadPage"));
@@ -138,6 +139,7 @@ function AnimatedRoutes() {
             <Route path="/analytics/dashboard" element={<SocialMediaDashboard />} />
             <Route path="/social/recommendation-dashboard" element={<RecommendationDashboard />} />
             <Route path="/settings/video-compression" element={<VideoCompressionDashboard />} />
+            <Route path="/social/feed-view-analytics" element={<FeedViewAnalyticsPage />} />
 
             {/* Social Media Module */}
             <Route path="/social/creator/trending/table" element={<CreatorTable />} />

@@ -213,6 +213,65 @@ const renderTableCell = (activeTab, row, column) => {
       }
       break;
 
+    case "viewed":
+      if (column === "content") {
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+              {row.feedId?.contentUrl ? (
+                <img
+                  src={row.feedId.contentUrl}
+                  alt={row.feedId.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  {row.feedId?.type === 'video' ? '🎥' : '📷'}
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="font-medium text-gray-900 dark:text-gray-100">{row.feedId?.title || "Viewed Feed"}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs font-medium flex items-center gap-1">
+                  <Eye className="w-3 h-3" />
+                  <span>Viewed</span>
+                </div>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {row.feedId?.type === 'video' ? 'Video' : 'Image'} • {row.deviceType || 'web'}
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      if (column === "category") {
+        return (
+          <div className="flex items-center gap-1.5">
+            <Tag className="w-3.5 h-3.5 text-indigo-500" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{row.category || "General"}</span>
+          </div>
+        );
+      }
+      if (column === "watchDuration") {
+        const sec = row.watchDuration || 0;
+        const formattedTime = sec >= 60 ? `${Math.floor(sec / 60)}m ${sec % 60}s` : `${sec}s`;
+        return (
+          <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-lg text-xs font-semibold">
+            ⏱️ {formattedTime}
+          </span>
+        );
+      }
+      if (column === "actionDate") {
+        return (
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <Calendar className="w-4 h-4 text-gray-400" />
+            {formatDate(row.viewedAt || row.createdAt)}
+          </div>
+        );
+      }
+      break;
+
     case "liked":
     case "disliked":
     case "shared":
@@ -343,6 +402,8 @@ export default function UserAnalyticsTable({ activeTab, data, currentPage, items
     switch (activeTab) {
       case "posts":
         return ["post", "engagement"];
+      case "viewed":
+        return ["content", "category", "watchDuration", "actionDate"];
       case "following":
       case "followers":
         return ["user", "joined", "actions"];
@@ -368,6 +429,8 @@ export default function UserAnalyticsTable({ activeTab, data, currentPage, items
     switch (activeTab) {
       case "posts":
         return ["Post", "Engagement"];
+      case "viewed":
+        return ["Feed Content", "Category", "Watch Duration", "Viewed On"];
       case "following":
         return ["User", "Followed On", "Actions"];
       case "followers":

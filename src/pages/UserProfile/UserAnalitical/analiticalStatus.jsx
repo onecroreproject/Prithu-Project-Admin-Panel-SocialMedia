@@ -16,6 +16,24 @@ import {
 } from "lucide-react";
 
 const statConfigs = {
+  viewed: {
+    icon: Eye,
+    color: "from-teal-500 to-emerald-500",
+    label: "Viewed Feeds",
+    description: "Total feeds watched"
+  },
+  totalViews: {
+    icon: Eye,
+    color: "from-blue-600 to-indigo-600",
+    label: "Total Views",
+    description: "Post views count"
+  },
+  todayViews: {
+    icon: TrendingUp,
+    color: "from-emerald-500 to-teal-600",
+    label: "Today's Views",
+    description: "Views recorded today"
+  },
   following: {
     icon: Users,
     color: "from-blue-500 to-cyan-500",

@@ -60,6 +60,7 @@ const mainNavItems = [
     name: "Feed Management",
     permission: "canManageFeeds",
     subItems: [
+      { name: "Feed View Analytics", path: "/social/feed-view-analytics", permission: "canManageFeeds" },
       { name: "Trending Feeds", path: "/social/trending/feed", permission: "canManageTrendingFeeds" },
       { name: "Feed Upload", path: "/social/admin/upload/page", permission: "canManageUpload" },
       { name: "Feed Calendar", path: "/social/calendar", permission: "canManageFeeds" },

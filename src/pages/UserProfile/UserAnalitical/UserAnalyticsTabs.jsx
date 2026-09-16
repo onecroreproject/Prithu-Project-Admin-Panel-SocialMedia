@@ -2,11 +2,12 @@ import { motion } from "framer-motion";
 
 const tabs = [
   { id: "posts", label: "Posts", icon: "📝" },
+  { id: "viewed", label: "Viewed Feeds", icon: "👁️" },
   { id: "following", label: "Following", icon: "👥" },
   { id: "followers", label: "Followers", icon: "🤝" },
   { id: "interested", label: "Interested", icon: "👍" },
   { id: "nonInterested", label: "Not Interested", icon: "👎" },
-  { id: "hidden", label: "Hidden", icon: "👁️" },
+  { id: "hidden", label: "Hidden", icon: "🚫" },
   { id: "liked", label: "Liked", icon: "❤️" },
   { id: "disliked", label: "Disliked", icon: "👎" },
   { id: "commented", label: "Comments", icon: "💬" },

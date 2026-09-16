@@ -50,7 +50,7 @@ import PromptManagementPage from "../PromptManagementPage";
 import AICategoryManagementPage from "../AICategoryManagementPage";
 import VideoCompressionDashboard from "../AdminPages/VideoCompressionDashboard";
 
-import { fetchFeeds, fetchCategories } from "../../Services/FeedServices/feedServices";
+import { fetchFeeds, fetchCategories, fetchFeedWatchAnalytics } from "../../Services/FeedServices/feedServices";
 
 export default function FeedManagementDashboard() {
   const navigate = useNavigate();
@@ -62,7 +62,7 @@ export default function FeedManagementDashboard() {
 
   // Fetch feeds data
   const { 
-    data: feedData = { feeds: [], totalFeeds: 0, totalImages: 0, totalVideos: 0 }, 
+    data: feedData = { feeds: [], totalFeeds: 0, totalImages: 0, totalVideos: 0, totalPostsWatched: 0, todayPostsWatched: 0, todayUniqueUsersWatched: 0, todayCategoryWatched: [] }, 
     isLoading: feedsLoading, 
     isFetching: feedsFetching,
     refetch: refetchFeeds 
@@ -82,6 +82,18 @@ export default function FeedManagementDashboard() {
     staleTime: 60000,
   });
 
+  // Fetch real-time watch analytics
+  const { 
+    data: watchStats = {}, 
+    isLoading: watchLoading,
+    refetch: refetchWatchStats 
+  } = useQuery({
+    queryKey: ["feedWatchAnalytics"],
+    queryFn: fetchFeedWatchAnalytics,
+    staleTime: 15000,
+    refetchInterval: 30000,
+  });
+
   const feeds = Array.isArray(feedData) ? feedData : (Array.isArray(feedData?.feeds) ? feedData.feeds : []);
 
   // Computed Analytics Metrics
@@ -90,8 +102,22 @@ export default function FeedManagementDashboard() {
   const videoCount = feedData.totalVideos || feeds.filter(f => f.type === "video" || f.type?.includes("video")).length || 0;
   const scheduledCount = feeds.filter(f => f.status === "scheduled").length;
 
+  // View / Watch Analytics Metrics
+  const totalPostsWatched = watchStats?.totalPostsWatched ?? feedData?.totalPostsWatched ?? 0;
+  const todayPostsWatched = watchStats?.todayPostsWatched ?? feedData?.todayPostsWatched ?? 0;
+  const todayUniqueUsersWatched = watchStats?.todayUniqueUsersWatched ?? feedData?.todayUniqueUsersWatched ?? 0;
+  const todayCategoryWatched = watchStats?.todayCategoryWatched || feedData?.todayCategoryWatched || [];
+  const topWatchedPostsToday = watchStats?.topWatchedPostsToday || [];
+
   const imagePercentage = totalCount > 0 ? Math.round((imageCount / totalCount) * 100) : 0;
   const videoPercentage = totalCount > 0 ? Math.round((videoCount / totalCount) * 100) : 0;
+
+  const formatCompact = (num) => {
+    if (!num && num !== 0) return "0";
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+    return num.toLocaleString();
+  };
 
   // Language Breakdown
   const languageStats = useMemo(() => {
@@ -410,108 +436,197 @@ export default function FeedManagementDashboard() {
         </div>
 
         {/* =========================================================================
-            2. OVERLAPPING KPI PERFORMANCE & CATALOG SUMMARY CARDS
+            2. OVERLAPPING KPI PERFORMANCE & WATCH ANALYTICS SUMMARY CARDS
         ========================================================================= */}
         <div className="-mt-10 sm:-mt-12 lg:-mt-14 px-3 sm:px-6 relative z-20">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
             
-            {/* Total Live Feeds */}
-            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
+            {/* 1. Total Posts Watched (All-Time) */}
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4.5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-cyan-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">
-                  Total Live Feeds
+                <p className="text-[10px] font-black uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-1 flex items-center gap-1">
+                  <Eye size={12} className="text-cyan-500" />
+                  Total Watched
                 </p>
-                <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                  {formatCompact(totalPostsWatched)}
+                </p>
+                <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                  All-time post views
+                </div>
+              </div>
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
+                <Eye className="w-5 h-5" />
+              </div>
+            </div>
+
+            {/* 2. Posts Watched Today */}
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4.5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-emerald-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1 flex items-center gap-1">
+                  <TrendingUp size={12} className="text-emerald-500" />
+                  Watched Today
+                </p>
+                <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                  {formatCompact(todayPostsWatched)}
+                </p>
+                <div className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {todayUniqueUsersWatched} active users today
+                </div>
+              </div>
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+            </div>
+
+            {/* 3. Total Live Feeds */}
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4.5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">
+                  Live Catalog
+                </p>
+                <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
                   {totalCount}
                 </p>
-                <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1">
+                <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                  Active in catalog
+                  Published feeds
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
-                <Layers className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
+                <Layers className="w-5 h-5" />
               </div>
             </div>
 
-            {/* Image Feeds */}
-            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-emerald-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
+            {/* 4. Images & Videos Ratio */}
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4.5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
-                  Image Feeds
+                <p className="text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
+                  Media Ratios
                 </p>
-                <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
-                  {imageCount}
+                <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                  {imageCount} <span className="text-xs text-slate-400 font-bold">Img</span> / {videoCount} <span className="text-xs text-slate-400 font-bold">Vid</span>
                 </p>
-                <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  {imagePercentage}% of library
-                </div>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
-                <ImageIcon className="w-6 h-6" />
-              </div>
-            </div>
-
-            {/* Video Feeds */}
-            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
-                  Video Feeds
-                </p>
-                <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
-                  {videoCount}
-                </p>
-                <div className="flex items-center gap-1 text-[11px] text-purple-600 dark:text-purple-400 font-bold mt-1">
+                <div className="flex items-center gap-1 text-[10px] text-purple-600 dark:text-purple-400 font-bold mt-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                  {videoPercentage}% of library
+                  {videoPercentage}% Video share
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
-                <Video className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
+                <Film className="w-5 h-5" />
               </div>
             </div>
 
-            {/* Categories */}
-            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-amber-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
+            {/* 5. Categories Watched Today */}
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4.5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-amber-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">
-                  Categories
+                <p className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">
+                  Categories Watched
                 </p>
-                <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
-                  {categories.length}
+                <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                  {todayCategoryWatched.length}
                 </p>
-                <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1">
+                <div className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  Taxonomy groups
+                  {categories.length} Total groups
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
-                <Tag className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
+                <Tag className="w-5 h-5" />
               </div>
             </div>
 
-            {/* Scheduled Queue */}
-            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-rose-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
+            {/* 6. Scheduled Queue */}
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4.5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl hover:shadow-2xl hover:border-rose-500/40 hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-between group">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 mb-1">
-                  Scheduled Queue
+                <p className="text-[10px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 mb-1">
+                  Scheduled
                 </p>
-                <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
                   {scheduledCount}
                 </p>
-                <div className="flex items-center gap-1 text-[11px] text-rose-600 dark:text-rose-400 font-bold mt-1">
+                <div className="flex items-center gap-1 text-[10px] text-rose-600 dark:text-rose-400 font-bold mt-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                   Auto-publish queue
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-red-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
-                <Clock className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-500 to-red-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/25 group-hover:scale-110 group-hover:rotate-3 transition-all shrink-0">
+                <Clock className="w-5 h-5" />
               </div>
             </div>
 
           </div>
         </div>
+      </div>
+
+      {/* =========================================================================
+          TODAY'S LIVE WATCH & CATEGORY INSIGHTS BAR
+      ========================================================================= */}
+      {todayCategoryWatched.length > 0 && (
+        <div className="bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-950 p-6 rounded-[2rem] border border-slate-800 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800/80">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Activity size={16} />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                  <span>Categories Watched Today</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/50 font-semibold">
+                    Live Real-Time
+                  </span>
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  Total views distribution across categories viewed by users today
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-slate-300">
+              <span className="text-slate-400">Today Total:</span>
+              <span className="font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-800/60">
+                {todayPostsWatched.toLocaleString()} views
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {todayCategoryWatched.map((cat, idx) => {
+              const percentage = todayPostsWatched > 0 ? Math.round((cat.viewsToday / todayPostsWatched) * 100) : 0;
+              return (
+                <div
+                  key={idx}
+                  className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 hover:border-slate-700 transition space-y-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-white truncate">
+                      {cat.categoryName}
+                    </span>
+                    <span className="text-xs font-black text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-800/40">
+                      {cat.viewsToday.toLocaleString()} views
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-emerald-500 to-cyan-500 h-1.5 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.max(percentage, 5)}%` }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <span>Rank #{idx + 1}</span>
+                    <span className="text-slate-300 font-semibold">{percentage}% of today's views</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
       </div>
 
       {/* =========================================================================

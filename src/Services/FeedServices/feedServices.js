@@ -211,6 +211,75 @@ export async function fetchFeeds(params = {}) {
   }
 }
 
+// ✅ Fetch Feed Watch Analytics (Total watched, Watched today, Category watched today, Hourly & Top feeds)
+export async function fetchFeedWatchAnalytics() {
+  try {
+    const res = await Api.get(API_ENDPOINTS.ADMIN_FEED_WATCH_ANALYTICS);
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch feed watch analytics:", error);
+    return {
+      success: false,
+      totalPostsWatched: 0,
+      todayPostsWatched: 0,
+      todayUniqueUsersWatched: 0,
+      totalWatchHours: 0,
+      todayWatchHours: 0,
+      todayCategoryWatched: [],
+      allTimeCategoryWatched: [],
+      todayHourlyViews: [],
+      topWatchedPostsToday: [],
+      topWatchedPostsAllTime: []
+    };
+  }
+}
+
+// ✅ Fetch Feed View Logs (Paginated live user view stream)
+export async function fetchFeedViewLogs(params = {}) {
+  try {
+    const res = await Api.get(API_ENDPOINTS.ADMIN_FEED_VIEW_LOGS, { params });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch feed view logs:", error);
+    return {
+      success: false,
+      total: 0,
+      page: 1,
+      totalPages: 1,
+      views: []
+    };
+  }
+}
+
+// ✅ Fetch Category View Analytics
+export async function fetchCategoryViewsAnalytics() {
+  try {
+    const res = await Api.get(API_ENDPOINTS.ADMIN_CATEGORY_VIEWS);
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch category views analytics:", error);
+    return {
+      success: false,
+      categories: []
+    };
+  }
+}
+
+// ✅ Fetch User Viewed Feeds (Watch history for individual user)
+export async function fetchUserViewedFeeds(userId, params = {}) {
+  try {
+    const res = await Api.get(`${API_ENDPOINTS.ADMIN_USER_VIEWED_FEEDS}/${userId}`, { params });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch user viewed feeds:", error);
+    return {
+      success: false,
+      totalViews: 0,
+      views: []
+    };
+  }
+}
+
 
 // ✅ Delete Category
 export async function deleteCategory(categoryId) {
@@ -226,12 +295,30 @@ export async function deleteCategory(categoryId) {
 
 
 
-export const updateCategory = async ({ id, name, subcategories }) => {
+export const updateCategory = async ({ id, name, subcategories, order }) => {
   try {
-    const res = await Api.put(API_ENDPOINTS.ADMIN_UPDATE_CATEGORY, { id, name, subcategories });
+    const res = await Api.put(API_ENDPOINTS.ADMIN_UPDATE_CATEGORY, { id, name, subcategories, order });
     return res.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to update category");
+  }
+};
+
+export const reorderCategories = async (categories) => {
+  try {
+    const res = await Api.put(API_ENDPOINTS.ADMIN_REORDER_CATEGORIES, { categories });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to reorder categories");
+  }
+};
+
+export const assignCategoryOrder = async ({ id, categoryId, order }) => {
+  try {
+    const res = await Api.put(API_ENDPOINTS.ADMIN_ASSIGN_CATEGORY_ORDER, { id: id || categoryId, order });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to assign category order");
   }
 };
 
@@ -282,5 +369,24 @@ export async function updateFeedSchedule(feedId, { scheduleTime }) {
     return res.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to update feed schedule");
+  }
+}
+
+// ✅ App Version & Play Store In-App Update Management
+export async function fetchAppVersionConfig() {
+  try {
+    const res = await Api.get(API_ENDPOINTS.ADMIN_GET_APP_VERSION);
+    return res.data.config;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch app version configuration");
+  }
+}
+
+export async function updateAppVersionConfig(payload) {
+  try {
+    const res = await Api.put(API_ENDPOINTS.ADMIN_UPDATE_APP_VERSION, payload);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update app version configuration");
   }
 }

@@ -24,6 +24,8 @@ export const API_ENDPOINTS = {
   USER_ANALYTICS_SHARED: "/api/shared",
   USER_ANALYTICS_DOWNLOADED: "/api/downloaded",
   USER_ANALYTICS_NON_INTERESTED: "/api/nonInterested",
+  USER_ANALYTICS_VIEWED: "/api/viewed",
+  ADMIN_USER_VIEWED_FEEDS: "/api/admin/viewed",
   ADMIN_DELETE_USER: "/api/admin/delete/user",
   USER_DELETE_LOGS: "/api/admin/user/delete-logs",
 
@@ -60,10 +62,16 @@ export const API_ENDPOINTS = {
   ADMIN_GET_CATEGORY: "/api/admin/get/feed/category",
   ADMIN_UPLOAD_CATEGORY: "/api/admin/add/feed/category",
   ADMIN_GET_ALL_FEED: "/api/admin/get/all/feed",
+  ADMIN_FEED_WATCH_ANALYTICS: "/api/admin/feed/watch-analytics",
+  ADMIN_FEED_VIEW_LOGS: "/api/admin/analytics/view-logs",
+  ADMIN_CATEGORY_VIEWS: "/api/admin/analytics/category-views",
+  ADMIN_USER_VIEWED_FEEDS: "/api/admin/user/viewed-feeds",
   ADMIN_DELETE_FEED: "/api/delete/feed",
   REMOVE_FEED_CATEGORY: "/api/admin/feed",
   ADMIN_DELETE_CATEGORY: "/api/delete/category",
   ADMIN_UPDATE_CATEGORY: "/api/admin/update/category",
+  ADMIN_REORDER_CATEGORIES: "/api/admin/categories/reorder",
+  ADMIN_ASSIGN_CATEGORY_ORDER: "/api/admin/category/order",
   ADMIN_GET_FEED_DESIGN: "/api/admin/feed", // Base for /:feedId/design
   ADMIN_UPDATE_FEED_DESIGN: "/api/admin/feed", // Base for /:feedId/design
   ADMIN_UPDATE_FEED_SCHEDULE: "/api/admin/feed", // Base for /:feedId/schedule
@@ -111,4 +119,8 @@ export const API_ENDPOINTS = {
   ML_METADATA_STATS: "/api/admin/ml-metadata/stats",
   ML_METADATA_TOGGLE: "/api/admin/ml-metadata/toggle",
   CRON_TRIGGER: "/api/admin/cron/trigger",
+
+  // App Version & Play Store Update
+  ADMIN_GET_APP_VERSION: "/api/admin/app-version",
+  ADMIN_UPDATE_APP_VERSION: "/api/admin/app-version",
 };
