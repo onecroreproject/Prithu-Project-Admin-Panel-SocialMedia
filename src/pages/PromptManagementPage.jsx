@@ -256,6 +256,7 @@ export default function PromptManagementPage() {
   // Form Fields State
   const [formTitle, setFormTitle] = useState("");
   const [formCategory, setFormCategory] = useState("");
+  const [formSubCategory, setFormSubCategory] = useState("");
   const [formPrompt, setFormPrompt] = useState("");
   const [formImageUrl, setFormImageUrl] = useState("");
   const [formAspectRatio, setFormAspectRatio] = useState("1:1");
@@ -435,6 +436,7 @@ export default function PromptManagementPage() {
     setEditingPrompt(null);
     setFormTitle("");
     setFormCategory(categories[0]?.name || "Halloween");
+    setFormSubCategory("");
     setFormPrompt("");
     setFormImageUrl(""); // Let it start empty for file choice
     setFormAspectRatio("1:1");
@@ -447,6 +449,7 @@ export default function PromptManagementPage() {
     setEditingPrompt(prompt);
     setFormTitle(prompt.title);
     setFormCategory(prompt.category);
+    setFormSubCategory(prompt.subCategory || "");
     setFormPrompt(prompt.prompt);
     setFormImageUrl(prompt.imageUrl);
     setFormAspectRatio(prompt.aspectRatio || "1:1");
@@ -469,6 +472,7 @@ export default function PromptManagementPage() {
     const promptData = {
       title: formTitle.trim(),
       category: formCategory,
+      subCategory: formSubCategory.trim(),
       prompt: formPrompt.trim(),
       imageUrl: formImageUrl.trim(),
       aspectRatio: formAspectRatio,
@@ -724,9 +728,16 @@ export default function PromptManagementPage() {
                     </td>
 
                     <td className="p-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 uppercase tracking-wider">
-                        {prompt.category}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 uppercase tracking-wider">
+                          {prompt.category}
+                        </span>
+                        {prompt.subCategory && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30">
+                            {prompt.subCategory}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="p-4 font-semibold text-gray-600 dark:text-gray-400">
@@ -891,7 +902,7 @@ export default function PromptManagementPage() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* Category select */}
                       <div>
                         <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
@@ -900,7 +911,10 @@ export default function PromptManagementPage() {
                         </label>
                         <select
                           value={formCategory}
-                          onChange={(e) => setFormCategory(e.target.value)}
+                          onChange={(e) => {
+                            setFormCategory(e.target.value);
+                            setFormSubCategory("");
+                          }}
                           className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition-shadow appearance-none"
                         >
                           {(categories.length > 0 ? categories : CATEGORIES_LIST.map(name => ({ _id: name, name }))).map((cat) => (
@@ -909,6 +923,27 @@ export default function PromptManagementPage() {
                             </option>
                           ))}
                         </select>
+                      </div>
+
+                      {/* Subcategory */}
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                          <Tag className="w-4 h-4 text-indigo-600" />
+                          Subcategory
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Traditional"
+                          value={formSubCategory}
+                          onChange={(e) => setFormSubCategory(e.target.value)}
+                          list="available-subcategories"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition-shadow"
+                        />
+                        <datalist id="available-subcategories">
+                          {(categories.find(c => c.name?.toLowerCase() === formCategory?.toLowerCase())?.subcategories || []).map((sub) => (
+                            <option key={sub} value={sub} />
+                          ))}
+                        </datalist>
                       </div>
 
                       {/* Aspect Ratio select */}

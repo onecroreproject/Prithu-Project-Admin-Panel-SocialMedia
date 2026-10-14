@@ -16,8 +16,10 @@ export default function AICategoryManagementPage() {
 
   // Form states
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newSubcategories, setNewSubcategories] = useState("");
   const [editingCategory, setEditingCategory] = useState(null);
   const [editCategoryName, setEditCategoryName] = useState("");
+  const [editSubcategories, setEditSubcategories] = useState("");
 
   // Fetch all categories
   const fetchCategories = async () => {
@@ -59,10 +61,14 @@ export default function AICategoryManagementPage() {
 
     setActionLoading(true);
     try {
-      const { data } = await api.post("/api/admin/aicategories", { name: newCategoryName.trim() });
+      const { data } = await api.post("/api/admin/aicategories", { 
+        name: newCategoryName.trim(),
+        subcategories: newSubcategories.trim()
+      });
       if (data && data.success) {
         toast.success("Category added successfully! ✨");
         setNewCategoryName("");
+        setNewSubcategories("");
         fetchCategories();
       }
     } catch (err) {
@@ -81,11 +87,15 @@ export default function AICategoryManagementPage() {
 
     setActionLoading(true);
     try {
-      const { data } = await api.put(`/api/admin/aicategories/${editingCategory._id}`, { name: editCategoryName.trim() });
+      const { data } = await api.put(`/api/admin/aicategories/${editingCategory._id}`, { 
+        name: editCategoryName.trim(),
+        subcategories: editSubcategories.trim()
+      });
       if (data && data.success) {
-        toast.success("Category renamed successfully! ✏️");
+        toast.success("Category updated successfully! ✏️");
         setEditingCategory(null);
         setEditCategoryName("");
+        setEditSubcategories("");
         fetchCategories();
         fetchPrompts(); // Refresh associations since prompts' categories might be updated
       }
@@ -214,14 +224,21 @@ export default function AICategoryManagementPage() {
         </div>
 
         {/* Quick Add Form */}
-        <form onSubmit={handleCreateCategory} className="flex gap-2 w-full md:w-auto">
+        <form onSubmit={handleCreateCategory} className="flex flex-wrap gap-2 w-full md:w-auto">
           <input
             type="text"
             required
             placeholder="New Category Name..."
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
-            className="w-full md:w-56 px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-transparent dark:text-white"
+            className="w-full sm:w-44 px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-transparent dark:text-white"
+          />
+          <input
+            type="text"
+            placeholder="Subcategories (e.g. A, B, C)..."
+            value={newSubcategories}
+            onChange={(e) => setNewSubcategories(e.target.value)}
+            className="w-full sm:w-56 px-3.5 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-transparent dark:text-white"
           />
           <button
             type="submit"
@@ -251,6 +268,7 @@ export default function AICategoryManagementPage() {
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.02]">
                   <th className="p-4 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Category Name</th>
+                  <th className="p-4 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Subcategories</th>
                   <th className="p-4 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Prompt Associations</th>
                   <th className="p-4 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Date Created</th>
                   <th className="p-4 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-right">Actions</th>
@@ -267,6 +285,22 @@ export default function AICategoryManagementPage() {
                     >
                       <td className="p-4 font-bold text-gray-800 dark:text-white">
                         {cat.name}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-wrap gap-1 max-w-sm">
+                          {cat.subcategories && cat.subcategories.length > 0 ? (
+                            cat.subcategories.map((sub) => (
+                              <span
+                                key={sub}
+                                className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30"
+                              >
+                                {sub}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">None</span>
+                          )}
+                        </div>
                       </td>
                       <td className="p-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
@@ -289,9 +323,10 @@ export default function AICategoryManagementPage() {
                             onClick={() => {
                               setEditingCategory(cat);
                               setEditCategoryName(cat.name);
+                              setEditSubcategories((cat.subcategories || []).join(", "));
                             }}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-all"
-                            title="Rename Category"
+                            title="Edit Category"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
@@ -352,6 +387,19 @@ export default function AICategoryManagementPage() {
                     required
                     value={editCategoryName}
                     onChange={(e) => setEditCategoryName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+                    Subcategories (comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Traditional, Modern & Casual"
+                    value={editSubcategories}
+                    onChange={(e) => setEditSubcategories(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
                   />
                 </div>
