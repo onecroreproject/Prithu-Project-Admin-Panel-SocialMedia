@@ -1,6 +1,6 @@
 import { Suspense, lazy } from "react";
 // App.jsx
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 
 // Context Providers
@@ -46,12 +46,13 @@ const UserFeedReportTable = lazy(() => import("./components/tables/UserTabel/use
 const CategoryManagementPage = lazy(() => import("./pages/CategoryManagementPage"));
 const PostGlobalOptionsPage = lazy(() => import("./pages/PostGlobalOptionsPage"));
 const PartyManagement = lazy(() => import("./pages/PartyManagement/PartyManagement"));
-const TrendingFeedsTable = lazy(() => import("./pages/treandingFeed"));
 const UsersWillingToPost = lazy(() => import("./pages/socialMedia/Feed/userFeedRequestPage"));
 const UserDeletionLogsPage = lazy(() => import("./pages/UserProfile/UserDeletionLogsPage"));
 const PromptManagementPage = lazy(() => import("./pages/PromptManagementPage"));
 const AICategoryManagementPage = lazy(() => import("./pages/AICategoryManagementPage"));
 const FeedCalendarPage = lazy(() => import("./pages/Calendar"));
+const BusinessProfilesDashboard = lazy(() => import("./pages/ProfileCardManagement/BusinessProfilesDashboard"));
+
 
 // Monetization Module
 const MonetizationDashboard = lazy(() => import("./pages/Monetization/MonetizationDashboard"));
@@ -150,7 +151,7 @@ function AnimatedRoutes() {
             <Route path="/social/user/analitical/page/:userId" element={<UserAnalytics />} />
             <Route path="/social/referal/tree/page/:userId" element={<ReferralTreePage />} />
             <Route path="/social/tree" element={<ReferralTreePage />} />
-            <Route path="/social/trending/feed" element={<TrendingFeedsTable />} />
+            <Route path="/social/trending/feed" element={<Navigate to="/social/dashboard" replace />} />
             <Route path="/social/post/request/approval" element={<UsersWillingToPost />} />
             <Route path="/social/user/deletion-logs" element={<UserDeletionLogsPage />} />
             <Route path="/social/admin/upload/page" element={<UploadPage />} />
@@ -165,6 +166,11 @@ function AnimatedRoutes() {
             <Route path="/social/blog/add" element={<AddBlogPage />} />
             <Route path="/social/blog/edit/:id" element={<AddBlogPage />} />
             <Route path="/social/whats-new" element={<WhatsNew />} />
+
+            {/* Business Profiles / Visiting Card Module */}
+            <Route path="/social/business-profiles" element={<BusinessProfilesDashboard />} />
+            <Route path="/social/visiting-cards" element={<BusinessProfilesDashboard />} />
+
 
             {/* Monetization Module */}
             <Route path="/social/monetization/dashboard" element={<MonetizationDashboard />} />

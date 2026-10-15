@@ -10,7 +10,8 @@ const ChatAnalytics = () => {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/chat/analytics');
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.prithu.app';
+        const res = await axios.get(`${baseUrl}/api/chat/analytics`);
         if (res.data.success) {
           setData(res.data);
         }

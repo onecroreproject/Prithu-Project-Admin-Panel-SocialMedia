@@ -235,13 +235,23 @@ const getCroppedImg = (imageSrc, pixelCrop) => {
 };
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const PRODUCTION_MEDIA_URL = "https://api.prithu.app";
 
 const getFullImageUrl = (url) => {
   if (!url) return "";
-  let normalizedUrl = url.replace(/\\/g, "/");
-  if (normalizedUrl.startsWith("http")) return normalizedUrl;
-  const baseUrl = API_BASE_URL.replace(/\/+$/, "");
-  return `${baseUrl}${normalizedUrl.startsWith("/") ? "" : "/"}${normalizedUrl}`;
+  let normalizedUrl = url.replace(/\\/g, "/").trim();
+  if (normalizedUrl.startsWith("http://") || normalizedUrl.startsWith("https://")) {
+    if (
+      normalizedUrl.includes("localhost") ||
+      normalizedUrl.includes("127.0.0.1") ||
+      normalizedUrl.includes("192.168.")
+    ) {
+      return normalizedUrl.replace(/^https?:\/\/[^\/]+/, PRODUCTION_MEDIA_URL);
+    }
+    return normalizedUrl;
+  }
+  const cleanPath = normalizedUrl.startsWith("/") ? normalizedUrl : `/${normalizedUrl}`;
+  return `${PRODUCTION_MEDIA_URL}${cleanPath}`;
 };
 
 export default function PromptManagementPage() {
@@ -716,6 +726,12 @@ export default function PromptManagementPage() {
                           alt="preview"
                           className="w-full h-full object-cover"
                           onError={(e) => {
+                            if (!e.target.src.includes("api.prithu.app") && prompt?.imageUrl) {
+                              const clean = prompt.imageUrl.replace(/\\/g, "/").replace(/^https?:\/\/[^\/]+/, "");
+                              const cleanPath = clean.startsWith("/") ? clean : `/${clean}`;
+                              e.target.src = `https://api.prithu.app${cleanPath}`;
+                              return;
+                            }
                             e.target.onerror = null;
                             e.target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100";
                           }}
@@ -1099,6 +1115,12 @@ export default function PromptManagementPage() {
                   alt={previewPrompt.title}
                   className="w-full h-full object-cover max-h-[90vh]"
                   onError={(e) => {
+                    if (!e.target.src.includes("api.prithu.app") && previewPrompt?.imageUrl) {
+                      const clean = previewPrompt.imageUrl.replace(/\\/g, "/").replace(/^https?:\/\/[^\/]+/, "");
+                      const cleanPath = clean.startsWith("/") ? clean : `/${clean}`;
+                      e.target.src = `https://api.prithu.app${cleanPath}`;
+                      return;
+                    }
                     e.target.onerror = null;
                     e.target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600";
                   }}

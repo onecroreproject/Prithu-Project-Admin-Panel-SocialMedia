@@ -62,74 +62,9 @@ export default function SocialMediaDashboard() {
     <>
       <PageMeta title="Prithu Dashboard | Analytics" description="Admin dashboard with analytics, metrics, and user insights" />
 
-      {/* Mobile Header */}
-      <div className="md:hidden sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-              aria-label="Toggle menu"
-            >
-              {sidebarOpen ? <X className="text-gray-600" /> : <Menu className="text-gray-600" />}
-            </button>
-            <h1 className="text-lg font-semibold text-gray-800">Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-full">
-              {admin?.userName || "Admin"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile View Selector */}
-      <div className="md:hidden px-4 py-3 bg-gray-50 border-b border-gray-100">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-          {[
-            { id: "metrics", label: "Metrics", icon: LayoutGrid },
-            { id: "analytics", label: "Analytics", icon: TrendingUp },
-            { id: "users", label: "Users", icon: Users },
-            admin?.role === "Admin" && { id: "childAdmins", label: "Child Admins", icon: Users },
-            { id: "revenue", label: "Revenue", icon: DollarSign },
-          ].filter(Boolean).map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleViewChange(item.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${activeView === item.id
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-800"
-                }`}
-            >
-              <item.icon className="text-base" />
-              <span className="hidden xs:inline">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Mobile Sidebar Drawer */}
-      <div
-        className={`md:hidden fixed inset-0 z-50 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setSidebarOpen(false)}></div>
-        <div className="relative w-64 h-full bg-white shadow-xl">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-800">Dashboard Views</h2>
-            <p className="text-sm text-gray-500 mt-1">Switch between different analytics views</p>
-          </div>
-          {/* Mobile navigation items would go here */}
-        </div>
-      </div>
-
       {/* Main Content Container */}
-      <div className="relative min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50/30">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        </div>
+      <div className="relative min-h-screen bg-[#f8fafc] dark:bg-[#070d1e] p-4 md:p-6 lg:p-8">
+
 
         <div className="relative z-10">
           {/* Desktop Header */}

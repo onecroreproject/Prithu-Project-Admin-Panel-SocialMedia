@@ -43,7 +43,6 @@ import PageMeta from "../../components/common/PageMeta";
 import FeedManagement from "../Tables/feedManagementTable";
 import ScheduledFeedTable from "../Tables/ScheduledFeedTable";
 import FeedUploadPage from "../../components/FeedUpload/FeedUploadPage";
-import TrendingFeedsTable from "../treandingFeed";
 import CategoryManagementPage from "../CategoryManagementPage";
 import PartyManagement from "../PartyManagement/PartyManagement";
 import PromptManagementPage from "../PromptManagementPage";
@@ -167,21 +166,6 @@ export default function FeedManagementDashboard() {
       description: "Visual media database, multi-criteria filtering, 9:16 mobile previews, bulk status actions & sync."
     },
     {
-      id: "trending",
-      name: "Trending Feeds",
-      category: "content",
-      path: "/social/trending/feed",
-      icon: Flame,
-      gradient: "from-amber-500 via-orange-500 to-red-500",
-      glowColor: "shadow-amber-500/25",
-      accentBg: "bg-amber-50 dark:bg-amber-950/40",
-      accentBorder: "border-amber-200 dark:border-amber-900/50",
-      tagText: "text-amber-600 dark:text-amber-400",
-      badge: "Viral Boost",
-      badgeClass: "bg-amber-100 text-amber-700 dark:bg-amber-950/90 dark:text-amber-300 border-amber-200 dark:border-amber-800/60",
-      description: "Real-time viral post tracking, high-velocity views, engagement multipliers & spotlight promotions."
-    },
-    {
       id: "upload",
       name: "Feed Upload",
       category: "content",
@@ -285,7 +269,6 @@ export default function FeedManagementDashboard() {
 
   const tabs = [
     { id: "catalog", label: "CATALOG & FEEDS", count: totalCount, icon: Layers },
-    { id: "trending", label: "TRENDING FEEDS", count: null, icon: Flame },
     { id: "upload", label: "UPLOAD STUDIO", count: null, icon: Plus },
     { id: "scheduled", label: "SCHEDULED QUEUE", count: scheduledCount, icon: Calendar },
     { id: "categories", label: "CATEGORY MGMT", count: categories.length, icon: Tag },
@@ -325,7 +308,7 @@ export default function FeedManagementDashboard() {
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-bold text-emerald-300 bg-emerald-950/70 border border-emerald-600/40 backdrop-blur-md shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  8 Active Feed Modules
+                  7 Active Feed Modules
                 </span>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-medium text-slate-300 bg-white/5 border border-white/10 backdrop-blur-md">
                   <Radio className="w-3 h-3 text-cyan-400" />
@@ -357,19 +340,6 @@ export default function FeedManagementDashboard() {
                 <span>Upload New Feed</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("trending");
-                  const el = document.getElementById("feed-workspace-tabs");
-                  if (el) el.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/15 backdrop-blur-md text-amber-300 rounded-2xl text-xs font-bold border border-white/15 transition-all hover:border-amber-400/40 cursor-pointer shadow-xs"
-              >
-                <Flame size={14} className="text-amber-400" />
-                <span>Trending Feeds</span>
-              </button>
-
               {/* Quick Jump Dropdown Menu */}
               <div className="relative">
                 <button
@@ -378,7 +348,7 @@ export default function FeedManagementDashboard() {
                   className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/15 backdrop-blur-md text-white rounded-2xl text-xs font-bold border border-white/15 transition-all cursor-pointer shadow-xs"
                 >
                   <Grid size={14} className="text-cyan-400" />
-                  <span>All Features (8)</span>
+                  <span>All Features (7)</span>
                   <ChevronDown size={14} className={`transition-transform duration-200 ${isQuickNavOpen ? "rotate-180" : ""}`} />
                 </button>
 
@@ -950,18 +920,6 @@ export default function FeedManagementDashboard() {
                 transition={{ duration: 0.2 }}
               >
                 <FeedManagement />
-              </motion.div>
-            )}
-
-            {activeTab === "trending" && (
-              <motion.div
-                key="trending"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-              >
-                <TrendingFeedsTable />
               </motion.div>
             )}
 

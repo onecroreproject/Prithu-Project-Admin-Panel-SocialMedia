@@ -8,7 +8,7 @@ export const SidebarProvider = ({ children }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   // SOCIAL SIDEBAR
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 

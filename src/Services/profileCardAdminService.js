@@ -30,9 +30,21 @@ export const grantProfileCardSubscription = async (payload) => {
     return response.data;
 };
 
+export const toggleCardStatus = async (cardId) => {
+    const response = await api.put(`/api/admin/visiting-cards/${cardId}/toggle-status`);
+    return response.data;
+};
+
+export const deleteVisitingCard = async (cardId) => {
+    const response = await api.delete(`/api/admin/visiting-cards/${cardId}`);
+    return response.data;
+};
+
 export default {
     getVisitingCardsStats,
     getVisitingCards,
+    toggleCardStatus,
+    deleteVisitingCard,
     getProfileCardPlan,
     updateProfileCardPlan,
     getProfileCardSubscribers,

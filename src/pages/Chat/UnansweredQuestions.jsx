@@ -8,7 +8,8 @@ const UnansweredQuestions = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/chat/unanswered');
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.prithu.app';
+        const res = await axios.get(`${baseUrl}/api/chat/unanswered`);
         if (res.data.success) {
           setQuestions(res.data.questions);
         }
